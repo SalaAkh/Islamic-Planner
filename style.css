@@ -340,6 +340,8 @@ body {
 .board-container {
     user-select: none;
     /* Предотвращаем выделение текста при панорамировании */
+    touch-action: none;
+    /* CRITICAL: prevents scroll/pull-to-refresh while drawing on mobile */
 }
 
 .board-container.panning {

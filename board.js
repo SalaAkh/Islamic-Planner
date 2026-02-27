@@ -1,6 +1,6 @@
-// No imports needed, using global Store
+import { Store } from './store.js';
 
-function initBoard() {
+export function initBoard(showToast) {
     const container = document.querySelector('.board-container');
     const infiniteCanvas = document.getElementById('infinite-canvas');
     const notesContainer = document.getElementById('notes-container');
@@ -28,6 +28,7 @@ function initBoard() {
         activeTool: 'pan',
         isPanning: false,
         isSpaceDown: false,
+        prevTool: null,
         startX: 0, startY: 0,
         notes: [],
         activeNote: null,
@@ -46,7 +47,7 @@ function initBoard() {
     // INIT
     // =====================
     resizeDrawingCanvas();
-    loadBoardData();
+    loadBoardData();     // async — loads notes from LocalStorage, drawing from IndexedDB
     setActiveTool('pan');
 
     // =====================
@@ -85,7 +86,7 @@ function initBoard() {
     if (btnClearDrawing) {
         btnClearDrawing.addEventListener('click', () => {
             ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-            Store.saveBoardData({ ...Store.getBoardData(), drawingData: null });
+            Store.clearDrawing();   // async IndexedDB delete
             showToastSafe('Рисунок очищен');
         });
     }
@@ -95,22 +96,24 @@ function initBoard() {
     // =====================
     function resizeDrawingCanvas() {
         const rect = container.getBoundingClientRect();
-        const imageData = ctx.getImageData(0, 0, drawingCanvas.width, drawingCanvas.height);
-        drawingCanvas.width = rect.width || window.innerWidth;
-        drawingCanvas.height = rect.height || 800;
-        ctx.putImageData(imageData, 0, 0);
+        // Preserve existing drawing on resize
+        const oldW = drawingCanvas.width;
+        const oldH = drawingCanvas.height;
+        if (oldW > 0 && oldH > 0) {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = oldW;
+            tempCanvas.height = oldH;
+            tempCanvas.getContext('2d').drawImage(drawingCanvas, 0, 0);
+            drawingCanvas.width = rect.width || window.innerWidth;
+            drawingCanvas.height = rect.height || 800;
+            ctx.drawImage(tempCanvas, 0, 0);
+        } else {
+            drawingCanvas.width = rect.width || window.innerWidth;
+            drawingCanvas.height = rect.height || 800;
+        }
     }
 
     window.addEventListener('resize', resizeDrawingCanvas);
-
-    // Convert screen position to canvas drawing position
-    function screenToCanvas(x, y) {
-        const rect = container.getBoundingClientRect();
-        return {
-            x: (x - rect.left - state.viewport.x) / state.viewport.zoom,
-            y: (y - rect.top - state.viewport.y) / state.viewport.zoom,
-        };
-    }
 
     function getDrawingPos(clientX, clientY) {
         const rect = container.getBoundingClientRect();
@@ -177,7 +180,7 @@ function initBoard() {
         }
     });
 
-    window.addEventListener('mouseup', (e) => {
+    window.addEventListener('mouseup', () => {
         if (state.isPanning) {
             state.isPanning = false;
             container.classList.remove('panning');
@@ -191,7 +194,7 @@ function initBoard() {
             state.isDrawing = false;
             ctx.closePath();
             ctx.globalCompositeOperation = 'source-over';
-            saveDrawingData();
+            saveDrawingData();  // async save to IndexedDB
         }
     });
 
@@ -204,9 +207,9 @@ function initBoard() {
             setActiveTool('pan');
         }
         // Shortcuts: P = pencil, E = eraser, V = pan
-        if (e.code === 'KeyP' && document.activeElement.tagName !== 'TEXTAREA') setActiveTool('pencil');
-        if (e.code === 'KeyE' && document.activeElement.tagName !== 'TEXTAREA') setActiveTool('eraser');
-        if (e.code === 'KeyV' && document.activeElement.tagName !== 'TEXTAREA') setActiveTool('pan');
+        if (e.code === 'KeyP' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') setActiveTool('pencil');
+        if (e.code === 'KeyE' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') setActiveTool('eraser');
+        if (e.code === 'KeyV' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') setActiveTool('pan');
     });
     document.addEventListener('keyup', (e) => {
         if (e.code === 'Space') {
@@ -313,7 +316,7 @@ function initBoard() {
             state.isDrawing = false;
             ctx.closePath();
             ctx.globalCompositeOperation = 'source-over';
-            saveDrawingData();
+            saveDrawingData();  // async save to IndexedDB
         }
         saveBoardData();
     });
@@ -452,43 +455,50 @@ function initBoard() {
     }
 
     function saveBoardData() {
-        const existing = Store.getBoardData();
         Store.saveBoardData({
             viewport: state.viewport,
             notes: state.notes,
-            drawingData: existing.drawingData || null
         });
     }
 
-    function saveDrawingData() {
-        const existing = Store.getBoardData();
-        Store.saveBoardData({
-            viewport: state.viewport,
-            notes: state.notes,
-            drawingData: drawingCanvas.toDataURL()
-        });
+    async function saveDrawingData() {
+        try {
+            const dataUrl = drawingCanvas.toDataURL();
+            await Store.saveDrawing(dataUrl);
+        } catch (e) {
+            console.error('[Board] Failed to save drawing:', e);
+        }
     }
 
-    function loadBoardData() {
+    async function loadBoardData() {
         const data = Store.getBoardData();
         if (!data) return;
+
+        // Restore viewport
         if (data.viewport) {
             state.viewport = data.viewport;
             updateTransform();
         }
+        // Restore sticky notes
         if (data.notes && Array.isArray(data.notes)) {
             state.notes = data.notes;
             notesContainer.innerHTML = '';
             state.notes.forEach(note => createNoteElement(note));
         }
-        if (data.drawingData) {
-            const img = new Image();
-            img.onload = () => ctx.drawImage(img, 0, 0);
-            img.src = data.drawingData;
+        // Restore drawing from IndexedDB (async, no size limit)
+        try {
+            const drawingData = await Store.getDrawing();
+            if (drawingData) {
+                const img = new Image();
+                img.onload = () => ctx.drawImage(img, 0, 0);
+                img.src = drawingData;
+            }
+        } catch (e) {
+            console.warn('[Board] Could not restore drawing:', e);
         }
     }
 
     function showToastSafe(msg) {
-        if (typeof window.showToast === 'function') window.showToast(msg);
+        if (typeof showToast === 'function') showToast(msg);
     }
 }

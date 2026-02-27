@@ -1,5 +1,5 @@
-// Global hooks for other modules
-window.showToast = showToast;
+import { Store } from './store.js';
+import { initBoard } from './board.js';
 
 // State
 let currentDate = new Date(); // День, который открыт в планировщике
@@ -32,10 +32,10 @@ function initTabs() {
                 renderCalendar();
             }
 
-            // Initialize board if first time
-            if (viewName === 'board' && !window.boardInitialized) {
-                initBoard();
-                window.boardInitialized = true;
+            // Initialize board if first time — pass showToast so board doesn't need global
+            if (viewName === 'board' && !window._boardInitialized) {
+                initBoard(showToast);
+                window._boardInitialized = true;
             }
         });
     });
@@ -161,24 +161,25 @@ function saveDailyData() {
 
 function updateIbadahProgress() {
     const checkboxes = document.querySelectorAll('.day-checkbox');
-    let total = checkboxes.length;
+    const total = checkboxes.length;
     let checked = 0;
 
     checkboxes.forEach(chk => {
         if (chk.checked) checked++;
     });
 
-    let percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
+    const percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
+    const bar = document.getElementById('ibadah-progress-bar');
 
     document.getElementById('ibadah-progress-text').innerText = percentage;
-    document.getElementById('ibadah-progress-bar').style.width = percentage + '%';
+    bar.style.width = percentage + '%';
 
     if (percentage === 100 && total > 0) {
-        document.getElementById('ibadah-progress-bar').classList.remove('bg-green-700');
-        document.getElementById('ibadah-progress-bar').classList.add('bg-amber-500', 'shadow-[0_0_15px_rgba(245,158,11,0.5)]');
+        bar.classList.remove('bg-green-700');
+        bar.classList.add('bg-amber-500', 'shadow-[0_0_15px_rgba(245,158,11,0.5)]');
     } else {
-        document.getElementById('ibadah-progress-bar').classList.add('bg-green-700');
-        document.getElementById('ibadah-progress-bar').classList.remove('bg-amber-500', 'shadow-[0_0_15px_rgba(245,158,11,0.5)]');
+        bar.classList.add('bg-green-700');
+        bar.classList.remove('bg-amber-500', 'shadow-[0_0_15px_rgba(245,158,11,0.5)]');
     }
 }
 
@@ -237,56 +238,52 @@ function renderCalendar() {
 
     // Math for days
     const firstDay = new Date(year, month, 1).getDay();
-    let shift = firstDay === 0 ? 6 : firstDay - 1;
+    const shift = firstDay === 0 ? 6 : firstDay - 1;
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // Empties
+    // Build all cells off-screen in a Fragment (one DOM reflow instead of 30+)
+    const fragment = document.createDocumentFragment();
+
+    // Empty cells for offset
     for (let i = 0; i < shift; i++) {
-        body.innerHTML += `<div class="calendar-cell empty"></div>`;
+        const empty = document.createElement('div');
+        empty.className = 'calendar-cell empty';
+        fragment.appendChild(empty);
     }
 
-    // Days
+    // Day cells
     for (let i = 1; i <= daysInMonth; i++) {
-        let loopDate = new Date(year, month, i);
-        let dayOfWeek = loopDate.getDay();
+        const dayOfWeek = new Date(year, month, i).getDay();
+        const isSunnahFast = (dayOfWeek === 1 || dayOfWeek === 4);
+        const isToday = i === today.getDate() && month === today.getMonth() && year === today.getFullYear();
 
-        let isSunnahFast = (dayOfWeek === 1 || dayOfWeek === 4);
         let classes = 'calendar-cell group';
-        let badge = '';
+        if (isSunnahFast) classes += ' sunnah-fast';
+        if (isToday) classes += ' ring-2 ring-green-500';
 
-        if (isSunnahFast) {
-            classes += ' sunnah-fast';
-            badge = '<span class="sunnah-badge">Сунна</span>';
-        }
-
-        if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-            classes += ' ring-2 ring-green-500';
-        }
-
-        // We can jump to this date when clicking the cell
         const cell = document.createElement('div');
         cell.className = classes;
         cell.innerHTML = `
             <div class="calendar-date pointer-events-none">${i}</div>
-            ${badge}
+            ${isSunnahFast ? '<span class="sunnah-badge">Сунна</span>' : ''}
             <div class="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-2 right-2 text-xs text-green-700 font-bold"><i class="fas fa-edit"></i> План</div>
         `;
-
         cell.addEventListener('click', () => {
             currentDate = new Date(year, month, i);
             renderDailyPlanner();
             switchToTab('daily');
         });
 
-        body.appendChild(cell);
+        fragment.appendChild(cell);
     }
+
+    body.appendChild(fragment);
 }
 
 // --- GOALS LOGIC ---
 function initGoals() {
     const goalsInputs = document.querySelectorAll('.goal-input');
 
-    // Load
     const data = Store.getGoals();
     goalsInputs.forEach(input => {
         const id = input.getAttribute('data-goal');
@@ -294,7 +291,6 @@ function initGoals() {
             input.value = data[id];
         }
 
-        // Save on change
         input.addEventListener('input', () => {
             const currentData = Store.getGoals();
             currentData[id] = input.value;
@@ -321,7 +317,7 @@ function getHijriDate(date) {
     }
 }
 
-function showToast(message = 'МашаАллах, сохранено!') {
+export function showToast(message = 'МашаАллах, сохранено!') {
     const toast = document.getElementById('toast-message');
     if (!toast) return;
 
@@ -330,8 +326,8 @@ function showToast(message = 'МашаАллах, сохранено!') {
     toast.classList.remove('opacity-0', 'pointer-events-none');
     toast.classList.add('opacity-100');
 
-    clearTimeout(toast.timeoutId);
-    toast.timeoutId = setTimeout(() => {
+    clearTimeout(toast._toastTimer);
+    toast._toastTimer = setTimeout(() => {
         toast.classList.remove('opacity-100');
         toast.classList.add('opacity-0', 'pointer-events-none');
     }, 2000);
