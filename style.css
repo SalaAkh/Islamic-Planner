@@ -1,0 +1,302 @@
+@import "tailwindcss";
+
+:root {
+    --paper: #fdfbf7;
+    --ink: #1e293b;
+    --primary: #2d5a27;
+    --lines: #e2e8f0;
+    --tab-daily: #475569;
+    --tab-calendar: #2d5a27;
+    --tab-goals: #b45309;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #cbd5e1;
+    background-image: radial-gradient(#94a3b8 1px, transparent 1px);
+    background-size: 20px 20px;
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem 2rem 3rem;
+    overflow-x: hidden;
+}
+
+.notebook-wrapper {
+    position: relative;
+    max-width: 1000px;
+    width: 100%;
+}
+
+.notebook-page {
+    background-color: var(--paper);
+    width: 100%;
+    min-height: 1100px;
+    border-radius: 4px 20px 20px 4px;
+    box-shadow:
+        20px 20px 40px rgba(0, 0, 0, 0.1),
+        -5px 0 15px rgba(0, 0, 0, 0.05);
+    position: relative;
+    padding: 3rem 4rem 4rem 5rem;
+    z-index: 2;
+}
+
+.notebook-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.02) 100%);
+    border-left: 8px solid var(--primary);
+    border-radius: 4px 0 0 4px;
+    z-index: 5;
+}
+
+.binder-holes {
+    position: absolute;
+    left: 15px;
+    top: 2rem;
+    bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 10;
+}
+
+.hole {
+    width: 14px;
+    height: 14px;
+    background-color: #cbd5e1;
+    border-radius: 50%;
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.planner-tabs {
+    position: absolute;
+    right: -45px;
+    top: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1;
+}
+
+.tab-btn {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    padding: 20px 10px;
+    border-radius: 0 10px 10px 0;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, right 0.2s;
+    position: relative;
+    right: 0;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-left: none;
+}
+
+.tab-btn:hover {
+    transform: translateX(5px);
+}
+
+.tab-btn.active {
+    right: 5px;
+    box-shadow: 8px 5px 15px rgba(0, 0, 0, 0.2);
+    z-index: 0;
+}
+
+.tab-daily {
+    background-color: var(--tab-daily);
+}
+
+.tab-calendar {
+    background-color: var(--tab-calendar);
+}
+
+.tab-goals {
+    background-color: var(--tab-goals);
+}
+
+.page-view {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.page-view.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.handwriting {
+    font-family: 'Caveat', cursive;
+    font-size: 1.4rem;
+    color: #0f172a;
+}
+
+.ruled-input {
+    background: transparent;
+    border: none;
+    border-bottom: 2px dotted var(--lines);
+    width: 100%;
+    padding: 4px 0;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.ruled-input:focus {
+    border-bottom: 2px solid var(--primary);
+}
+
+.ruled-textarea {
+    background: transparent;
+    border: none;
+    width: 100%;
+    line-height: 2rem;
+    background-image: repeating-linear-gradient(transparent, transparent 31px, var(--lines) 31px, var(--lines) 32px);
+    outline: none;
+    resize: none;
+}
+
+.arabic {
+    font-family: 'Amiri', serif;
+}
+
+.paper-checkbox {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #94a3b8;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    background: transparent;
+    transition: all 0.2s;
+}
+
+.paper-checkbox:checked {
+    border-color: var(--primary);
+}
+
+.paper-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: sans-serif;
+    color: var(--primary);
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.section-title {
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: rgba(45, 90, 39, 0.2);
+    z-index: -1;
+    transform: rotate(-1deg);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.calendar-day-header {
+    text-align: center;
+    font-weight: 600;
+    color: var(--primary);
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--lines);
+}
+
+.calendar-cell {
+    min-height: 100px;
+    border: 1px solid var(--lines);
+    border-radius: 8px;
+    padding: 5px;
+    position: relative;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.calendar-cell:hover {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.calendar-cell.sunnah-fast {
+    background-color: rgba(212, 175, 55, 0.1);
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+.calendar-cell.empty {
+    background: transparent;
+    border: none;
+    cursor: default;
+}
+
+.calendar-cell.empty:hover {
+    border: none;
+    background: transparent;
+}
+
+.calendar-date {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #475569;
+}
+
+.sunnah-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.6rem;
+    background: #d4af37;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+/* Nav styles for days */
+.nav-btn {
+    color: var(--primary);
+    transition: transform 0.2s, color 0.2s;
+    cursor: pointer;
+}
+
+.nav-btn:hover {
+    transform: scale(1.1);
+    color: #166534;
+    /* darker green */
+}

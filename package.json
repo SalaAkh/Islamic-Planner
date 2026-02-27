@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vite build"
   },
   "repository": {
     "type": "git",
@@ -13,9 +15,16 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "bugs": {
     "url": "https://github.com/SalaAkh/Islamic-Planner/issues"
   },
   "homepage": "https://github.com/SalaAkh/Islamic-Planner#readme",
- 
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.1",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.2.1",
+    "vite": "^7.3.1"
+  }
+}

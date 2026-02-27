@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barakah Planner — Исламский Блокнот</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap"
+        rel="stylesheet">
+  <script type="module" crossorigin src="/assets/index-BjF2ZJ3N.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-ZNIoD4rH.css">
+</head>
+
+<body>
+    <div class="notebook-wrapper">
+        <!-- Вкладки навигации -->
+        <div class="planner-tabs">
+            <button data-tab="daily" id="tab-daily" class="tab-btn tab-daily active">День</button>
+            <button data-tab="calendar" id="tab-calendar" class="tab-btn tab-calendar">Календарь</button>
+            <button data-tab="goals" id="tab-goals" class="tab-btn tab-goals">Цели</button>
+        </div>
+
+        <div class="notebook-page mx-auto">
+            <!-- Кольца блокнота -->
+            <div class="binder-holes">
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+                <div class="hole"></div>
+            </div>
+
+            <!-- СТРАНИЦА 1: ДНЕВНОЙ ПЛАНЕР -->
+            <div id="view-daily" class="page-view active">
+                <header
+                    class="mb-10 border-b-2 border-slate-200 pb-4 flex flex-col md:flex-row justify-between items-end">
+                    <div>
+                        <h1 class="text-3xl font-bold text-green-900 tracking-tight">План на день</h1>
+                        <p class="arabic text-xl text-green-700 italic mt-1">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+                    </div>
+                    <div class="w-full md:w-1/3 mt-4 md:mt-0 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <i id="prev-day" class="fas fa-chevron-left nav-btn text-xl p-2 pl-0"></i>
+                            <div class="flex-grow flex items-center px-2">
+                                <span
+                                    class="text-sm font-semibold text-gray-500 mr-2 uppercase tracking-wide">Дата:</span>
+                                <input id="date-display" type="text" readonly
+                                    class="ruled-input handwriting w-full text-center text-gray-700 cursor-default"
+                                    value="Сегодня">
+                            </div>
+                            <i id="next-day" class="fas fa-chevron-right nav-btn text-xl p-2 pr-0"></i>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-sm font-semibold text-gray-500 mr-2 uppercase tracking-wide">Ният:</span>
+                            <input data-id="niyyah" type="text" placeholder="Ради довольства Аллаха..."
+                                class="ruled-input handwriting w-full text-green-800 day-input">
+                        </div>
+                    </div>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-10">
+                    <!-- Левая колонка (Трекеры) -->
+                    <div class="md:col-span-4 space-y-10">
+                        <!-- Ибадат -->
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800 mb-4 section-title">Ибадат Трекер</h2>
+                            <div class="space-y-3 pl-2 border-l-2 border-dashed border-gray-200">
+                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                    <input data-id="fajr" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <span
+                                        class="text-gray-700 font-medium group-hover:text-green-700 transition">Фаджр</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                    <input data-id="morning_azkar" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <span class="text-gray-500 text-sm group-hover:text-green-700 transition">Утренние
+                                        азкары</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer group mt-4">
+                                    <input data-id="zuhr" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <span
+                                        class="text-gray-700 font-medium group-hover:text-green-700 transition">Зухр</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                    <input data-id="asr" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <span
+                                        class="text-gray-700 font-medium group-hover:text-green-700 transition">Аср</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                    <input data-id="evening_azkar" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <span class="text-gray-500 text-sm group-hover:text-green-700 transition">Вечерние
+                                        азкары</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer group mt-4">
+                                    <input data-id="maghrib" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <span
+                                        class="text-gray-700 font-medium group-hover:text-green-700 transition">Магриб</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                    <input data-id="isha" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <span
+                                        class="text-gray-700 font-medium group-hover:text-green-700 transition">Иша</span>
+                                </label>
+                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                    <input data-id="witr" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <span
+                                        class="text-gray-500 text-sm group-hover:text-green-700 transition">Витр</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Коран -->
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800 mb-4 section-title">Чтение Корана</h2>
+                            <input data-id="quran" type="text" placeholder="Сура / Аяты"
+                                class="ruled-input handwriting w-full mb-2 day-input">
+                        </div>
+
+                        <!-- Добрые дела -->
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800 mb-2 section-title">Садака / Благое дело</h2>
+                            <input data-id="sadaka" type="text" placeholder="Кому помочь сегодня?"
+                                class="ruled-input handwriting w-full day-input">
+                        </div>
+                    </div>
+
+                    <!-- Правая колонка (Блоки времени) -->
+                    <div class="md:col-span-8 space-y-8">
+                        <!-- Блок 1 -->
+                        <div class="relative">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-sun text-amber-500 mr-2"></i>
+                                <h3 class="font-bold text-gray-800 uppercase tracking-widest text-sm">Фаджр — Зухр</h3>
+                                <div class="flex-grow border-b border-gray-300 ml-4"></div>
+                                <span class="text-xs text-gray-400 ml-2 italic">Фокус</span>
+                            </div>
+                            <div class="space-y-1 pl-6">
+                                <div class="flex items-center">
+                                    <button data-task-id="t1"
+                                        class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <input data-id="task1" type="text" placeholder="Главная задача дня..."
+                                        class="ruled-input handwriting day-input">
+                                </div>
+                                <div class="flex items-center">
+                                    <button data-task-id="t2"
+                                        class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <input data-id="task2" type="text" class="ruled-input handwriting day-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Блок 2 -->
+                        <div class="relative">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-clock text-blue-500 mr-2"></i>
+                                <h3 class="font-bold text-gray-800 uppercase tracking-widest text-sm">Зухр — Аср</h3>
+                                <div class="flex-grow border-b border-gray-300 ml-4"></div>
+                                <span class="text-xs text-gray-400 ml-2 italic">Рутина</span>
+                            </div>
+                            <div class="space-y-1 pl-6">
+                                <div class="flex items-center">
+                                    <button data-task-id="t3"
+                                        class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <input data-id="task3" type="text" class="ruled-input handwriting day-input">
+                                </div>
+                                <div class="flex items-center">
+                                    <button data-task-id="t4"
+                                        class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <input data-id="task4" type="text" class="ruled-input handwriting day-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Блок 3 -->
+                        <div class="relative">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-coffee text-orange-500 mr-2"></i>
+                                <h3 class="font-bold text-gray-800 uppercase tracking-widest text-sm">Аср — Магриб</h3>
+                                <div class="flex-grow border-b border-gray-300 ml-4"></div>
+                            </div>
+                            <div class="space-y-1 pl-6">
+                                <div class="flex items-center">
+                                    <button data-task-id="t5"
+                                        class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <input data-id="task5" type="text" placeholder="Бытовые дела..."
+                                        class="ruled-input handwriting day-input">
+                                </div>
+                                <div class="flex items-center">
+                                    <button data-task-id="t6"
+                                        class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <input data-id="task6" type="text" class="ruled-input handwriting day-input">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Блок 4 -->
+                        <div class="relative">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-moon text-indigo-500 mr-2"></i>
+                                <h3 class="font-bold text-gray-800 uppercase tracking-widest text-sm">Магриб — Сон</h3>
+                                <div class="flex-grow border-b border-gray-300 ml-4"></div>
+                            </div>
+                            <div class="space-y-1 pl-6">
+                                <div class="flex items-center">
+                                    <button data-task-id="t7"
+                                        class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <input data-id="task7" type="text" placeholder="Семья, отдых..."
+                                        class="ruled-input handwriting day-input">
+                                </div>
+                                <div class="flex items-center">
+                                    <button data-task-id="t8"
+                                        class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <input data-id="task8" type="text" placeholder="Чтение перед сном..."
+                                        class="ruled-input handwriting day-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- СТРАНИЦА 2: КАЛЕНДАРЬ -->
+            <div id="view-calendar" class="page-view">
+                <header class="mb-8 border-b-2 border-slate-200 pb-4 flex justify-between items-center">
+                    <div>
+                        <h1 class="text-3xl font-bold text-green-900 tracking-tight" id="calendar-month-title">Календарь
+                        </h1>
+                        <p class="text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i> Понедельники и четверги
+                            выделены для Сунна-постов</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <i id="prev-month" class="fas fa-chevron-left nav-btn text-2xl p-2"></i>
+                        <i id="next-month" class="fas fa-chevron-right nav-btn text-2xl p-2"></i>
+                    </div>
+                </header>
+
+                <div class="calendar-wrapper bg-white/50 p-4 rounded-xl border border-gray-200">
+                    <div class="calendar-grid" id="calendar-header">
+                        <div class="calendar-day-header">Пн</div>
+                        <div class="calendar-day-header">Вт</div>
+                        <div class="calendar-day-header">Ср</div>
+                        <div class="calendar-day-header">Чт</div>
+                        <div class="calendar-day-header">Пт</div>
+                        <div class="calendar-day-header">Сб</div>
+                        <div class="calendar-day-header">Вс</div>
+                    </div>
+                    <div class="calendar-grid" id="calendar-body">
+                        <!-- Генерация через JS -->
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <h2 class="text-lg font-bold text-gray-800 mb-2 section-title">События месяца</h2>
+                    <!-- Notes is saved based on current month viewing -->
+                    <textarea id="month-notes" class="ruled-textarea handwriting h-32"
+                        placeholder="Запланированные встречи, поездки, долги по постам..."></textarea>
+                </div>
+            </div>
+
+            <!-- СТРАНИЦА 3: ЦЕЛИ -->
+            <div id="view-goals" class="page-view">
+                <header class="mb-10 border-b-2 border-slate-200 pb-4">
+                    <h1 class="text-3xl font-bold text-amber-700 tracking-tight">Глобальные Цели</h1>
+                    <p class="arabic text-xl text-amber-600 italic mt-1">وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ
+                    </p>
+                    <p class="text-sm text-gray-500">«Человеку уготовано только то, к чему он стремился» (Коран 53:39)
+                    </p>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <!-- Ахират -->
+                    <div>
+                        <h2 class="text-2xl font-bold text-green-800 mb-6 flex items-center">
+                            <i class="fas fa-heart mr-3"></i> Ахират (Вечное)
+                        </h2>
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Изучение
+                                    Религии</h3>
+                                <textarea data-goal="religion" class="ruled-textarea handwriting h-24 goal-input"
+                                    placeholder="Выучить Джуз Амма, прочитать Сиру..."></textarea>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Характер и
+                                    Привычки</h3>
+                                <textarea data-goal="habits" class="ruled-textarea handwriting h-24 goal-input"
+                                    placeholder="Перестать гневаться, совершать тахаджуд..."></textarea>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Садака
+                                    Джария</h3>
+                                <textarea data-goal="sadaka" class="ruled-textarea handwriting h-24 goal-input"
+                                    placeholder="Поучаствовать в строительстве колодца..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Дунья -->
+                    <div>
+                        <h2 class="text-2xl font-bold text-blue-800 mb-6 flex items-center">
+                            <i class="fas fa-globe mr-3"></i> Дунья (Мирское)
+                        </h2>
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Работа и
+                                    Финансы</h3>
+                                <textarea data-goal="work" class="ruled-textarea handwriting h-24 goal-input"
+                                    placeholder="Закрыть долги, повысить квалификацию..."></textarea>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Здоровье и
+                                    Тело</h3>
+                                <textarea data-goal="health" class="ruled-textarea handwriting h-24 goal-input"
+                                    placeholder="Спорт 3 раза в неделю, правильное питание..."></textarea>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Семья и
+                                    Отношения</h3>
+                                <textarea data-goal="family" class="ruled-textarea handwriting h-24 goal-input"
+                                    placeholder="Больше времени с родителями..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>
