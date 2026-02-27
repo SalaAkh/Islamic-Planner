@@ -11,8 +11,10 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="/style.css">
-    <script type="module" src="/main.js" defer></script>
+    <link rel="stylesheet" href="./style.css">
+    <script src="./store.js"></script>
+    <script src="./board.js"></script>
+    <script src="./main.js" defer></script>
 </head>
 
 <body>
@@ -22,6 +24,8 @@
             <button data-tab="daily" id="tab-daily" class="tab-btn tab-daily active">День</button>
             <button data-tab="calendar" id="tab-calendar" class="tab-btn tab-calendar">Календарь</button>
             <button data-tab="goals" id="tab-goals" class="tab-btn tab-goals">Цели</button>
+            <button data-tab="board" id="tab-board" class="tab-btn tab-board">Доска <span
+                    class="text-[10px] ml-1 opacity-70">Beta</span></button>
         </div>
 
         <div class="notebook-page mx-auto">
@@ -55,12 +59,16 @@
                     <div class="w-full md:w-1/3 mt-4 md:mt-0 space-y-2">
                         <div class="flex items-center justify-between">
                             <i id="prev-day" class="fas fa-chevron-left nav-btn text-xl p-2 pl-0"></i>
-                            <div class="flex-grow flex items-center px-2">
-                                <span
-                                    class="text-sm font-semibold text-gray-500 mr-2 uppercase tracking-wide">Дата:</span>
-                                <input id="date-display" type="text" readonly
-                                    class="ruled-input handwriting w-full text-center text-gray-700 cursor-default"
-                                    value="Сегодня">
+                            <div class="flex-grow flex flex-col items-center px-2 relative">
+                                <div class="flex items-center w-full">
+                                    <span
+                                        class="text-sm font-semibold text-gray-500 mr-2 uppercase tracking-wide">Дата:</span>
+                                    <input id="date-display" type="text" readonly
+                                        class="ruled-input handwriting w-full text-center text-gray-700 cursor-default"
+                                        value="Сегодня">
+                                </div>
+                                <span id="hijri-date-display"
+                                    class="text-xs text-green-700 mt-1 font-semibold tracking-wide absolute -bottom-5"></span>
                             </div>
                             <i id="next-day" class="fas fa-chevron-right nav-btn text-xl p-2 pr-0"></i>
                         </div>
@@ -77,8 +85,17 @@
                     <div class="md:col-span-4 space-y-10">
                         <!-- Ибадат -->
                         <div>
-                            <h2 class="text-lg font-bold text-gray-800 mb-4 section-title">Ибадат Трекер</h2>
-                            <div class="space-y-3 pl-2 border-l-2 border-dashed border-gray-200">
+                            <div class="flex justify-between items-end mb-4">
+                                <h2 class="text-lg font-bold text-gray-800 section-title">Ибадат Трекер</h2>
+                                <span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full"><span
+                                        id="ibadah-progress-text">0</span>%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-1.5 mb-6">
+                                <div id="ibadah-progress-bar"
+                                    class="bg-green-700 h-1.5 rounded-full transition-all duration-500 ease-out"
+                                    style="width: 0%"></div>
+                            </div>
+                            <div class="space-y-3 pl-2 border-l-2 border-dashed border-gray-200" id="ibadah-list">
                                 <label class="flex items-center space-x-3 cursor-pointer group">
                                     <input data-id="fajr" type="checkbox" class="paper-checkbox day-checkbox">
                                     <span
@@ -337,7 +354,90 @@
                 </div>
             </div>
 
+            <!-- СТРАНИЦА 4: ДОСКА (TAFAKKUR BOARD) -->
+            <div id="view-board" class="page-view" style="height: 100%;">
+                <header
+                    class="mb-4 border-b-2 border-slate-200 pb-4 flex flex-wrap justify-between items-center relative z-10 bg-paper gap-3">
+                    <div>
+                        <h1 class="text-3xl font-bold text-indigo-900 tracking-tight">Tafakkur Board</h1>
+                        <p class="text-gray-500 mt-1 text-sm"><i class="fas fa-infinity mr-1"></i> Бесконечный холст ·
+                            Pinch-to-zoom на мобильном</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <button id="add-note-yellow"
+                            class="w-10 h-10 rounded-full bg-yellow-200 border-2 border-yellow-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-yellow-700 tooltip"
+                            aria-label="Жёлтый стикер"><i class="fas fa-plus"></i></button>
+                        <button id="add-note-green"
+                            class="w-10 h-10 rounded-full bg-green-200 border-2 border-green-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-green-700 tooltip"
+                            aria-label="Зелёный стикер"><i class="fas fa-plus"></i></button>
+                        <button id="add-note-blue"
+                            class="w-10 h-10 rounded-full bg-blue-200 border-2 border-blue-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-blue-700 tooltip"
+                            aria-label="Синий стикер"><i class="fas fa-plus"></i></button>
+                        <div class="w-px h-8 bg-gray-200 mx-1 hidden md:block"></div>
+                        <button id="reset-board-view"
+                            class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold transition-colors">
+                            <i class="fas fa-crosshairs mr-1"></i>Центр</button>
+                    </div>
+                </header>
+
+                <!-- Drawing Toolbar -->
+                <div class="board-toolbar">
+                    <div class="toolbar-group">
+                        <button id="tool-pan" class="tool-btn" title="Перемещение (V)">
+                            <i class="fas fa-hand-paper"></i>
+                            <span class="tool-label">Рука</span>
+                        </button>
+                        <button id="tool-pencil" class="tool-btn" title="Карандаш (P)">
+                            <i class="fas fa-pencil-alt"></i>
+                            <span class="tool-label">Рисунок</span>
+                        </button>
+                        <button id="tool-eraser" class="tool-btn" title="Ластик (E)">
+                            <i class="fas fa-eraser"></i>
+                            <span class="tool-label">Ластик</span>
+                        </button>
+                    </div>
+                    <div class="toolbar-divider"></div>
+                    <div class="toolbar-group items-center">
+                        <label class="tool-label-sm">Цвет</label>
+                        <input type="color" id="draw-color" value="#1e293b" class="color-picker-btn" title="Цвет кисти">
+                    </div>
+                    <div class="toolbar-group items-center">
+                        <label class="tool-label-sm">Размер</label>
+                        <input type="range" id="brush-size" min="1" max="20" value="3" class="brush-slider">
+                    </div>
+                    <div class="toolbar-divider hidden md:block"></div>
+                    <button id="clear-drawing" class="tool-btn text-red-400 hover:text-red-600"
+                        title="Очистить рисунок">
+                        <i class="fas fa-trash-alt"></i>
+                        <span class="tool-label">Очистить</span>
+                    </button>
+                    <div class="toolbar-shortcuts hidden lg:flex items-center gap-1 ml-2 text-gray-400 text-xs">
+                        <span class="kbd">P</span> рисунок
+                        <span class="kbd">E</span> ластик
+                        <span class="kbd">V</span> рука
+                        <span class="kbd">Space</span> пан
+                    </div>
+                </div>
+
+                <div class="board-container relative overflow-hidden bg-gray-50 rounded-2xl"
+                    style="min-height: 720px; cursor: grab;">
+                    <div id="infinite-canvas" class="infinite-canvas" style="transform: translate(0px, 0px) scale(1);">
+                        <div class="canvas-grid-bg"></div>
+                        <div id="notes-container" class="absolute inset-0"></div>
+                    </div>
+                    <!-- Drawing canvas: sits over viewport, fixed position, NOT transformed -->
+                    <canvas id="drawing-canvas" class="drawing-canvas"></canvas>
+                </div>
+            </div>
+
         </div>
+    </div>
+
+    <!-- Toast Message -->
+    <div id="toast-message"
+        class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center gap-3">
+        <i class="fas fa-check-circle text-green-400"></i>
+        <span id="toast-text" class="font-medium text-sm">Сохранено</span>
     </div>
 </body>
 

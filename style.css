@@ -8,6 +8,8 @@
     --tab-daily: #475569;
     --tab-calendar: #2d5a27;
     --tab-goals: #b45309;
+    --tab-board: #4f46e5;
+    /* Indigo */
 }
 
 body {
@@ -122,6 +124,10 @@ body {
     background-color: var(--tab-goals);
 }
 
+.tab-board {
+    background-color: var(--tab-board);
+}
+
 .page-view {
     display: none;
     animation: fadeIn 0.4s ease;
@@ -187,11 +193,13 @@ body {
     cursor: pointer;
     position: relative;
     background: transparent;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .paper-checkbox:checked {
     border-color: var(--primary);
+    transform: scale(1.15) rotate(5deg);
+    background-color: rgba(45, 90, 39, 0.05);
 }
 
 .paper-checkbox:checked::after {
@@ -246,12 +254,14 @@ body {
     position: relative;
     background: rgba(255, 255, 255, 0.5);
     cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
 }
 
 .calendar-cell:hover {
     border-color: var(--primary);
     background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .calendar-cell.sunnah-fast {
@@ -268,6 +278,8 @@ body {
 .calendar-cell.empty:hover {
     border: none;
     background: transparent;
+    transform: none;
+    box-shadow: none;
 }
 
 .calendar-date {
@@ -286,6 +298,7 @@ body {
     padding: 2px 6px;
     border-radius: 10px;
     font-weight: bold;
+    box-shadow: 0 2px 4px rgba(212, 175, 55, 0.3);
 }
 
 /* Nav styles for days */
@@ -299,4 +312,600 @@ body {
     transform: scale(1.1);
     color: #166534;
     /* darker green */
+}
+
+@keyframes gold-pulse {
+    0% {
+        box-shadow: 0 0 5px rgba(245, 158, 11, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.8);
+    }
+
+    100% {
+        box-shadow: 0 0 5px rgba(245, 158, 11, 0.4);
+    }
+}
+
+.bg-amber-500 {
+    animation: gold-pulse 2s infinite ease-in-out;
+}
+
+/* Tafakkur Board Styles */
+.bg-paper {
+    background-color: var(--paper);
+}
+
+.board-container {
+    user-select: none;
+    /* Предотвращаем выделение текста при панорамировании */
+}
+
+.board-container.panning {
+    cursor: grabbing !important;
+}
+
+.infinite-canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
+.canvas-grid-bg {
+    position: absolute;
+    top: -5000px;
+    left: -5000px;
+    width: 10000px;
+    height: 10000px;
+    background-image:
+        radial-gradient(circle, #cbd5e1 1.5px, transparent 1.5px),
+        radial-gradient(circle, #cbd5e1 1.5px, transparent 1.5px);
+    background-size: 40px 40px;
+    background-position: 0 0, 20px 20px;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* Sticky Notes */
+.sticky-note {
+    position: absolute;
+    width: 200px;
+    min-height: 200px;
+    padding: 15px 15px 25px 15px;
+    border-radius: 2px 2px 10px 2px;
+    /* Эффект загнутого угла */
+    box-shadow:
+        3px 4px 10px rgba(0, 0, 0, 0.1),
+        inset -1px -2px 10px rgba(0, 0, 0, 0.05);
+    /* Легкая тень внутри */
+    cursor: grab;
+    transform-origin: center center;
+    transition: box-shadow 0.2s, z-index 0s;
+    display: flex;
+    flex-direction: column;
+}
+
+.sticky-note:active {
+    cursor: grabbing;
+    box-shadow:
+        6px 8px 15px rgba(0, 0, 0, 0.15),
+        inset -1px -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Угол стикера */
+.sticky-note::after {
+    content: "";
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    border-width: 10px 10px 0 0;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.1) white transparent transparent;
+    border-radius: 0 0 10px 0;
+    box-shadow: -1px -1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.sticky-content {
+    flex-grow: 1;
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1.3rem;
+    line-height: 1.5;
+    color: var(--ink);
+    resize: none;
+    cursor: text;
+    overflow-y: hidden;
+}
+
+.sticky-content::placeholder {
+    color: rgba(0, 0, 0, 0.3);
+}
+
+/* Кнопка удаления на стикере */
+.delete-note-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s, color 0.2s;
+}
+
+.sticky-note:hover .delete-note-btn {
+    opacity: 1;
+}
+
+.delete-note-btn:hover {
+    background: rgba(239, 68, 68, 0.8);
+    /* Красный цвет Tailwind text-red-500 */
+    color: white;
+}
+
+/* Цвета стикеров */
+.note-yellow {
+    background-color: #fef08a;
+}
+
+/* bg-yellow-200 */
+.note-green {
+    background-color: #bbf7d0;
+}
+
+/* bg-green-200 */
+.note-blue {
+    background-color: #bfdbfe;
+}
+
+/* bg-blue-200 */
+
+/* Tooltip */
+.tooltip {
+    position: relative;
+}
+
+.tooltip:hover::after {
+    content: attr(aria-label);
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+/* ============================================
+   STICKY NOTES — IMPROVED WITH DRAG HANDLE
+   ============================================ */
+.sticky-note {
+    position: absolute;
+    width: 220px;
+    min-height: 180px;
+    border-radius: 3px 3px 12px 3px;
+    box-shadow:
+        4px 5px 14px rgba(0, 0, 0, 0.12),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.04);
+    transform-origin: center center;
+    transition: box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sticky-note:hover {
+    box-shadow:
+        8px 10px 20px rgba(0, 0, 0, 0.16),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.04);
+    transform: rotate(-0.5deg);
+}
+
+/* Worn corner */
+.sticky-note::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    border-width: 12px 12px 0 0;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.08) white transparent transparent;
+    border-radius: 0 0 12px 0;
+}
+
+/* Drag handle bar at top of note */
+.note-drag-handle {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    color: rgba(0, 0, 0, 0.2);
+    font-size: 12px;
+    flex-shrink: 0;
+    position: relative;
+    transition: color 0.2s;
+}
+
+.note-drag-handle:hover {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.note-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Delete button on handle */
+.delete-note-btn {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    font-size: 10px;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s, color 0.2s;
+}
+
+.sticky-note:hover .delete-note-btn {
+    opacity: 1;
+}
+
+.delete-note-btn:hover {
+    background: rgba(239, 68, 68, 0.85);
+    color: white;
+}
+
+.sticky-content {
+    flex-grow: 1;
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: rgba(0, 0, 0, 0.75);
+    resize: none;
+    cursor: text;
+    padding: 4px 14px 18px;
+    min-height: 120px;
+}
+
+.sticky-content::placeholder {
+    color: rgba(0, 0, 0, 0.25);
+}
+
+/* Note colors */
+.note-yellow {
+    background-color: #fef3a0;
+}
+
+.note-green {
+    background-color: #c6f6d5;
+}
+
+.note-blue {
+    background-color: #bee3f8;
+}
+
+.note-yellow .note-drag-handle {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.note-green .note-drag-handle {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.note-blue .note-drag-handle {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+/* ============================================
+   DRAWING CANVAS
+   ============================================ */
+.drawing-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* default: pan mode */
+    z-index: 5;
+}
+
+/* ============================================
+   BOARD DRAWING TOOLBAR
+   ============================================ */
+.board-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 8px 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    flex-wrap: wrap;
+}
+
+.toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 32px;
+    background: #e2e8f0;
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
+.tool-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s ease;
+    padding: 4px 8px;
+}
+
+.tool-btn:hover {
+    background: #f1f5f9;
+    color: #334155;
+    transform: translateY(-1px);
+}
+
+.tool-btn.tool-active {
+    background: #e0e7ff;
+    color: #4338ca;
+    font-weight: 600;
+    box-shadow: 0 0 0 2px #c7d2fe;
+}
+
+.tool-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+}
+
+.tool-label-sm {
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+/* Color picker */
+.color-picker-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #e2e8f0;
+    cursor: pointer;
+    padding: 2px;
+    background: none;
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.color-picker-btn:hover {
+    border-color: #4338ca;
+    transform: scale(1.1);
+}
+
+/* Brush size range input */
+.brush-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 80px;
+    height: 4px;
+    border-radius: 2px;
+    background: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+    margin-left: 6px;
+}
+
+.brush-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4338ca;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(67, 56, 202, 0.4);
+    transition: transform 0.15s;
+}
+
+.brush-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+/* Keyboard shortcut badges */
+.kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1px 5px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #f8fafc;
+    font-size: 10px;
+    font-family: monospace;
+    color: #475569;
+    box-shadow: 0 1px 0 #cbd5e1;
+}
+
+.toolbar-shortcuts {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-left: auto;
+}
+
+/* ============================================
+   DESIGN IMPROVEMENTS — Body + General Shell
+   ============================================ */
+
+/* Nicer body background */
+body {
+    background: linear-gradient(135deg, #c8d8e8 0%, #b8c9da 50%, #c5d5e5 100%);
+    background-image:
+        radial-gradient(#94a3b8 1px, transparent 1px),
+        linear-gradient(135deg, #c8d8e8 0%, #b8c9da 100%);
+    background-size: 20px 20px, 100% 100%;
+}
+
+/* Subtle notebook glow */
+.notebook-page {
+    box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.15),
+        0 5px 20px rgba(0, 0, 0, 0.08),
+        -5px 0 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Smooth tab hover scale was missing */
+.tab-btn:hover {
+    transform: translateX(6px) !important;
+}
+
+/* ============================================
+   MOBILE / TABLET RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    body {
+        padding: 0.5rem 0.5rem 0.5rem 2.5rem;
+    }
+
+    .notebook-page {
+        padding: 1.5rem 1.5rem 2rem 3rem;
+        min-height: unset;
+        border-radius: 4px 12px 12px 4px;
+    }
+
+    .planner-tabs {
+        right: -35px;
+        top: 60px;
+        gap: 6px;
+    }
+
+    .tab-btn {
+        padding: 14px 8px;
+        font-size: 13px;
+    }
+
+    .binder-holes {
+        left: 10px;
+    }
+
+    .hole {
+        width: 11px;
+        height: 11px;
+    }
+
+    .board-toolbar {
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 10px;
+    }
+
+    .tool-btn {
+        min-width: 40px;
+        height: 40px;
+        font-size: 13px;
+    }
+
+    .brush-slider {
+        width: 60px;
+    }
+
+    .toolbar-shortcuts {
+        display: none;
+    }
+
+    .toolbar-divider {
+        display: none;
+    }
+
+    /* Calendar cells smaller on mobile */
+    .calendar-cell {
+        min-height: 60px;
+        font-size: 0.85rem;
+    }
+
+    .calendar-grid {
+        gap: 4px;
+    }
+
+    .sunnah-badge {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 0.25rem 0.25rem 0.25rem 2rem;
+    }
+
+    .notebook-page {
+        padding: 1rem 1rem 1.5rem 2.5rem;
+    }
+
+    .planner-tabs {
+        right: -30px;
+        top: 40px;
+    }
+
+    .tab-btn {
+        padding: 10px 6px;
+        font-size: 11px;
+        border-radius: 0 8px 8px 0;
+    }
 }

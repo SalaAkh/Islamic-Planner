@@ -1,4 +1,5 @@
-import { Store } from './store.js';
+// Global hooks for other modules
+window.showToast = showToast;
 
 // State
 let currentDate = new Date(); // День, который открыт в планировщике
@@ -29,6 +30,12 @@ function initTabs() {
 
             if (viewName === 'calendar' && document.getElementById('calendar-body').innerHTML.trim() === '') {
                 renderCalendar();
+            }
+
+            // Initialize board if first time
+            if (viewName === 'board' && !window.boardInitialized) {
+                initBoard();
+                window.boardInitialized = true;
             }
         });
     });
@@ -92,6 +99,7 @@ function renderDailyPlanner() {
     let displayStr = `${currentDate.getDate()} ${monthNames[currentDate.getMonth()]}`;
     if (dateStr === todayStr) displayStr += " (Сегодня)";
     document.getElementById('date-display').value = displayStr;
+    document.getElementById('hijri-date-display').innerText = getHijriDate(currentDate);
 
     // Load inputs
     document.querySelectorAll('.day-input').forEach(input => {
@@ -125,6 +133,8 @@ function renderDailyPlanner() {
             btn.innerHTML = '';
         }
     });
+
+    updateIbadahProgress();
 }
 
 function saveDailyData() {
@@ -145,6 +155,31 @@ function saveDailyData() {
     });
 
     Store.saveDayData(dateStr, data);
+    updateIbadahProgress();
+    showToast();
+}
+
+function updateIbadahProgress() {
+    const checkboxes = document.querySelectorAll('.day-checkbox');
+    let total = checkboxes.length;
+    let checked = 0;
+
+    checkboxes.forEach(chk => {
+        if (chk.checked) checked++;
+    });
+
+    let percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
+
+    document.getElementById('ibadah-progress-text').innerText = percentage;
+    document.getElementById('ibadah-progress-bar').style.width = percentage + '%';
+
+    if (percentage === 100 && total > 0) {
+        document.getElementById('ibadah-progress-bar').classList.remove('bg-green-700');
+        document.getElementById('ibadah-progress-bar').classList.add('bg-amber-500', 'shadow-[0_0_15px_rgba(245,158,11,0.5)]');
+    } else {
+        document.getElementById('ibadah-progress-bar').classList.add('bg-green-700');
+        document.getElementById('ibadah-progress-bar').classList.remove('bg-amber-500', 'shadow-[0_0_15px_rgba(245,158,11,0.5)]');
+    }
 }
 
 function toggleTask(btn) {
@@ -266,4 +301,38 @@ function initGoals() {
             Store.saveGoals(currentData);
         });
     });
+}
+
+// --- UTILS & UX ---
+function getHijriDate(date) {
+    try {
+        return new Intl.DateTimeFormat('ru-RU-u-ca-islamic-umalqura', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        }).format(date).replace(' г.', '');
+    } catch (e) {
+        // Fallback
+        return new Intl.DateTimeFormat('ru-RU-u-ca-islamic', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        }).format(date).replace(' г.', '');
+    }
+}
+
+function showToast(message = 'МашаАллах, сохранено!') {
+    const toast = document.getElementById('toast-message');
+    if (!toast) return;
+
+    document.getElementById('toast-text').innerText = message;
+
+    toast.classList.remove('opacity-0', 'pointer-events-none');
+    toast.classList.add('opacity-100');
+
+    clearTimeout(toast.timeoutId);
+    toast.timeoutId = setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0', 'pointer-events-none');
+    }, 2000);
 }
