@@ -12,6 +12,12 @@
         href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="./style.css">
+
+    <!-- PWA & Favicon -->
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <meta name="theme-color" content="#059669">
+
     <script type="module" src="./main.js"></script>
 </head>
 
@@ -452,6 +458,20 @@
         <i class="fas fa-check-circle text-green-400"></i>
         <span id="toast-text" class="font-medium text-sm">Сохранено</span>
     </div>
+    <script>
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('[SurviveKit] ServiceWorker registered with scope:', registration.scope);
+                    })
+                    .catch(err => {
+                        console.error('[SurviveKit] ServiceWorker registration failed:', err);
+                    });
+            });
+        }
+    </script>
 </body>
 
 </html>
