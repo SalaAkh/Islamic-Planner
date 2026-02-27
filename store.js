@@ -143,5 +143,63 @@ export const Store = {
 
     clearDrawing() {
         return idbDelete('board_drawing');
+    },
+
+    // ── Data Backup & Restore (SurviveKit) ─────────────────────────
+    async exportAllData() {
+        const data = {
+            localStorage: {},
+            indexedDB: {}
+        };
+        // 1. Gather all LocalStorage keys starting with barakah_
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('barakah_')) {
+                data.localStorage[key] = localStorage.getItem(key);
+            }
+        }
+        // 2. Gather IndexedDB drawing
+        try {
+            const drawing = await this.getDrawing();
+            if (drawing) {
+                data.indexedDB['board_drawing'] = drawing;
+            }
+        } catch (e) {
+            console.error('[Store] Export DB error:', e);
+        }
+        return JSON.stringify(data);
+    },
+
+    async importAllData(jsonData) {
+        try {
+            const data = JSON.parse(jsonData);
+
+            // 1. Restore LocalStorage
+            if (data.localStorage) {
+                // Clear ONLY barakah_ keys to avoid orphan data
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key.startsWith('barakah_')) keysToRemove.push(key);
+                }
+                keysToRemove.forEach(k => localStorage.removeItem(k));
+
+                for (const [key, value] of Object.entries(data.localStorage)) {
+                    localStorage.setItem(key, value);
+                }
+            }
+
+            // 2. Restore IndexedDB
+            if (data.indexedDB && data.indexedDB['board_drawing']) {
+                await this.saveDrawing(data.indexedDB['board_drawing']);
+            } else {
+                await this.clearDrawing();
+            }
+
+            return true;
+        } catch (e) {
+            console.error('[Store] Import error:', e);
+            throw e;
+        }
     }
 };

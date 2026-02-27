@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initDailyPlanner();
     initCalendar();
     initGoals();
+    initBackupRestore();
 });
 
 // --- TABS LOGIC ---
@@ -331,4 +332,50 @@ export function showToast(message = 'МашаАллах, сохранено!') {
         toast.classList.remove('opacity-100');
         toast.classList.add('opacity-0', 'pointer-events-none');
     }, 2000);
+}
+
+// --- BACKUP & RESTORE LOGIC ---
+function initBackupRestore() {
+    const btnExport = document.getElementById('btn-export');
+    const btnImport = document.getElementById('btn-import');
+    const fileImport = document.getElementById('file-import');
+
+    if (btnExport) {
+        btnExport.addEventListener('click', async () => {
+            const jsonStr = await Store.exportAllData();
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `barakah_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Резервная копия скачана');
+        });
+    }
+
+    if (btnImport && fileImport) {
+        btnImport.addEventListener('click', () => {
+            fileImport.click();
+        });
+
+        fileImport.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    await Store.importAllData(event.target.result);
+                    showToast('Данные восстановлены! Перезагрузка...');
+                    setTimeout(() => window.location.reload(), 1500);
+                } catch (err) {
+                    showToast('Ошибка при импорте данных!');
+                    console.error('Import failed:', err);
+                }
+            };
+            reader.readAsText(file);
+            fileImport.value = ''; // reset file input
+        });
+    }
 }
