@@ -22,7 +22,9 @@ const translations = {
         "ai_prompt_label": "Как распланировать день?", "placeholder_ai": "Например: Утром тренировка, днем кодинг стартапа, Аср - чтение 10 страниц Корана...",
         "goals_title": "Глобальные Цели", "ahirat_title": "Ахират (Вечное)", "dunya_title": "Дунья (Мирское)",
         "board_title": "Tafakkur Board", "board_info": "Бесконечный холст · Pinch-to-zoom на мобильном", "center_btn": "Центр",
-        "donate_title": "Поддержать проект", "donate_text": "Ваша поддержка помогает развивать проект и приносить больше пользы Умме. Джазакаллаху Хайран!"
+        "donate_title": "Поддержать проект", "donate_text": "Ваша поддержка помогает развивать проект и приносить больше пользы Умме. Джазакаллаху Хайран!",
+        "section_contacts": "Контакты", "contacts_desc": "Давайте превратим вашу идею в стабильный бизнес. Пишите!", "contacts_city": "Караганда, Казахстан",
+        "label_name": "Ваше имя", "placeholder_name": "Ваше имя", "label_contact": "Email", "placeholder_contact": "Email", "label_message": "Сообщение", "placeholder_message": "Расскажите о вашем проекте", "btn_send": "Отправить"
     },
     kk: {
         "tab_daily": "Күн", "tab_calendar": "Күнтізбе", "tab_goals": "Мақсаттар", "tab_board": "Тақта",
@@ -46,7 +48,9 @@ const translations = {
         "ai_prompt_label": "Күнді қалай жоспарлаймыз?", "placeholder_ai": "Мысалы: Таңертең жаттығу, күндіз жұмыс, Аср - Құран оқу...",
         "goals_title": "Ауқымды Мақсаттар", "ahirat_title": "Ақырет (Мәңгілік)", "dunya_title": "Дүние (Өткінші)",
         "board_title": "Тафаккур Тақтасы", "board_info": "Шексіз кенеп · Мобильдік құрылғыда Pinch-to-zoom", "center_btn": "Ортасы",
-        "donate_title": "Жобаға қолдау көрсету", "donate_text": "Сіздің қолдауыңыз жобаның дамуына және Үмбетке көбірек пайда әкелуіне көмектеседі. Жазакаллаһу Хайран!"
+        "donate_title": "Жобаға қолдау көрсету", "donate_text": "Сіздің қолдауыңыз жобаның дамуына және Үмбетке көбірек пайда әкелуіне көмектеседі. Жазакаллаһу Хайран!",
+        "section_contacts": "Байланыс", "contacts_desc": "Идеяңызды тұрақты бизнеске айналдырайық. Жазыңыз!", "contacts_city": "Қарағанды, Қазақстан",
+        "label_name": "Атыңыз", "placeholder_name": "Атыңыз", "label_contact": "Email", "placeholder_contact": "Email", "label_message": "Хабарлама", "placeholder_message": "Жобаңыз туралы айтып беріңіз", "btn_send": "Жіберу"
     },
     ar: {
         "tab_daily": "اليوم", "tab_calendar": "التقويم", "tab_goals": "الأهداف", "tab_board": "اللوحة",
@@ -70,7 +74,9 @@ const translations = {
         "ai_prompt_label": "كيف تخطط ليومك؟", "placeholder_ai": "مثال: تدريب صباحي، برمجة ظهرا، قراءة القرآن عصرا...",
         "goals_title": "الأهداف الكبرى", "ahirat_title": "الآخرة", "dunya_title": "الدنيا",
         "board_title": "لوحة التفكر", "board_info": "مساحة غير محدودة", "center_btn": "المركز",
-        "donate_title": "دعم المشروع", "donate_text": "دعمكم يساعد في تطوير المشروع وتقديم المزيد من النفع للأمة. جزاكم الله خيراً!"
+        "donate_title": "دعم المشروع", "donate_text": "دعمكم يساعد في تطوير المشروع وتقديم المزيد من النفع للأمة. جزاكم الله خيراً!",
+        "section_contacts": "جهات الاتصال", "contacts_desc": "دعونا نحول فكرتك إلى عمل مستقر. تواصل معنا!", "contacts_city": "قراغندي، كازاخستان",
+        "label_name": "اسمك", "placeholder_name": "اسمك", "label_contact": "البريد الإلكتروني", "placeholder_contact": "البريد الإلكتروني", "label_message": "رسالة", "placeholder_message": "أخبرنا عن مشروعك", "btn_send": "إرسال"
     },
     en: {
         "tab_daily": "Daily", "tab_calendar": "Calendar", "tab_goals": "Goals", "tab_board": "Board",
@@ -94,7 +100,9 @@ const translations = {
         "ai_prompt_label": "How to plan the day?", "placeholder_ai": "e.g., Morning workout, coding at noon, Asr - reading Quran...",
         "goals_title": "Global Goals", "ahirat_title": "Akhirah (Eternal)", "dunya_title": "Dunya (Worldly)",
         "board_title": "Tafakkur Board", "board_info": "Infinite canvas · Pinch-to-zoom on mobile", "center_btn": "Center",
-        "donate_title": "Support the Project", "donate_text": "Your support helps develop the project and bring more benefit to the Ummah. Jazakallahu Khairan!"
+        "donate_title": "Support the Project", "donate_text": "Your support helps develop the project and bring more benefit to the Ummah. Jazakallahu Khairan!",
+        "section_contacts": "Contacts", "contacts_desc": "Let's turn your idea into a stable business. Contact us!", "contacts_city": "Karaganda, Kazakhstan",
+        "label_name": "Your name", "placeholder_name": "Your name", "label_contact": "Email", "placeholder_contact": "Email", "label_message": "Message", "placeholder_message": "Tell us about your project", "btn_send": "Send"
     }
 };
 
