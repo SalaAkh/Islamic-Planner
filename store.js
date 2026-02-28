@@ -71,7 +71,7 @@ async function idbDelete(key) {
 // =====================================================================
 // LOCALSTORAGE — for lightweight text/state data (fast, sync)
 // =====================================================================
-export const Store = {
+window.Store = {
     // ── Daily Planner ──────────────────────────────────────────────
     getDayData(dateString) {
         try {

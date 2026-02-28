@@ -1,12 +1,9 @@
-const CACHE_NAME = 'barakah-planner-v1';
+const CACHE_NAME = 'barakah-planner-v2';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
-    './style.css',
-    './main.js',
-    './board.js',
-    './store.js',
     './manifest.json',
+    './favicon.ico',
     'https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
@@ -16,6 +13,7 @@ self.addEventListener('install', (event) => {
         caches.open(CACHE_NAME)
             .then((cache) => cache.addAll(ASSETS_TO_CACHE))
             .then(() => self.skipWaiting())
+            .catch(err => console.warn('[SurviveKit] SW cache addAll failed on some assets, this is acceptable for singlefile builds:', err))
     );
 });
 

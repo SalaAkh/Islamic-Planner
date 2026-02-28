@@ -1,0 +1,259 @@
+// =====================================================================
+// AI PLANNER ASSISTANT (SurviveKit Feature)
+// Powered by Groq/Gemini API via Fetch (BYOK model)
+// =====================================================================
+
+const AI_SYSTEM_PROMPT = `
+Ты исламский планировщик продуктивности. Твоя задача — получить сырой текст пользователя (его планы на день) и строго распределить активности по 5 исламским блокам времени. 
+
+Блоки времени:
+1. fajr_zuhr (Утро: духовность, фокус, главная задача)
+2. zuhr_asr (Обед: рутина, созвоны, работа)
+3. asr_maghrib (Вечер: отдых, бытовые дела, семья)
+4. maghrib_isha (Поздний вечер: семья, ужин)
+5. isha_sleep (Ночь: уединение, чтение, подготовка ко сну)
+
+ПРАВИЛА:
+- Верни ТОЛЬКО валидный JSON. Никакого текста до или после. Никаких markdown блоков \`\`\`json.
+- Формат ответа: {"fajr_zuhr": ["задача 1", "задача 2"], "zuhr_asr": [...], "asr_maghrib": [...], "maghrib_isha": [...], "isha_sleep": [...]}
+- Если в какой-то блок нет задач от пользователя, придумай 1-2 идеальные задачи, соответствующие идеологии Barakah (благодать, баланс религии и дуньи).
+- Формулируй задачи кратко (до 5 слов).
+`;
+
+class AiAssistant {
+    constructor() {
+        this.apiKey = localStorage.getItem('barakah_ai_key') || '';
+
+        // UI Elements
+        this.fab = document.getElementById('ai-fab-btn');
+        this.modal = document.getElementById('ai-modal');
+        this.closeBtn = document.getElementById('close-ai-modal');
+        this.modalContent = this.modal.querySelector('div');
+
+        this.setupArea = document.getElementById('ai-setup-area');
+        this.chatArea = document.getElementById('ai-chat-area');
+        this.apiKeyInput = document.getElementById('ai-api-key');
+        this.saveKeyBtn = document.getElementById('save-ai-key');
+        this.settingsBtn = document.getElementById('ai-settings-btn');
+
+        this.promptInput = document.getElementById('ai-prompt');
+        this.submitBtn = document.getElementById('ai-submit-btn');
+        this.loadingOverlay = document.getElementById('ai-loading');
+
+        this.init();
+    }
+
+    init() {
+        // Event Listeners
+        if (this.fab) this.fab.addEventListener('click', () => this.openModal());
+        if (this.closeBtn) this.closeBtn.addEventListener('click', () => this.closeModal());
+        if (this.modal) {
+            this.modal.addEventListener('click', (e) => {
+                if (e.target === this.modal) this.closeModal();
+            });
+        }
+
+        if (this.saveKeyBtn) this.saveKeyBtn.addEventListener('click', () => this.saveApiKey());
+        if (this.settingsBtn) this.settingsBtn.addEventListener('click', () => this.toggleSettings());
+
+        if (this.submitBtn) this.submitBtn.addEventListener('click', () => this.generatePlan());
+
+        // Auto-resize prompt area
+        if (this.promptInput) {
+            this.promptInput.addEventListener('input', () => {
+                this.submitBtn.disabled = this.promptInput.value.trim().length === 0;
+            });
+        }
+    }
+
+    openModal() {
+        this.modal.classList.remove('hidden');
+        this.modal.classList.add('flex');
+        // Trigger reflow for animation
+        void this.modal.offsetWidth;
+        this.modalContent.classList.remove('scale-95', 'opacity-0');
+        this.modalContent.classList.add('scale-100', 'opacity-100');
+
+        if (!this.apiKey) {
+            this.setupArea.classList.remove('hidden');
+        } else {
+            this.promptInput.focus();
+        }
+    }
+
+    closeModal() {
+        this.modalContent.classList.remove('scale-100', 'opacity-100');
+        this.modalContent.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+            this.modal.classList.add('hidden');
+            this.modal.classList.remove('flex');
+            this.setupArea.classList.add('hidden'); // Reset state
+        }, 300);
+    }
+
+    toggleSettings() {
+        if (this.setupArea.classList.contains('hidden')) {
+            this.setupArea.classList.remove('hidden');
+            this.apiKeyInput.value = this.apiKey;
+            this.apiKeyInput.focus();
+        } else {
+            this.setupArea.classList.add('hidden');
+        }
+    }
+
+    saveApiKey() {
+        const val = this.apiKeyInput.value.trim();
+        if (val) {
+            this.apiKey = val;
+            localStorage.setItem('barakah_ai_key', val);
+            this.setupArea.classList.add('hidden');
+            if (window.showToast) window.showToast('API ключ сохранен!');
+            this.promptInput.focus();
+        }
+    }
+
+    async generatePlan() {
+        if (!this.apiKey) {
+            this.toggleSettings();
+            return;
+        }
+
+        const promptText = this.promptInput.value.trim();
+        if (!promptText) return;
+
+        this.setLoading(true);
+
+        try {
+            // GROQ API Fetch
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'llama3-8b-8192',
+                    messages: [
+                        { role: 'system', content: AI_SYSTEM_PROMPT },
+                        { role: 'user', content: promptText }
+                    ],
+                    temperature: 0.5,
+                    max_tokens: 1024
+                })
+            });
+
+            if (!response.ok) {
+                if (response.status === 401) throw new Error('Неверный API ключ. Проверьте настройки.');
+                throw new Error(`Ошибка сервера (${response.status})`);
+            }
+
+            const data = await response.json();
+            const content = data.choices[0].message.content;
+
+            this.processAiResponse(content);
+
+            this.promptInput.value = '';
+            this.closeModal();
+            if (window.showToast) window.showToast('План сгенерирован! МашаАллах!');
+
+        } catch (error) {
+            console.error('[AI] Fetch error:', error);
+            alert(`Ошибка ИИ: ${error.message}`);
+        } finally {
+            this.setLoading(false);
+        }
+    }
+
+    setLoading(isLoading) {
+        if (isLoading) {
+            this.loadingOverlay.classList.remove('hidden');
+            this.loadingOverlay.classList.add('flex');
+            this.submitBtn.disabled = true;
+        } else {
+            this.loadingOverlay.classList.add('hidden');
+            this.loadingOverlay.classList.remove('flex');
+            this.submitBtn.disabled = this.promptInput.value.trim().length === 0;
+        }
+    }
+
+    processAiResponse(jsonStr) {
+        try {
+            // Очищаем потенциальный мусор вокруг JSON
+            let start = jsonStr.indexOf('{');
+            let end = jsonStr.lastIndexOf('}') + 1;
+            if (start === -1 || end === 0) throw new Error('JSON не найден в ответе');
+
+            let cleanJson = jsonStr.substring(start, end);
+            const plan = JSON.parse(cleanJson);
+
+            const mapping = {
+                'fajr_zuhr': '1',
+                'zuhr_asr': '2',
+                'asr_maghrib': '3',
+                'maghrib_isha': '4',
+                'isha_sleep': '5'
+            };
+
+            for (const [key, tasks] of Object.entries(plan)) {
+                if (mapping[key] && Array.isArray(tasks)) {
+                    this.fillBlock(mapping[key], tasks);
+                }
+            }
+
+            // Trigger save
+            const container = document.querySelector('.md\\:col-span-8.space-y-8');
+            if (container) {
+                container.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+        } catch (e) {
+            console.error('[AI] Parsing failed:', e, jsonStr);
+            alert('ИИ вернул неверный формат ответа. Попробуйте еще раз.');
+        }
+    }
+
+    fillBlock(blockIndex, tasks) {
+        const addBtn = document.querySelector(`button[data-block-index="${blockIndex}"]`);
+        if (!addBtn) return;
+
+        // Button is inside a div, so parent's previous sibling is the list container
+        const listContainer = addBtn.parentElement.previousElementSibling;
+        if (!listContainer) return;
+
+        const existingInputs = listContainer.querySelectorAll('.day-input');
+
+        let taskIndex = 0;
+
+        // 1. Fill existing empty inputs
+        existingInputs.forEach(input => {
+            if (!input.value.trim() && taskIndex < tasks.length) {
+                input.value = tasks[taskIndex];
+                input.classList.remove('line-through', 'text-gray-400', 'opacity-60');
+                const toggle = input.previousElementSibling;
+                if (toggle && toggle.classList.contains('task-done')) {
+                    toggle.classList.remove('task-done', 'text-green-700', 'border-green-700');
+                    toggle.innerHTML = '';
+                }
+                taskIndex++;
+            }
+        });
+
+        // 2. Add new rows if needed
+        while (taskIndex < tasks.length) {
+            const newIndex = Date.now() + Math.random();
+            const newRow = document.createElement('div');
+            newRow.className = 'flex items-center';
+            newRow.innerHTML = `
+                <button data-task-id="t_dyn_${newIndex}" class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                <input data-id="task_dyn_${newIndex}" type="text" class="ruled-input handwriting day-input" value="${tasks[taskIndex]}">
+            `;
+            listContainer.appendChild(newRow);
+            taskIndex++;
+        }
+    }
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+    window.aiAssistant = new AiAssistant();
+});

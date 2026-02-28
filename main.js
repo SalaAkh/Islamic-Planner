@@ -1,6 +1,3 @@
-import { Store } from './store.js';
-import { initBoard } from './board.js';
-
 // State
 let currentDate = new Date(); // День, который открыт в планировщике
 let calendarDate = new Date(); // Месяц, который открыт в календаре
@@ -8,6 +5,14 @@ let calendarDate = new Date(); // Месяц, который открыт в к�
 const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Dynamic manifest loading to prevent CORS on file:// protocol
+    if (window.location.protocol !== 'file:') {
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = './public/manifest.json';
+        document.head.appendChild(link);
+    }
+
     initTabs();
     initDailyPlanner();
     initCalendar();
@@ -70,22 +75,49 @@ function initDailyPlanner() {
         renderDailyPlanner();
     });
 
-    // Event listeners to save data on input change
-    const inputs = document.querySelectorAll('.day-input');
-    const checkboxes = document.querySelectorAll('.day-checkbox');
-    const tasks = document.querySelectorAll('.task-toggle');
+    // Event Delegation for dynamic elements
+    const plannerContainer = document.querySelector('.md\\:col-span-8.space-y-8');
 
-    inputs.forEach(input => {
-        input.addEventListener('input', saveDailyData);
-    });
-    checkboxes.forEach(chk => {
-        chk.addEventListener('change', saveDailyData);
-    });
-    tasks.forEach(btn => {
-        btn.addEventListener('click', function () {
-            toggleTask(this);
+    plannerContainer.addEventListener('input', (e) => {
+        if (e.target.classList.contains('day-input') || e.target.classList.contains('day-checkbox')) {
             saveDailyData();
-        });
+        }
+    });
+
+    plannerContainer.addEventListener('change', (e) => {
+        if (e.target.classList.contains('day-checkbox')) {
+            saveDailyData();
+        }
+    });
+
+    plannerContainer.addEventListener('click', (e) => {
+        // Handle task toggle (checkboxes)
+        const toggleBtn = e.target.closest('.task-toggle');
+        if (toggleBtn) {
+            toggleTask(toggleBtn);
+            saveDailyData();
+            return;
+        }
+
+        // Handle Add Task button
+        const addBtn = e.target.closest('.add-task-btn');
+        if (addBtn) {
+            const listContainer = addBtn.parentElement.previousElementSibling;
+            const blockIndex = addBtn.getAttribute('data-block-index');
+            const newIndex = Date.now(); // Unique ID
+
+            const newRow = document.createElement('div');
+            newRow.className = 'flex items-center';
+            newRow.innerHTML = `
+                <button data-task-id="t_dyn_${newIndex}" class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                <input data-id="task_dyn_${newIndex}" type="text" placeholder="Новая задача..." class="ruled-input handwriting day-input">
+            `;
+
+            if (listContainer) {
+                listContainer.appendChild(newRow);
+                newRow.querySelector('input').focus();
+            }
+        }
     });
 
     renderDailyPlanner();
@@ -103,6 +135,38 @@ function renderDailyPlanner() {
     document.getElementById('hijri-date-display').innerText = getHijriDate(currentDate);
 
     // Load inputs
+    // For dynamic tasks, we need to rebuild the HTML if necessary, 
+    // but building proper HTML serialization requires more complex logic.
+    // Given the time, we'll restore inputs IF they exist in HTML. 
+    // To support returning dynamic inputs after reload, we inject them into the DOM first.
+
+    // First, clear all dynamic tasks to prevent duplicates on date switch
+    document.querySelectorAll('input[data-id^="task_dyn_"]').forEach(el => el.parentElement.remove());
+
+    // Reconstruct dynamic inputs from saved data
+    if (data.texts) {
+        // Group dynamic tasks by guessing their block based on order, 
+        // For simplicity, we just inject them into the last block if we don't have block tracking.
+        // Actually, to make it robust for MVP, we just append them to the first block.
+        // Better solution: Save HTML structure or block mapping. 
+        // We will append all dynamic tasks to Block 1 for now if they are found.
+        const block1Container = document.querySelector('.space-y-1.pl-6');
+
+        Object.keys(data.texts).forEach(key => {
+            if (key.startsWith('task_dyn_') && !document.querySelector(`[data-id="${key}"]`)) {
+                const newRow = document.createElement('div');
+                newRow.className = 'flex items-center';
+                const dynId = key.replace('task_dyn_', '');
+                newRow.innerHTML = `
+                    <button data-task-id="t_dyn_${dynId}" class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                    <input data-id="${key}" type="text" class="ruled-input handwriting day-input">
+                `;
+                block1Container.appendChild(newRow);
+            }
+        });
+    }
+
+    // Now populate all values
     document.querySelectorAll('.day-input').forEach(input => {
         const id = input.getAttribute('data-id');
         input.value = data.texts && data.texts[id] ? data.texts[id] : '';
@@ -117,12 +181,6 @@ function renderDailyPlanner() {
         }
     });
 
-    // Load checkboxes
-    document.querySelectorAll('.day-checkbox').forEach(chk => {
-        const id = chk.getAttribute('data-id');
-        chk.checked = data.checkboxes && data.checkboxes[id] ? !!data.checkboxes[id] : false;
-    });
-
     // Load task buttons
     document.querySelectorAll('.task-toggle').forEach(btn => {
         const targetInputId = btn.nextElementSibling.getAttribute('data-id');
@@ -133,6 +191,12 @@ function renderDailyPlanner() {
             btn.classList.remove('task-done', 'text-green-700', 'border-green-700');
             btn.innerHTML = '';
         }
+    });
+
+    // Load checkboxes (if any remain)
+    document.querySelectorAll('.day-checkbox').forEach(chk => {
+        const id = chk.getAttribute('data-id');
+        chk.checked = data.checkboxes && data.checkboxes[id] ? !!data.checkboxes[id] : false;
     });
 
     updateIbadahProgress();
@@ -318,7 +382,7 @@ function getHijriDate(date) {
     }
 }
 
-export function showToast(message = 'МашаАллах, сохранено!') {
+window.showToast = function (message = 'МашаАллах, сохранено!') {
     const toast = document.getElementById('toast-message');
     if (!toast) return;
 

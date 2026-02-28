@@ -1,6 +1,4 @@
-import { Store } from './store.js';
-
-export function initBoard(showToast) {
+window.initBoard = function (showToast) {
     const container = document.querySelector('.board-container');
     const infiniteCanvas = document.getElementById('infinite-canvas');
     const notesContainer = document.getElementById('notes-container');

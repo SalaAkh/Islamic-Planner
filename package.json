@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "vite",
-    "build": "vite build"
+    "dev": "tailwindcss -i ./style.css -o ./tailwind.css --watch",
+    "build": "tailwindcss -i ./style.css -o ./tailwind.css --minify && node build-monolith.js"
   },
   "repository": {
     "type": "git",
@@ -21,11 +20,7 @@
   },
   "homepage": "https://github.com/SalaAkh/Islamic-Planner#readme",
   "devDependencies": {
-    "@tailwindcss/vite": "^4.2.1",
-    "autoprefixer": "^10.4.27",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.2.1",
-    "vite": "^7.3.1",
-    "vite-plugin-singlefile": "^2.3.0"
+    "@tailwindcss/cli": "^4.2.1",
+    "tailwindcss": "^4.2.1"
   }
 }
