@@ -78,7 +78,8 @@ body {
 
 .planner-tabs {
     position: absolute;
-    right: -45px;
+    right: -48px;
+    /* Выдвигаем вкладку наружу ровно на ее ширину */
     top: 100px;
     display: flex;
     flex-direction: column;
@@ -89,13 +90,14 @@ body {
 .tab-btn {
     writing-mode: vertical-rl;
     text-orientation: mixed;
-    padding: 20px 10px;
-    border-radius: 0 10px 10px 0;
+    padding: 20px 15px;
+    /* Увеличил ширину вкладки (было 10px) */
+    border-radius: 0 12px 12px 0;
     font-weight: 600;
     color: white;
     cursor: pointer;
-    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s, right 0.2s;
+    box-shadow: 6px 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s, right 0.2s, background-color 0.2s;
     position: relative;
     right: 0;
     border: 1px solid rgba(0, 0, 0, 0.1);
@@ -103,11 +105,14 @@ body {
 }
 
 .tab-btn:hover {
-    transform: translateX(5px);
+    transform: translateX(8px);
 }
 
 .tab-btn.active {
     right: 5px;
+    /* Активная вкладка чуть задвигается внутрь */
+    padding-left: 20px;
+    /* Делаем активную вкладку визуально длиннее (шире) */
     box-shadow: 8px 5px 15px rgba(0, 0, 0, 0.2);
     z-index: 0;
 }
