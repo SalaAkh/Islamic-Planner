@@ -21,7 +21,8 @@ const translations = {
         "month_notes_title": "События месяца", "month_notes_ph": "Запланированные встречи, поездки, долги по постам...",
         "ai_prompt_label": "Как распланировать день?", "placeholder_ai": "Например: Утром тренировка, днем кодинг стартапа, Аср - чтение 10 страниц Корана...",
         "goals_title": "Глобальные Цели", "ahirat_title": "Ахират (Вечное)", "dunya_title": "Дунья (Мирское)",
-        "board_title": "Tafakkur Board", "board_info": "Бесконечный холст · Pinch-to-zoom на мобильном", "center_btn": "Центр"
+        "board_title": "Tafakkur Board", "board_info": "Бесконечный холст · Pinch-to-zoom на мобильном", "center_btn": "Центр",
+        "donate_title": "Поддержать проект", "donate_text": "Ваша поддержка помогает развивать проект и приносить больше пользы Умме. Джазакаллаху Хайран!"
     },
     kk: {
         "tab_daily": "Күн", "tab_calendar": "Күнтізбе", "tab_goals": "Мақсаттар", "tab_board": "Тақта",
@@ -44,7 +45,8 @@ const translations = {
         "month_notes_title": "Ай оқиғалары", "month_notes_ph": "Жоспарланған кездесулер, сапарлар, қарыз оразалар...",
         "ai_prompt_label": "Күнді қалай жоспарлаймыз?", "placeholder_ai": "Мысалы: Таңертең жаттығу, күндіз жұмыс, Аср - Құран оқу...",
         "goals_title": "Ауқымды Мақсаттар", "ahirat_title": "Ақырет (Мәңгілік)", "dunya_title": "Дүние (Өткінші)",
-        "board_title": "Тафаккур Тақтасы", "board_info": "Шексіз кенеп · Мобильдік құрылғыда Pinch-to-zoom", "center_btn": "Ортасы"
+        "board_title": "Тафаккур Тақтасы", "board_info": "Шексіз кенеп · Мобильдік құрылғыда Pinch-to-zoom", "center_btn": "Ортасы",
+        "donate_title": "Жобаға қолдау көрсету", "donate_text": "Сіздің қолдауыңыз жобаның дамуына және Үмбетке көбірек пайда әкелуіне көмектеседі. Жазакаллаһу Хайран!"
     },
     ar: {
         "tab_daily": "اليوم", "tab_calendar": "التقويم", "tab_goals": "الأهداف", "tab_board": "اللوحة",
@@ -67,7 +69,8 @@ const translations = {
         "month_notes_title": "أحداث الشهر", "month_notes_ph": "الاجتماعات المخطط لها، السفر...",
         "ai_prompt_label": "كيف تخطط ليومك؟", "placeholder_ai": "مثال: تدريب صباحي، برمجة ظهرا، قراءة القرآن عصرا...",
         "goals_title": "الأهداف الكبرى", "ahirat_title": "الآخرة", "dunya_title": "الدنيا",
-        "board_title": "لوحة التفكر", "board_info": "مساحة غير محدودة", "center_btn": "المركز"
+        "board_title": "لوحة التفكر", "board_info": "مساحة غير محدودة", "center_btn": "المركز",
+        "donate_title": "دعم المشروع", "donate_text": "دعمكم يساعد في تطوير المشروع وتقديم المزيد من النفع للأمة. جزاكم الله خيراً!"
     },
     en: {
         "tab_daily": "Daily", "tab_calendar": "Calendar", "tab_goals": "Goals", "tab_board": "Board",
@@ -90,7 +93,8 @@ const translations = {
         "month_notes_title": "Month Events", "month_notes_ph": "Planned meetings, trips, missed fasts...",
         "ai_prompt_label": "How to plan the day?", "placeholder_ai": "e.g., Morning workout, coding at noon, Asr - reading Quran...",
         "goals_title": "Global Goals", "ahirat_title": "Akhirah (Eternal)", "dunya_title": "Dunya (Worldly)",
-        "board_title": "Tafakkur Board", "board_info": "Infinite canvas · Pinch-to-zoom on mobile", "center_btn": "Center"
+        "board_title": "Tafakkur Board", "board_info": "Infinite canvas · Pinch-to-zoom on mobile", "center_btn": "Center",
+        "donate_title": "Support the Project", "donate_text": "Your support helps develop the project and bring more benefit to the Ummah. Jazakallahu Khairan!"
     }
 };
 
