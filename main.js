@@ -23,7 +23,46 @@ document.addEventListener('DOMContentLoaded', () => {
     initGoals();
     initBackupRestore();
     initTheme();
+    initDonationToast();
 });
+
+// --- DONATION TOAST LOGIC ---
+let donationToastTimeout;
+window.showDonationToast = function () {
+    const toast = document.getElementById('donation-toast');
+    if (!toast) return;
+    toast.classList.remove('-translate-y-[150%]', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+
+    // Auto hide after 15 seconds
+    clearTimeout(donationToastTimeout);
+    donationToastTimeout = setTimeout(() => {
+        if (window.hideDonationToast) window.hideDonationToast();
+    }, 15000);
+};
+
+window.hideDonationToast = function () {
+    const toast = document.getElementById('donation-toast');
+    if (!toast) return;
+    toast.classList.add('-translate-y-[150%]', 'opacity-0');
+    toast.classList.remove('translate-y-0', 'opacity-100');
+};
+
+window.showDonateModal = function () {
+    if (window.hideDonationToast) window.hideDonationToast();
+    const modal = document.getElementById('donate-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+};
+
+function initDonationToast() {
+    // Show initially after short delay to not overlap with initial animations
+    setTimeout(window.showDonationToast, 3000);
+    // Repeat every 3 minutes (180000 ms)
+    setInterval(window.showDonationToast, 180000);
+}
 
 // --- TABS LOGIC ---
 function initTabs() {
@@ -81,7 +120,7 @@ function initDailyPlanner() {
     });
 
     // Event Delegation for dynamic elements
-    const plannerContainer = document.querySelector('.md\\:col-span-8.space-y-8');
+    const plannerContainer = document.querySelector('.md\\:col-span-8');
 
     plannerContainer.addEventListener('input', (e) => {
         if (e.target.classList.contains('day-input') || e.target.classList.contains('day-checkbox')) {
@@ -141,10 +180,14 @@ function renderDailyPlanner() {
 
     let displayStr = `${currentDate.getDate()} ${monthName}`;
     if (dateStr === todayStr) {
-        const todayWord = lang === 'kk' ? 'Бүгін' : lang === 'ar' ? 'اليوم' : 'Сегодня';
+        let todayWord = 'Сегодня';
+        if (lang === 'kk') todayWord = 'Бүгін';
+        else if (lang === 'ar') todayWord = 'اليوم';
+        else if (lang === 'en') todayWord = 'Today';
         displayStr += ` (${todayWord})`;
     }
-    document.getElementById('date-display').value = displayStr;
+    const displayInput = document.getElementById('date-display');
+    displayInput.value = displayStr;
     document.getElementById('hijri-date-display').innerText = getHijriDate(currentDate);
 
     // Load inputs
@@ -387,19 +430,23 @@ function initGoals() {
 
 // --- UTILS & UX ---
 function getHijriDate(date) {
+    const lang = localStorage.getItem('barakah_lang') || 'ru';
+    // Нам нужен язык локали, а для ISO он 2 буквы
+    const localePrefix = lang === 'en' ? 'en-US' : lang === 'ar' ? 'ar-SA' : lang === 'kk' ? 'kk-KZ' : 'ru-RU';
+
     try {
-        return new Intl.DateTimeFormat('ru-RU-u-ca-islamic-umalqura', {
+        return new Intl.DateTimeFormat(`${localePrefix}-u-ca-islamic-umalqura`, {
             day: 'numeric',
             month: 'long',
             year: 'numeric'
-        }).format(date).replace(' г.', '');
+        }).format(date).replace(' г.', '').replace(' AH', '');
     } catch (e) {
         // Fallback
-        return new Intl.DateTimeFormat('ru-RU-u-ca-islamic', {
+        return new Intl.DateTimeFormat(`${localePrefix}-u-ca-islamic`, {
             day: 'numeric',
             month: 'long',
             year: 'numeric'
-        }).format(date).replace(' г.', '');
+        }).format(date).replace(' г.', '').replace(' AH', '');
     }
 }
 
@@ -488,4 +535,18 @@ function initTheme() {
             themeToggleBtn.innerHTML = isDark ? '<i class="fas fa-sun text-amber-500"></i>' : '<i class="fas fa-moon"></i>';
         });
     }
+}
+
+window.copyToClipboard = function (text, successMsgKey) {
+    navigator.clipboard.writeText(text).then(() => {
+        const lang = localStorage.getItem('barakah_lang') || 'ru';
+        // We need a way to access translations within main.js if it's not global
+        // but translations is usually global from i18n.js
+        const msg = (window.translations && window.translations[lang] && window.translations[lang][successMsgKey]) || 'Copied!';
+        if (window.showToast) {
+            window.showToast(msg);
+        } else {
+            alert(msg);
+        }
+    });
 }
