@@ -24,7 +24,7 @@ if (fs.existsSync('./tailwind.css')) {
 }
 
 // 3. Встраиваем JS файлы
-const scriptsToInline = ['store.js', 'board.js', 'main.js'];
+const scriptsToInline = ['i18n.js', 'store.js', 'ai.js', 'board.js', 'main.js'];
 
 scriptsToInline.forEach(script => {
     console.log(`Inlining ${script}...`);

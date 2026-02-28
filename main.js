@@ -13,11 +13,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.head.appendChild(link);
     }
 
+    if (typeof initI18n === 'function') {
+        initI18n();
+    }
+
     initTabs();
     initDailyPlanner();
     initCalendar();
     initGoals();
     initBackupRestore();
+    initTheme();
 });
 
 // --- TABS LOGIC ---
@@ -129,8 +134,16 @@ function renderDailyPlanner() {
 
     // Update header
     const todayStr = formatDate(new Date());
-    let displayStr = `${currentDate.getDate()} ${monthNames[currentDate.getMonth()]}`;
-    if (dateStr === todayStr) displayStr += " (Сегодня)";
+    const lang = localStorage.getItem('barakah_lang') || 'ru';
+    const monthFormat = new Intl.DateTimeFormat(lang, { month: 'long' });
+    let monthName = monthFormat.format(currentDate);
+    monthName = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
+    let displayStr = `${currentDate.getDate()} ${monthName}`;
+    if (dateStr === todayStr) {
+        const todayWord = lang === 'kk' ? 'Бүгін' : lang === 'ar' ? 'اليوم' : 'Сегодня';
+        displayStr += ` (${todayWord})`;
+    }
     document.getElementById('date-display').value = displayStr;
     document.getElementById('hijri-date-display').innerText = getHijriDate(currentDate);
 
@@ -294,7 +307,11 @@ function renderCalendar() {
     const year = calendarDate.getFullYear();
     const month = calendarDate.getMonth(); // 0-11
 
-    title.innerText = monthNames[month] + ' ' + year;
+    const lang = localStorage.getItem('barakah_lang') || 'ru';
+    let monthNameStr = new Intl.DateTimeFormat(lang, { month: 'long' }).format(new Date(year, month));
+    monthNameStr = monthNameStr.charAt(0).toUpperCase() + monthNameStr.slice(1);
+
+    title.innerText = monthNameStr + ' ' + year;
 
     // Restore monthly notes
     const goals = Store.getGoals();
@@ -328,10 +345,14 @@ function renderCalendar() {
 
         const cell = document.createElement('div');
         cell.className = classes;
+
+        const sunnahText = lang === 'en' ? 'Sunnah' : lang === 'kk' ? 'Сүннет' : lang === 'ar' ? 'سنة' : 'Сунна';
+        const planText = lang === 'en' ? 'Plan' : lang === 'kk' ? 'Жоспар' : lang === 'ar' ? 'خطة' : 'План';
+
         cell.innerHTML = `
             <div class="calendar-date pointer-events-none">${i}</div>
-            ${isSunnahFast ? '<span class="sunnah-badge">Сунна</span>' : ''}
-            <div class="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-2 right-2 text-xs text-green-700 font-bold"><i class="fas fa-edit"></i> План</div>
+            ${isSunnahFast ? '<span class="sunnah-badge">' + sunnahText + '</span>' : ''}
+            <div class="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-2 right-2 text-xs text-green-700 font-bold"><i class="fas fa-edit"></i> ${planText}</div>
         `;
         cell.addEventListener('click', () => {
             currentDate = new Date(year, month, i);
@@ -440,6 +461,31 @@ function initBackupRestore() {
             };
             reader.readAsText(file);
             fileImport.value = ''; // reset file input
+        });
+    }
+}
+// --- THEME TOGGLE LOGIC ---
+function initTheme() {
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const htmlEl = document.documentElement;
+
+    // Init from localStorage or OS preference
+    const savedTheme = localStorage.getItem('barakah_theme');
+    if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        htmlEl.classList.add('dark');
+        if (themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        htmlEl.classList.remove('dark');
+        if (themeToggleBtn) themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+
+    // Toggle click handler
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            htmlEl.classList.toggle('dark');
+            const isDark = htmlEl.classList.contains('dark');
+            localStorage.setItem('barakah_theme', isDark ? 'dark' : 'light');
+            themeToggleBtn.innerHTML = isDark ? '<i class="fas fa-sun text-amber-500"></i>' : '<i class="fas fa-moon"></i>';
         });
     }
 }

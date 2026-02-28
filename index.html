@@ -18,6 +18,7 @@
     <meta name="theme-color" content="#059669">
 
     <!-- Подключаем скрипты классическим способом -->
+    <script src="./i18n.js"></script>
     <script src="./store.js"></script>
     <script src="./ai.js"></script>
     <script src="./board.js"></script>
@@ -28,11 +29,14 @@
     <div class="notebook-wrapper">
         <!-- Вкладки навигации -->
         <div class="planner-tabs">
-            <button data-tab="daily" id="tab-daily" class="tab-btn tab-daily active">День</button>
-            <button data-tab="calendar" id="tab-calendar" class="tab-btn tab-calendar">Календарь</button>
-            <button data-tab="goals" id="tab-goals" class="tab-btn tab-goals">Цели</button>
-            <button data-tab="board" id="tab-board" class="tab-btn tab-board">Доска</button>
+            <button data-tab="daily" id="tab-daily" class="tab-btn tab-daily active" data-i18n="tab_daily">День</button>
+            <button data-tab="calendar" id="tab-calendar" class="tab-btn tab-calendar"
+                data-i18n="tab_calendar">Календарь</button>
+            <button data-tab="goals" id="tab-goals" class="tab-btn tab-goals" data-i18n="tab_goals">Цели</button>
+            <button data-tab="board" id="tab-board" class="tab-btn tab-board" data-i18n="tab_board">Доска</button>
         </div>
+
+        <!-- Theme Toggle Was Here, moved to bottom-right -->
 
         <div class="notebook-page mx-auto">
             <!-- Кольца блокнота -->
@@ -59,29 +63,34 @@
                 <header
                     class="mb-10 border-b-2 border-slate-200 pb-4 flex flex-col md:flex-row justify-between items-end">
                     <div>
-                        <h1 class="text-3xl font-bold text-green-900 tracking-tight">План на день</h1>
-                        <p class="arabic text-xl text-green-700 italic mt-1">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+                        <h1 class="text-3xl font-bold text-green-900 dark:text-green-300 tracking-tight"
+                            data-i18n="title_daily">План на
+                            день</h1>
+                        <p class="arabic text-xl text-green-700 dark:text-green-400 italic mt-1">بِسْمِ اللَّهِ
+                            الرَّحْمَٰنِ الرَّحِيمِ</p>
                     </div>
                     <div class="w-full md:w-1/3 mt-4 md:mt-0 space-y-2">
                         <div class="flex items-center justify-between">
                             <i id="prev-day" class="fas fa-chevron-left nav-btn text-xl p-2 pl-0"></i>
                             <div class="flex-grow flex flex-col items-center px-2 relative">
                                 <div class="flex items-center w-full">
-                                    <span
-                                        class="text-sm font-semibold text-gray-500 mr-2 uppercase tracking-wide">Дата:</span>
+                                    <span class="text-sm font-semibold text-gray-500 mr-2 uppercase tracking-wide"
+                                        data-i18n="date_today">Дата:</span>
                                     <input id="date-display" type="text" readonly
-                                        class="ruled-input handwriting w-full text-center text-gray-700 cursor-default"
-                                        value="Сегодня">
+                                        class="ruled-input handwriting w-full text-center text-gray-700 dark:text-gray-300 cursor-default"
+                                        value="Сегодня" data-i18n="date_today">
                                 </div>
                                 <span id="hijri-date-display"
-                                    class="text-xs text-green-700 mt-1 font-semibold tracking-wide absolute -bottom-5"></span>
+                                    class="text-xs text-green-700 dark:text-green-400 mt-1 font-semibold tracking-wide absolute -bottom-5"></span>
                             </div>
                             <i id="next-day" class="fas fa-chevron-right nav-btn text-xl p-2 pr-0"></i>
                         </div>
                         <div class="flex items-center">
-                            <span class="text-sm font-semibold text-gray-500 mr-2 uppercase tracking-wide">Ният:</span>
+                            <span class="text-sm font-semibold text-gray-500 mr-2 uppercase tracking-wide"
+                                data-i18n="niyyah_label">Ният:</span>
                             <input data-id="niyyah" type="text" placeholder="Ради довольства Аллаха..."
-                                class="ruled-input handwriting w-full text-green-800 day-input">
+                                data-i18n="niyyah_ph"
+                                class="ruled-input handwriting w-full text-green-800 dark:text-green-400 day-input">
                         </div>
                     </div>
                 </header>
@@ -92,8 +101,11 @@
                         <!-- Ибадат -->
                         <div>
                             <div class="flex justify-between items-end mb-4">
-                                <h2 class="text-lg font-bold text-gray-800 section-title">Ибадат Трекер</h2>
-                                <span class="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full"><span
+                                <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 section-title"
+                                    data-i18n="ibadah_title">
+                                    Ибадат Трекер</h2>
+                                <span
+                                    class="text-xs font-bold text-green-700 dark:text-green-400 bg-green-100 px-2 py-1 rounded-full"><span
                                         id="ibadah-progress-text">0</span>%</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-1.5 mb-6">
@@ -105,57 +117,71 @@
                                 <label class="flex items-center space-x-3 cursor-pointer group">
                                     <input data-id="fajr" type="checkbox" class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-gray-700 font-medium group-hover:text-green-700 transition">Фаджр</span>
+                                        class="text-gray-700 dark:text-gray-300 font-medium group-hover:text-green-700 dark:text-green-400 transition"
+                                        data-i18n="fajr">Фаджр</span>
                                 </label>
                                 <label class="flex items-center space-x-3 cursor-pointer group">
                                     <input data-id="morning_azkar" type="checkbox" class="paper-checkbox day-checkbox">
-                                    <span class="text-gray-500 text-sm group-hover:text-green-700 transition">Утренние
+                                    <span
+                                        class="text-gray-500 text-sm group-hover:text-green-700 dark:text-green-400 transition"
+                                        data-i18n="morning_azkar">Утренние
                                         азкары</span>
                                 </label>
                                 <label class="flex items-center space-x-3 cursor-pointer group mt-4">
                                     <input data-id="zuhr" type="checkbox" class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-gray-700 font-medium group-hover:text-green-700 transition">Зухр</span>
+                                        class="text-gray-700 dark:text-gray-300 font-medium group-hover:text-green-700 dark:text-green-400 transition"
+                                        data-i18n="zuhr">Зухр</span>
                                 </label>
                                 <label class="flex items-center space-x-3 cursor-pointer group">
                                     <input data-id="asr" type="checkbox" class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-gray-700 font-medium group-hover:text-green-700 transition">Аср</span>
+                                        class="text-gray-700 dark:text-gray-300 font-medium group-hover:text-green-700 dark:text-green-400 transition"
+                                        data-i18n="asr">Аср</span>
                                 </label>
                                 <label class="flex items-center space-x-3 cursor-pointer group">
                                     <input data-id="evening_azkar" type="checkbox" class="paper-checkbox day-checkbox">
-                                    <span class="text-gray-500 text-sm group-hover:text-green-700 transition">Вечерние
+                                    <span
+                                        class="text-gray-500 text-sm group-hover:text-green-700 dark:text-green-400 transition"
+                                        data-i18n="evening_azkar">Вечерние
                                         азкары</span>
                                 </label>
                                 <label class="flex items-center space-x-3 cursor-pointer group mt-4">
                                     <input data-id="maghrib" type="checkbox" class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-gray-700 font-medium group-hover:text-green-700 transition">Магриб</span>
+                                        class="text-gray-700 dark:text-gray-300 font-medium group-hover:text-green-700 dark:text-green-400 transition"
+                                        data-i18n="maghrib">Магриб</span>
                                 </label>
                                 <label class="flex items-center space-x-3 cursor-pointer group">
                                     <input data-id="isha" type="checkbox" class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-gray-700 font-medium group-hover:text-green-700 transition">Иша</span>
+                                        class="text-gray-700 dark:text-gray-300 font-medium group-hover:text-green-700 dark:text-green-400 transition"
+                                        data-i18n="isha">Иша</span>
                                 </label>
                                 <label class="flex items-center space-x-3 cursor-pointer group">
                                     <input data-id="witr" type="checkbox" class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-gray-500 text-sm group-hover:text-green-700 transition">Витр</span>
+                                        class="text-gray-500 text-sm group-hover:text-green-700 dark:text-green-400 transition"
+                                        data-i18n="witr">Витр</span>
                                 </label>
                             </div>
                         </div>
 
                         <!-- Коран -->
                         <div>
-                            <h2 class="text-lg font-bold text-gray-800 mb-4 section-title">Чтение Корана</h2>
-                            <input data-id="quran" type="text" placeholder="Сура / Аяты"
+                            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4 section-title"
+                                data-i18n="quran_title">
+                                Чтение Корана</h2>
+                            <input data-id="quran" type="text" placeholder="Сура / Аяты" data-i18n="quran_ph"
                                 class="ruled-input handwriting w-full mb-2 day-input">
                         </div>
 
                         <!-- Добрые дела -->
                         <div>
-                            <h2 class="text-lg font-bold text-gray-800 mb-2 section-title">Садака / Благое дело</h2>
-                            <input data-id="sadaka" type="text" placeholder="Кому помочь сегодня?"
+                            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 section-title"
+                                data-i18n="sadaka_title">
+                                Садака / Благое дело</h2>
+                            <input data-id="sadaka" type="text" placeholder="Кому помочь сегодня?" data-i18n="sadaka_ph"
                                 class="ruled-input handwriting w-full day-input">
                         </div>
                     </div>
@@ -166,9 +192,10 @@
                         <div class="relative">
                             <div class="flex items-center mb-2">
                                 <i class="fas fa-sun text-amber-500 mr-2"></i>
-                                <h3 class="font-bold text-gray-800 uppercase tracking-widest text-sm">Фаджр — Зухр</h3>
+                                <h3 class="font-bold text-gray-800 dark:text-gray-200 uppercase tracking-widest text-sm"
+                                    data-i18n="fajr_zuhr">Фаджр — Зухр</h3>
                                 <div class="flex-grow border-b border-gray-300 ml-4"></div>
-                                <span class="text-xs text-gray-400 ml-2 italic">Фокус</span>
+                                <span class="text-xs text-gray-400 ml-2 italic" data-i18n="focus_label">Фокус</span>
                             </div>
                             <div class="space-y-1 pl-6">
                                 <div class="flex items-center">
@@ -187,7 +214,7 @@
                             <div class="pl-6 mt-2 opacity-0 hover:opacity-100 transition-opacity">
                                 <button data-block-index="1"
                                     class="add-task-btn text-xs text-gray-400 hover:text-green-600 flex items-center gap-1">
-                                    <i class="fas fa-plus"></i> Добавить задачу
+                                    <i class="fas fa-plus"></i> <span data-i18n="add_task">Добавить задачу</span>
                                 </button>
                             </div>
                         </div>
@@ -196,9 +223,10 @@
                         <div class="relative">
                             <div class="flex items-center mb-2">
                                 <i class="fas fa-clock text-blue-500 mr-2"></i>
-                                <h3 class="font-bold text-gray-800 uppercase tracking-widest text-sm">Зухр — Аср</h3>
+                                <h3 class="font-bold text-gray-800 dark:text-gray-200 uppercase tracking-widest text-sm"
+                                    data-i18n="zuhr_asr">Зухр — Аср</h3>
                                 <div class="flex-grow border-b border-gray-300 ml-4"></div>
-                                <span class="text-xs text-gray-400 ml-2 italic">Рутина</span>
+                                <span class="text-xs text-gray-400 ml-2 italic" data-i18n="focus_label">Рутина</span>
                             </div>
                             <div class="space-y-1 pl-6">
                                 <div class="flex items-center">
@@ -216,7 +244,7 @@
                             <div class="pl-6 mt-2 opacity-0 hover:opacity-100 transition-opacity">
                                 <button data-block-index="2"
                                     class="add-task-btn text-xs text-gray-400 hover:text-green-600 flex items-center gap-1">
-                                    <i class="fas fa-plus"></i> Добавить задачу
+                                    <i class="fas fa-plus"></i> <span data-i18n="add_task">Добавить задачу</span>
                                 </button>
                             </div>
                         </div>
@@ -225,7 +253,8 @@
                         <div class="relative">
                             <div class="flex items-center mb-2">
                                 <i class="fas fa-coffee text-orange-500 mr-2"></i>
-                                <h3 class="font-bold text-gray-800 uppercase tracking-widest text-sm">Аср — Магриб</h3>
+                                <h3 class="font-bold text-gray-800 dark:text-gray-200 uppercase tracking-widest text-sm"
+                                    data-i18n="asr_maghrib">Аср — Магриб</h3>
                                 <div class="flex-grow border-b border-gray-300 ml-4"></div>
                             </div>
                             <div class="space-y-1 pl-6">
@@ -245,7 +274,7 @@
                             <div class="pl-6 mt-2 opacity-0 hover:opacity-100 transition-opacity">
                                 <button data-block-index="3"
                                     class="add-task-btn text-xs text-gray-400 hover:text-green-600 flex items-center gap-1">
-                                    <i class="fas fa-plus"></i> Добавить задачу
+                                    <i class="fas fa-plus"></i> <span data-i18n="add_task">Добавить задачу</span>
                                 </button>
                             </div>
                         </div>
@@ -254,7 +283,8 @@
                         <div class="relative">
                             <div class="flex items-center mb-2">
                                 <i class="fas fa-cloud-moon text-purple-500 mr-2"></i>
-                                <h3 class="font-bold text-gray-800 uppercase tracking-widest text-sm">Магриб — Иша</h3>
+                                <h3 class="font-bold text-gray-800 dark:text-gray-200 uppercase tracking-widest text-sm"
+                                    data-i18n="maghrib_isha">Магриб — Иша</h3>
                                 <div class="flex-grow border-b border-gray-300 ml-4"></div>
                             </div>
                             <div class="space-y-1 pl-6">
@@ -274,7 +304,7 @@
                             <div class="pl-6 mt-2 opacity-0 hover:opacity-100 transition-opacity">
                                 <button data-block-index="4"
                                     class="add-task-btn text-xs text-gray-400 hover:text-green-600 flex items-center gap-1">
-                                    <i class="fas fa-plus"></i> Добавить задачу
+                                    <i class="fas fa-plus"></i> <span data-i18n="add_task">Добавить задачу</span>
                                 </button>
                             </div>
                         </div>
@@ -283,7 +313,8 @@
                         <div class="relative">
                             <div class="flex items-center mb-2">
                                 <i class="fas fa-moon text-indigo-500 mr-2"></i>
-                                <h3 class="font-bold text-gray-800 uppercase tracking-widest text-sm">Иша — Сон</h3>
+                                <h3 class="font-bold text-gray-800 dark:text-gray-200 uppercase tracking-widest text-sm"
+                                    data-i18n="isha_sleep">Иша — Сон</h3>
                                 <div class="flex-grow border-b border-gray-300 ml-4"></div>
                             </div>
                             <div class="space-y-1 pl-6">
@@ -309,10 +340,12 @@
             <div id="view-calendar" class="page-view">
                 <header class="mb-8 border-b-2 border-slate-200 pb-4 flex justify-between items-center">
                     <div>
-                        <h1 class="text-3xl font-bold text-green-900 tracking-tight" id="calendar-month-title">Календарь
+                        <h1 class="text-3xl font-bold text-green-900 dark:text-green-300 tracking-tight"
+                            id="calendar-month-title" data-i18n="calendar_title">Календарь
                         </h1>
-                        <p class="text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i> Понедельники и четверги
-                            выделены для Сунна-постов</p>
+                        <p class="text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i> <span
+                                data-i18n="calendar_info">Понедельники и четверги
+                                выделены для Сунна-постов</span></p>
                     </div>
                     <div class="flex gap-4">
                         <i id="prev-month" class="fas fa-chevron-left nav-btn text-2xl p-2"></i>
@@ -320,15 +353,16 @@
                     </div>
                 </header>
 
-                <div class="calendar-wrapper bg-white/50 p-4 rounded-xl border border-gray-200">
+                <div
+                    class="calendar-wrapper bg-white/50 dark:bg-slate-800/50 p-4 rounded-xl border border-gray-200 dark:border-slate-700">
                     <div class="calendar-grid" id="calendar-header">
-                        <div class="calendar-day-header">Пн</div>
-                        <div class="calendar-day-header">Вт</div>
-                        <div class="calendar-day-header">Ср</div>
-                        <div class="calendar-day-header">Чт</div>
-                        <div class="calendar-day-header">Пт</div>
-                        <div class="calendar-day-header">Сб</div>
-                        <div class="calendar-day-header">Вс</div>
+                        <div class="calendar-day-header" data-i18n="calendar_mon">Пн</div>
+                        <div class="calendar-day-header" data-i18n="calendar_tue">Вт</div>
+                        <div class="calendar-day-header" data-i18n="calendar_wed">Ср</div>
+                        <div class="calendar-day-header" data-i18n="calendar_thu">Чт</div>
+                        <div class="calendar-day-header" data-i18n="calendar_fri">Пт</div>
+                        <div class="calendar-day-header" data-i18n="calendar_sat">Сб</div>
+                        <div class="calendar-day-header" data-i18n="calendar_sun">Вс</div>
                     </div>
                     <div class="calendar-grid" id="calendar-body">
                         <!-- Генерация через JS -->
@@ -336,17 +370,22 @@
                 </div>
 
                 <div class="mt-8">
-                    <h2 class="text-lg font-bold text-gray-800 mb-2 section-title">События месяца</h2>
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 section-title"
+                        data-i18n="month_notes_title">События
+                        месяца</h2>
                     <!-- Notes is saved based on current month viewing -->
                     <textarea id="month-notes" class="ruled-textarea handwriting h-32"
-                        placeholder="Запланированные встречи, поездки, долги по постам..."></textarea>
+                        placeholder="Запланированные встречи, поездки, долги по постам..."
+                        data-i18n="month_notes_ph"></textarea>
                 </div>
             </div>
 
             <!-- СТРАНИЦА 3: ЦЕЛИ -->
             <div id="view-goals" class="page-view">
                 <header class="mb-10 border-b-2 border-slate-200 pb-4">
-                    <h1 class="text-3xl font-bold text-amber-700 tracking-tight">Глобальные Цели</h1>
+                    <h1 class="text-3xl font-bold text-amber-700 dark:text-amber-400 tracking-tight"
+                        data-i18n="goals_title">Глобальные Цели
+                    </h1>
                     <p class="arabic text-xl text-amber-600 italic mt-1">وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ
                     </p>
                     <p class="text-sm text-gray-500">«Человеку уготовано только то, к чему он стремился» (Коран 53:39)
@@ -356,8 +395,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
                     <!-- Ахират -->
                     <div>
-                        <h2 class="text-2xl font-bold text-green-800 mb-6 flex items-center">
-                            <i class="fas fa-heart mr-3"></i> Ахират (Вечное)
+                        <h2 class="text-2xl font-bold text-green-800 dark:text-green-400 mb-6 flex items-center">
+                            <i class="fas fa-heart mr-3"></i> <span data-i18n="ahirat_title">Ахират (Вечное)</span>
                         </h2>
                         <div class="space-y-6">
                             <div>
@@ -384,7 +423,7 @@
                     <!-- Дунья -->
                     <div>
                         <h2 class="text-2xl font-bold text-blue-800 mb-6 flex items-center">
-                            <i class="fas fa-globe mr-3"></i> Дунья (Мирское)
+                            <i class="fas fa-globe mr-3"></i> <span data-i18n="dunya_title">Дунья (Мирское)</span>
                         </h2>
                         <div class="space-y-6">
                             <div>
@@ -415,7 +454,8 @@
                 <header
                     class="mb-4 border-b-2 border-slate-200 pb-4 flex flex-wrap justify-between items-center relative z-10 bg-paper gap-3">
                     <div>
-                        <h1 class="text-3xl font-bold text-indigo-900 tracking-tight">Tafakkur Board</h1>
+                        <h1 class="text-3xl font-bold text-indigo-900 dark:text-indigo-400 tracking-tight">Tafakkur
+                            Board</h1>
                         <p class="text-gray-500 mt-1 text-sm"><i class="fas fa-infinity mr-1"></i> Бесконечный холст ·
                             Pinch-to-zoom на мобильном</p>
                     </div>
@@ -424,15 +464,15 @@
                             class="w-10 h-10 rounded-full bg-yellow-200 border-2 border-yellow-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-yellow-700 tooltip"
                             aria-label="Жёлтый стикер"><i class="fas fa-plus"></i></button>
                         <button id="add-note-green"
-                            class="w-10 h-10 rounded-full bg-green-200 border-2 border-green-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-green-700 tooltip"
+                            class="w-10 h-10 rounded-full bg-green-200 border-2 border-green-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-green-700 dark:text-green-400 tooltip"
                             aria-label="Зелёный стикер"><i class="fas fa-plus"></i></button>
                         <button id="add-note-blue"
                             class="w-10 h-10 rounded-full bg-blue-200 border-2 border-blue-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-blue-700 tooltip"
                             aria-label="Синий стикер"><i class="fas fa-plus"></i></button>
                         <div class="w-px h-8 bg-gray-200 mx-1 hidden md:block"></div>
                         <button id="reset-board-view"
-                            class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold transition-colors">
-                            <i class="fas fa-crosshairs mr-1"></i>Центр</button>
+                            class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold transition-colors">
+                            <i class="fas fa-crosshairs mr-1"></i><span data-i18n="center_btn">Центр</span></button>
                     </div>
                 </header>
 
@@ -490,32 +530,44 @@
     </div>
 
     <!-- Backup & Restore Floating Buttons -->
-    <div class="fixed bottom-6 left-6 flex flex-col gap-3 z-50">
-        <button id="btn-import"
-            class="w-10 h-10 rounded-full bg-emerald-600 text-white shadow-xl hover:scale-110 transition-transform flex items-center justify-center tooltip hover:bg-emerald-700"
-            aria-label="Импорт (Восстановить)">
-            <i class="fas fa-upload"></i>
+    <div class="fixed bottom-6 left-6 flex flex-col gap-3 z-50" dir="ltr">
+        <button id="btn-import" dir="auto"
+            class="px-5 py-3 rounded-full bg-emerald-600 text-white shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2 hover:bg-emerald-700 font-semibold text-sm">
+            <i class="fas fa-upload"></i> <span data-i18n="btn_import">Импорт</span>
         </button>
-        <button id="btn-export"
-            class="w-10 h-10 rounded-full bg-indigo-600 text-white shadow-xl hover:scale-110 transition-transform flex items-center justify-center tooltip hover:bg-indigo-700"
-            aria-label="Экспорт (Бэкап данных)">
-            <i class="fas fa-download"></i>
+        <button id="btn-export" dir="auto"
+            class="px-5 py-3 rounded-full bg-indigo-600 text-white shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2 hover:bg-indigo-700 font-semibold text-sm">
+            <i class="fas fa-download"></i> <span data-i18n="btn_export">Экспорт</span>
         </button>
         <input type="file" id="file-import" class="hidden" accept=".json">
     </div>
 
-    <!-- AI Floating Action Button -->
-    <button id="ai-fab-btn"
-        class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(124,58,237,0.5)] hover:scale-110 hover:shadow-[0_0_30px_rgba(124,58,237,0.8)] transition-all z-50 flex items-center justify-center tooltip"
-        aria-label="ИИ Ассистент">
-        <i class="fas fa-magic text-xl animate-pulse"></i>
-    </button>
+    <!-- Right Action Buttons (AI, Theme, Lang) -->
+    <div class="fixed bottom-6 right-6 flex flex-col items-end gap-3 z-50" dir="ltr">
+        <!-- Lang Toggle -->
+        <button id="lang-toggle"
+            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-gray-600 dark:text-gray-300 hover:scale-110 transition-transform border border-gray-100 dark:border-slate-700 tooltip"
+            aria-label="Смена языка">
+            <span id="lang-icon" class="text-xs font-bold font-sans">RU</span>
+        </button>
+        <!-- Theme Toggle -->
+        <button id="theme-toggle"
+            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-gray-600 dark:text-gray-300 hover:scale-110 transition-transform border border-gray-100 dark:border-slate-700 tooltip"
+            aria-label="Смена темы">
+            <i class="fas fa-moon"></i>
+        </button>
+        <!-- AI Floating Action Button -->
+        <button id="ai-fab-btn" dir="auto"
+            class="px-5 py-3 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(124,58,237,0.5)] hover:scale-105 hover:shadow-[0_0_30px_rgba(124,58,237,0.8)] transition-all flex items-center justify-center gap-2 font-semibold text-sm">
+            <i class="fas fa-magic text-xl animate-pulse"></i> <span data-i18n="btn_ai">ИИ Ассистент</span>
+        </button>
+    </div>
 
     <!-- AI Modal -->
     <div id="ai-modal"
         class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
         <div
-            class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 opacity-0 transition-all duration-300">
+            class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 opacity-0 transition-all duration-300">
             <!-- Header -->
             <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white relative">
                 <button id="close-ai-modal"
@@ -527,8 +579,8 @@
                         <i class="fas fa-robot text-2xl text-white"></i>
                     </div>
                     <div>
-                        <h2 class="text-xl font-bold">ИИ Планировщик</h2>
-                        <p class="text-sm text-indigo-100 opacity-90">На базе Groq/Gemini</p>
+                        <h2 class="text-xl font-bold" data-i18n="ai_modal_title">ИИ Планировщик</h2>
+                        <p class="text-sm text-indigo-100 opacity-90">На базе Google Gemini 3</p>
                     </div>
                 </div>
             </div>
@@ -536,44 +588,53 @@
             <!-- Body -->
             <div class="p-6 space-y-5">
                 <!-- API Setup (hidden if configured) -->
-                <div id="ai-setup-area" class="bg-indigo-50 rounded-xl p-4 border border-indigo-100 hidden">
-                    <p class="text-xs text-gray-500 mb-2">Для работы оффлайн-клиента требуется ваш API ключ.</p>
+                <div id="ai-setup-area"
+                    class="bg-indigo-50 dark:bg-slate-800 rounded-xl p-4 border border-indigo-100 dark:border-slate-700 hidden">
+                    <p class="text-xs text-gray-500 mb-2" data-i18n="ai_setup_help">Для работы оффлайн-клиента требуется
+                        ваш API ключ Gemini.</p>
                     <div class="flex gap-2">
-                        <input type="password" id="ai-api-key" placeholder="Groq API Key (gsk_...)"
-                            class="flex-grow bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <input type="password" id="ai-api-key" placeholder="Gemini API Key (AIzaSy...)"
+                            class="flex-grow bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
                         <button id="save-ai-key"
-                            class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors">Сохранить</button>
+                            class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors"
+                            data-i18n="btn_save">Сохранить</button>
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-2 text-right"><a href="https://console.groq.com/keys"
-                            target="_blank" class="underline hover:text-indigo-600">Получить бесплатный ключ</a></p>
+                    <p class="text-[10px] text-gray-400 mt-2 text-right"><a
+                            href="https://aistudio.google.com/app/apikey" target="_blank"
+                            class="underline hover:text-indigo-600">Получить бесплатный ключ</a></p>
                 </div>
 
                 <!-- Prompt Area -->
                 <div id="ai-chat-area">
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Как распланировать день?</label>
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"
+                        data-i18n="ai_prompt_label">Как
+                        распланировать день?</label>
                     <div class="relative">
-                        <textarea id="ai-prompt" rows="3"
+                        <textarea id="ai-prompt" rows="3" data-i18n="placeholder_ai"
                             placeholder="Например: Утром тренировка, днем кодинг стартапа, Аср - чтение 10 страниц Корана..."
-                            class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"></textarea>
+                            class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-4 text-gray-700 dark:text-gray-300 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"></textarea>
 
                         <!-- AI Loading Overlay -->
                         <div id="ai-loading"
-                            class="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-xl hidden flex-col items-center justify-center">
+                            class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-xl hidden flex-col items-center justify-center z-10">
                             <i class="fas fa-circle-notch fa-spin text-3xl text-purple-600 mb-2"></i>
-                            <span class="text-sm font-semibold text-purple-800 animate-pulse">Нейросеть думает...</span>
+                            <span class="text-sm font-semibold text-purple-800 animate-pulse"
+                                data-i18n="ai_loading_text">Нейросеть думает...</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Footer -->
-            <div class="bg-gray-50 p-4 px-6 flex justify-between items-center border-t border-gray-100">
-                <button id="ai-settings-btn" class="text-gray-400 hover:text-gray-600 text-sm" title="Настройки API">
+            <div
+                class="bg-gray-50 dark:bg-slate-800/50 p-4 px-6 flex justify-between items-center border-t border-gray-100 dark:border-slate-700">
+                <button id="ai-settings-btn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm"
+                    title="Настройки API">
                     <i class="fas fa-cog"></i>
                 </button>
                 <button id="ai-submit-btn"
                     class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 rounded-full font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <i class="fas fa-magic"></i> Создать план
+                    <i class="fas fa-magic"></i> <span data-i18n="btn_generate">Создать план</span>
                 </button>
             </div>
         </div>
@@ -583,7 +644,7 @@
     <div id="toast-message"
         class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center gap-3">
         <i class="fas fa-check-circle text-green-400"></i>
-        <span id="toast-text" class="font-medium text-sm">Сохранено</span>
+        <span id="toast-text" class="font-medium text-sm" data-i18n="toast_saved">Сохранено</span>
     </div>
     <script>
         // PWA Service Worker Registration

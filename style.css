@@ -1,27 +1,43 @@
 @import "tailwindcss";
 
 :root {
+    --bg-main: #cbd5e1;
+    --bg-dots: #94a3b8;
     --paper: #fdfbf7;
     --ink: #1e293b;
     --primary: #2d5a27;
+    --primary-light: rgba(45, 90, 39, 0.05);
     --lines: #e2e8f0;
     --tab-daily: #475569;
     --tab-calendar: #2d5a27;
     --tab-goals: #b45309;
     --tab-board: #4f46e5;
-    /* Indigo */
+}
+
+.dark {
+    --bg-main: #0f172a;
+    --bg-dots: #334155;
+    --paper: #1e293b;
+    --ink: #e2e8f0;
+    --primary: #4ade80;
+    --primary-light: rgba(74, 222, 128, 0.1);
+    --lines: #334155;
+    --tab-daily: #334155;
+    --tab-calendar: #166534;
+    --tab-goals: #78350f;
+    --tab-board: #3730a3;
 }
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #cbd5e1;
-    background-image: radial-gradient(#94a3b8 1px, transparent 1px);
+    background-color: var(--bg-main);
+    background-image: radial-gradient(var(--bg-dots) 1px, transparent 1px);
     background-size: 20px 20px;
     color: var(--ink);
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    padding: 2rem 1rem 2rem 3rem;
+    padding: 2rem 4rem 2rem 3rem;
     overflow-x: hidden;
 }
 
@@ -40,7 +56,7 @@ body {
         20px 20px 40px rgba(0, 0, 0, 0.1),
         -5px 0 15px rgba(0, 0, 0, 0.05);
     position: relative;
-    padding: 3rem 4rem 4rem 5rem;
+    padding: 3rem 4rem 8rem 5rem;
     z-index: 2;
 }
 
@@ -157,7 +173,7 @@ body {
 .handwriting {
     font-family: 'Caveat', cursive;
     font-size: 1.4rem;
-    color: #0f172a;
+    color: var(--ink);
 }
 
 .ruled-input {
@@ -204,7 +220,7 @@ body {
 .paper-checkbox:checked {
     border-color: var(--primary);
     transform: scale(1.15) rotate(5deg);
-    background-color: rgba(45, 90, 39, 0.05);
+    background-color: var(--primary-light);
 }
 
 .paper-checkbox:checked::after {
@@ -231,7 +247,7 @@ body {
     left: 0;
     width: 100%;
     height: 4px;
-    background-color: rgba(45, 90, 39, 0.2);
+    background-color: var(--primary-light);
     z-index: -1;
     transform: rotate(-1deg);
 }
@@ -829,11 +845,11 @@ body {
    ============================================ */
 @media (max-width: 768px) {
     body {
-        padding: 0.5rem 0.5rem 0.5rem 2.5rem;
+        padding: 0.5rem 2.5rem 0.5rem 2.5rem;
     }
 
     .notebook-page {
-        padding: 1.5rem 1.5rem 2rem 3rem;
+        padding: 1.5rem 1.5rem 8rem 3rem;
         min-height: unset;
         border-radius: 4px 12px 12px 4px;
     }
@@ -899,11 +915,11 @@ body {
 
 @media (max-width: 480px) {
     body {
-        padding: 0.25rem 0.25rem 0.25rem 2rem;
+        padding: 0.25rem 2.5rem 0.25rem 2rem;
     }
 
     .notebook-page {
-        padding: 1rem 1rem 1.5rem 2.5rem;
+        padding: 1rem 1rem 8rem 2.5rem;
     }
 
     .planner-tabs {

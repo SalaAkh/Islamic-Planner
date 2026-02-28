@@ -15,9 +15,10 @@ const AI_SYSTEM_PROMPT = `
 
 ПРАВИЛА:
 - Верни ТОЛЬКО валидный JSON. Никакого текста до или после. Никаких markdown блоков \`\`\`json.
-- Формат ответа: {"fajr_zuhr": ["задача 1", "задача 2"], "zuhr_asr": [...], "asr_maghrib": [...], "maghrib_isha": [...], "isha_sleep": [...]}
-- Если в какой-то блок нет задач от пользователя, придумай 1-2 идеальные задачи, соответствующие идеологии Barakah (благодать, баланс религии и дуньи).
-- Формулируй задачи кратко (до 5 слов).
+- Формат ответа: {"fajr_zuhr": ["задача 1", "задача 2", "задача 3"], "zuhr_asr": [...], "asr_maghrib": [...], "maghrib_isha": [...], "isha_sleep": [...]}
+- Интегрируй сырой текст пользователя в подходящие блоки времени.
+- Для ВСЕХ блоков времени (даже если пользователь их не упомянул) распиши подробный идеальный план, соответствующий идеологии Barakah (баланс религии и дуньи). Придумай по 3-5 логичных и полезных задач для КАЖДОГО блока.
+- Формулируй задачи кратко и емко (до 5-7 слов).
 `;
 
 class AiAssistant {
@@ -124,31 +125,39 @@ class AiAssistant {
         this.setLoading(true);
 
         try {
-            // GROQ API Fetch
-            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            // GEMINI API Fetch
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${this.apiKey}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    model: 'llama3-8b-8192',
-                    messages: [
-                        { role: 'system', content: AI_SYSTEM_PROMPT },
-                        { role: 'user', content: promptText }
+                    systemInstruction: {
+                        parts: [{ text: AI_SYSTEM_PROMPT }]
+                    },
+                    contents: [
+                        { role: 'user', parts: [{ text: promptText }] }
                     ],
-                    temperature: 0.5,
-                    max_tokens: 1024
+                    generationConfig: {
+                        temperature: 0.5,
+                        maxOutputTokens: 1024,
+                        responseMimeType: "application/json"
+                    }
                 })
             });
 
             if (!response.ok) {
-                if (response.status === 401) throw new Error('Неверный API ключ. Проверьте настройки.');
+                if (response.status === 400 || response.status === 403) throw new Error('Неверный API ключ или параметры. Проверьте настройки.');
                 throw new Error(`Ошибка сервера (${response.status})`);
             }
 
             const data = await response.json();
-            const content = data.choices[0].message.content;
+
+            if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                throw new Error('Непредвиденный формат ответа от Gemini.');
+            }
+
+            const content = data.candidates[0].content.parts[0].text;
 
             this.processAiResponse(content);
 

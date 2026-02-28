@@ -1,0 +1,158 @@
+// Словарь переводов
+const translations = {
+    ru: {
+        "tab_daily": "День", "tab_calendar": "Календарь", "tab_goals": "Цели", "tab_board": "Доска",
+        "date_today": "Дата:", "date_val_today": "Сегодня",
+        "title_daily": "План на день", "niyyah_label": "Ният:", "niyyah_ph": "Ради довольства Аллаха...",
+        "ibadah_title": "Ибадат Трекер", "quran_title": "Чтение Корана", "quran_ph": "Сура / Аяты",
+        "sadaka_title": "Садака / Благое дело", "sadaka_ph": "Кому помочь сегодня?",
+        "fajr": "Фаджр", "morning_azkar": "Уттренние азкары", "zuhr": "Зухр", "asr": "Аср",
+        "evening_azkar": "Вечерние азкары", "maghrib": "Магриб", "isha": "Иша", "witr": "Витр",
+        "fajr_zuhr": "Фаджр — Зухр", "zuhr_asr": "Зухр — Аср", "asr_maghrib": "Аср — Магриб",
+        "maghrib_isha": "Магриб — Иша", "isha_sleep": "Иша — Сон",
+        "focus_label": "Фокус", "routine_label": "Рутина", "add_task": "+ Добавить задачу",
+        "task1_ph": "Главная задача дня...", "task5_ph": "Бытовые дела...", "task7_ph": "Семья, ужин...", "task9_ph": "Уединение, отдых...", "task10_ph": "Чтение перед сном...",
+        "btn_import": "Импорт", "btn_export": "Экспорт", "btn_ai": "ИИ Ассистент",
+        "ai_modal_title": "ИИ Планировщик", "ai_setup_help": "Для работы требуется ваш API ключ Gemini",
+        "btn_save": "Сохранить", "btn_generate": "Создать план", "ai_loading_text": "Нейросеть думает...",
+        "toast_saved": "Сохранено",
+        "calendar_title": "Календарь", "calendar_info": "Понедельники и четверги выделены для Сунна-постов",
+        "calendar_mon": "Пн", "calendar_tue": "Вт", "calendar_wed": "Ср", "calendar_thu": "Чт", "calendar_fri": "Пт", "calendar_sat": "Сб", "calendar_sun": "Вс",
+        "month_notes_title": "События месяца", "month_notes_ph": "Запланированные встречи, поездки, долги по постам...",
+        "ai_prompt_label": "Как распланировать день?", "placeholder_ai": "Например: Утром тренировка, днем кодинг стартапа, Аср - чтение 10 страниц Корана...",
+        "goals_title": "Глобальные Цели", "ahirat_title": "Ахират (Вечное)", "dunya_title": "Дунья (Мирское)",
+        "board_title": "Tafakkur Board", "board_info": "Бесконечный холст · Pinch-to-zoom на мобильном", "center_btn": "Центр"
+    },
+    kk: {
+        "tab_daily": "Күн", "tab_calendar": "Күнтізбе", "tab_goals": "Мақсаттар", "tab_board": "Тақта",
+        "date_today": "Күн:", "date_val_today": "Бүгін",
+        "title_daily": "Күн жоспары", "niyyah_label": "Ниет:", "niyyah_ph": "Алланың разылығы үшін...",
+        "ibadah_title": "Құлшылық Трекері", "quran_title": "Құран оқу", "quran_ph": "Сүре / Аяттар",
+        "sadaka_title": "Садақа / Жақсы іс", "sadaka_ph": "Бүгін кімге көмектесемін?",
+        "fajr": "Бамдат", "morning_azkar": "Таңғы зікірлер", "zuhr": "Бесін", "asr": "Екінті",
+        "evening_azkar": "Кешкі зікірлер", "maghrib": "Ақшам", "isha": "Құптан", "witr": "Үтір",
+        "fajr_zuhr": "Бамдат — Бесін", "zuhr_asr": "Бесін — Екінті", "asr_maghrib": "Екінті — Ақшам",
+        "maghrib_isha": "Ақшам — Құптан", "isha_sleep": "Құптан — Ұйқы",
+        "focus_label": "Фокус", "routine_label": "Рутина", "add_task": "+ Тапсырма",
+        "task1_ph": "Күннің басты міндеті...", "task5_ph": "Тұрмыстық істер...", "task7_ph": "Отбасы, кешкі ас...", "task9_ph": "Демалыс...", "task10_ph": "Ұйқы алдында оқу...",
+        "btn_import": "Импорт", "btn_export": "Экспорт", "btn_ai": "ЖИ Көмекшісі",
+        "ai_modal_title": "ЖИ Жоспарлаушы", "ai_setup_help": "Жұмыс істеу үшін Gemini API кілті қажет",
+        "btn_save": "Сақтау", "btn_generate": "Жоспар құру", "ai_loading_text": "Жүйе ойлануда...",
+        "toast_saved": "Сақталды",
+        "calendar_title": "Күнтізбе", "calendar_info": "Дүйсенбі және бейсенбі Сүннет оразалары үшін белгіленген",
+        "calendar_mon": "Дс", "calendar_tue": "Сс", "calendar_wed": "Ср", "calendar_thu": "Бс", "calendar_fri": "Жм", "calendar_sat": "Сн", "calendar_sun": "Жк",
+        "month_notes_title": "Ай оқиғалары", "month_notes_ph": "Жоспарланған кездесулер, сапарлар, қарыз оразалар...",
+        "ai_prompt_label": "Күнді қалай жоспарлаймыз?", "placeholder_ai": "Мысалы: Таңертең жаттығу, күндіз жұмыс, Аср - Құран оқу...",
+        "goals_title": "Ауқымды Мақсаттар", "ahirat_title": "Ақырет (Мәңгілік)", "dunya_title": "Дүние (Өткінші)",
+        "board_title": "Тафаккур Тақтасы", "board_info": "Шексіз кенеп · Мобильдік құрылғыда Pinch-to-zoom", "center_btn": "Ортасы"
+    },
+    ar: {
+        "tab_daily": "اليوم", "tab_calendar": "التقويم", "tab_goals": "الأهداف", "tab_board": "اللوحة",
+        "date_today": "التاريخ:", "date_val_today": "اليوم",
+        "title_daily": "خطة اليوم", "niyyah_label": "النية:", "niyyah_ph": "ابتغاء مرضاة الله...",
+        "ibadah_title": "متتبع العبادات", "quran_title": "قراءة القرآن", "quran_ph": "سورة / آيات",
+        "sadaka_title": "صدقة / عمل صالح", "sadaka_ph": "لمن سأقدم المساعدة اليوم؟",
+        "fajr": "الفجر", "morning_azkar": "أذكار الصباح", "zuhr": "الظهر", "asr": "العصر",
+        "evening_azkar": "أذكار المساء", "maghrib": "المغرب", "isha": "العشاء", "witr": "الوتر",
+        "fajr_zuhr": "الفجر — الظهر", "zuhr_asr": "الظهر — العصر", "asr_maghrib": "العصر — المغرب",
+        "maghrib_isha": "المغرب — العشاء", "isha_sleep": "العشاء — النوم",
+        "focus_label": "التركيز", "routine_label": "العادات", "add_task": "+ إضافة مهمة",
+        "task1_ph": "المهمة الرئيسية اليوم...", "task5_ph": "الأعمال المنزلية...", "task7_ph": "العائلة، العشاء...", "task9_ph": "استراحة...", "task10_ph": "القراءة قبل النوم...",
+        "btn_import": "استيراد", "btn_export": "تصدير", "btn_ai": "المساعد الذكي",
+        "ai_modal_title": "المخطط الذكي", "ai_setup_help": "مطلوب مفتاح Gemini API",
+        "btn_save": "حفظ", "btn_generate": "إنشاء الخطة", "ai_loading_text": "جاري التفكير...",
+        "toast_saved": "تم الحفظ",
+        "calendar_title": "التقويم", "calendar_info": "الإثنين والخميس مخصصان لصيام السنة",
+        "calendar_mon": "ن", "calendar_tue": "ث", "calendar_wed": "ر", "calendar_thu": "خ", "calendar_fri": "ج", "calendar_sat": "س", "calendar_sun": "أ",
+        "month_notes_title": "أحداث الشهر", "month_notes_ph": "الاجتماعات المخطط لها، السفر...",
+        "ai_prompt_label": "كيف تخطط ليومك؟", "placeholder_ai": "مثال: تدريب صباحي، برمجة ظهرا، قراءة القرآن عصرا...",
+        "goals_title": "الأهداف الكبرى", "ahirat_title": "الآخرة", "dunya_title": "الدنيا",
+        "board_title": "لوحة التفكر", "board_info": "مساحة غير محدودة", "center_btn": "المركز"
+    },
+    en: {
+        "tab_daily": "Daily", "tab_calendar": "Calendar", "tab_goals": "Goals", "tab_board": "Board",
+        "date_today": "Date:", "date_val_today": "Today",
+        "title_daily": "Daily Plan", "niyyah_label": "Niyyah:", "niyyah_ph": "For the sake of Allah...",
+        "ibadah_title": "Ibadah Tracker", "quran_title": "Quran Reading", "quran_ph": "Surah / Ayahs",
+        "sadaka_title": "Sadaqah / Good Deed", "sadaka_ph": "Who to help today?",
+        "fajr": "Fajr", "morning_azkar": "Morning Azkar", "zuhr": "Zuhr", "asr": "Asr",
+        "evening_azkar": "Evening Azkar", "maghrib": "Maghrib", "isha": "Isha", "witr": "Witr",
+        "fajr_zuhr": "Fajr — Zuhr", "zuhr_asr": "Zuhr — Asr", "asr_maghrib": "Asr — Maghrib",
+        "maghrib_isha": "Maghrib — Isha", "isha_sleep": "Isha — Sleep",
+        "focus_label": "Focus", "routine_label": "Routine", "add_task": "+ Add task",
+        "task1_ph": "Main task of the day...", "task5_ph": "Household chores...", "task7_ph": "Family, dinner...", "task9_ph": "Rest, me time...", "task10_ph": "Reading before sleep...",
+        "btn_import": "Import", "btn_export": "Export", "btn_ai": "AI Assistant",
+        "ai_modal_title": "AI Planner", "ai_setup_help": "Gemini API key is required",
+        "btn_save": "Save", "btn_generate": "Generate Plan", "ai_loading_text": "AI is thinking...",
+        "toast_saved": "Saved",
+        "calendar_title": "Calendar", "calendar_info": "Mondays and Thursdays are for Sunnah fasting",
+        "calendar_mon": "Mo", "calendar_tue": "Tu", "calendar_wed": "We", "calendar_thu": "Th", "calendar_fri": "Fr", "calendar_sat": "Sa", "calendar_sun": "Su",
+        "month_notes_title": "Month Events", "month_notes_ph": "Planned meetings, trips, missed fasts...",
+        "ai_prompt_label": "How to plan the day?", "placeholder_ai": "e.g., Morning workout, coding at noon, Asr - reading Quran...",
+        "goals_title": "Global Goals", "ahirat_title": "Akhirah (Eternal)", "dunya_title": "Dunya (Worldly)",
+        "board_title": "Tafakkur Board", "board_info": "Infinite canvas · Pinch-to-zoom on mobile", "center_btn": "Center"
+    }
+};
+
+let currentLang = localStorage.getItem('barakah_lang') || 'ru';
+
+function applyTranslations(lang) {
+    const dict = translations[lang] || translations['ru'];
+
+    // Перевод текстовых элементов
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) {
+            // Если это инпут или текстарея с data-i18n-target="placeholder"
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                el.placeholder = dict[key];
+            } else {
+                // Если внутри кнопки есть иконка, надо найти текстовую ноду или span, но для простоты
+                // мы обернем текст кнопок в <span data-i18n="...">
+                el.textContent = dict[key];
+            }
+        }
+    });
+
+    // Направление текста для Арабского
+    if (lang === 'ar') {
+        document.documentElement.setAttribute('dir', 'rtl');
+        document.body.classList.add('font-arabic'); // Добавляем особый шрифт при необходимости
+    } else {
+        document.documentElement.setAttribute('dir', 'ltr');
+        document.body.classList.remove('font-arabic');
+    }
+}
+
+function initI18n() {
+    applyTranslations(currentLang);
+
+    const langToggleBtn = document.getElementById('lang-toggle');
+    const langIcon = document.getElementById('lang-icon');
+
+    const updateLangIcon = (lang) => {
+        if (!langIcon) return;
+        if (lang === 'ru') langIcon.textContent = 'RU';
+        else if (lang === 'kk') langIcon.textContent = 'KK';
+        else if (lang === 'ar') langIcon.textContent = 'AR';
+        else if (lang === 'en') langIcon.textContent = 'EN';
+    };
+
+    updateLangIcon(currentLang);
+
+    if (langToggleBtn) {
+        langToggleBtn.addEventListener('click', () => {
+            if (currentLang === 'ru') currentLang = 'kk';
+            else if (currentLang === 'kk') currentLang = 'ar';
+            else if (currentLang === 'ar') currentLang = 'en';
+            else currentLang = 'ru';
+
+            localStorage.setItem('barakah_lang', currentLang);
+            applyTranslations(currentLang);
+            updateLangIcon(currentLang);
+            showToast('Язык изменен / Тіл өзгертілді / تم تغيير اللغة');
+        });
+    }
+}
+
+window.initI18n = initI18n;
