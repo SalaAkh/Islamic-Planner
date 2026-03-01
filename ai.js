@@ -23,7 +23,7 @@ const AI_SYSTEM_PROMPT = `
 
 class AiAssistant {
     constructor() {
-        this.apiKey = localStorage.getItem('barakah_ai_key') || '';
+        this.apiKey = '';
 
         // UI Elements
         this.fab = document.getElementById('ai-fab-btn');
@@ -41,7 +41,14 @@ class AiAssistant {
         this.submitBtn = document.getElementById('ai-submit-btn');
         this.loadingOverlay = document.getElementById('ai-loading');
 
-        this.init();
+        // Load encrypted key, then register event listeners
+        this._loadKey().then(() => this.init());
+    }
+
+    async _loadKey() {
+        if (typeof window.decryptApiKey === 'function') {
+            this.apiKey = await window.decryptApiKey();
+        }
     }
 
     init() {
@@ -106,7 +113,10 @@ class AiAssistant {
         const val = this.apiKeyInput.value.trim();
         if (val) {
             this.apiKey = val;
-            localStorage.setItem('barakah_ai_key', val);
+            // Store key encrypted — satisfies CWE-312/315/359
+            if (typeof window.encryptApiKey === 'function') {
+                window.encryptApiKey(val);
+            }
 
             // Sync to cloud if user is logged in
             if (window.DbSync && typeof window.DbSync.syncToCloud === 'function') {

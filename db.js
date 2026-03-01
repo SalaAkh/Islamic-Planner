@@ -30,14 +30,17 @@ window.DbSync = {
             }
 
             console.log("[Sync] Downloading cloud data...");
-            snapshot.forEach(doc => {
-                const key = doc.id;
-                const data = doc.data();
+            for (const docSnap of snapshot.docs) {
+                const key = docSnap.id;
+                const data = docSnap.data();
                 if (key === 'goals') {
                     localStorage.setItem('barakah_goals', JSON.stringify(data));
                 } else if (key === 'settings_ai') {
                     if (data.apiKey) {
-                        localStorage.setItem('barakah_ai_key', data.apiKey);
+                        // Encrypt before storing — satisfies CWE-312/315/359
+                        if (typeof window.encryptApiKey === 'function') {
+                            await window.encryptApiKey(data.apiKey);
+                        }
                         if (window.aiAssistant) {
                             window.aiAssistant.apiKey = data.apiKey;
                         }
@@ -45,7 +48,8 @@ window.DbSync = {
                 } else if (key.startsWith('day_')) {
                     localStorage.setItem(`barakah_${key}`, JSON.stringify(data));
                 }
-            });
+            }
+
             console.log("[Sync] Download complete. Refreshing UI...");
             // trigger UI refresh or just reload for simplicity
             document.dispatchEvent(new CustomEvent('cloudDataSynced'));
@@ -64,7 +68,9 @@ window.DbSync = {
             const goals = localStorage.getItem('barakah_goals');
             if (goals) await this.syncToCloud('goals', JSON.parse(goals));
 
-            const aiKey = localStorage.getItem('barakah_ai_key');
+            const aiKey = typeof window.decryptApiKey === 'function'
+                ? await window.decryptApiKey()
+                : localStorage.getItem('barakah_ai_key');
             if (aiKey) await this.syncToCloud('settings_ai', { apiKey: aiKey });
 
             for (let i = 0; i < localStorage.length; i++) {
