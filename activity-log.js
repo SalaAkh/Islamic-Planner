@@ -113,16 +113,46 @@ function renderEntry(doc, index) {
 window.ActivityLog = {
 
     /** Log a user action to Firestore (fire-and-forget). */
-    async log(action, meta = {}) {
-        if (!window.firebaseDb || !window.Auth?.user) return;
+    async log(action, meta = {}, timestamp = null) {
+        // Wait a bit if firebase isn't ready yet
+        if (!window.firebaseDb) {
+            console.log('[ActivityLog] Waiting for Firebase...');
+            setTimeout(() => this.log(action, meta, timestamp), 1000);
+            return;
+        }
+
+        if (!window.Auth?.user) {
+            // If not logged in, we can't save to Firestore. 
+            // We just ignore or buffer if we're still in the middle of auth init.
+            return;
+        }
+
         try {
             const uid = window.Auth.user.uid;
             const colRef = collection(window.firebaseDb, `users/${uid}/activity_log`);
-            await addDoc(colRef, { action, meta, timestamp: serverTimestamp() });
+            const logData = {
+                action,
+                meta,
+                timestamp: timestamp ? (timestamp instanceof Date ? timestamp : new Date(timestamp)) : serverTimestamp()
+            };
+
+            await addDoc(colRef, logData);
             console.log(`[ActivityLog] ✔ ${action}`, meta);
             this._pruneOldEntries(uid, colRef).catch(() => { });
         } catch (e) {
             console.warn('[ActivityLog] Failed to log action:', e);
+        }
+    },
+
+    /** Move buffered logs to Firestore. */
+    async _flushBuffer() {
+        if (!window._activityLogBuffer || window._activityLogBuffer.length === 0) return;
+        console.log(`[ActivityLog] Flushing ${window._activityLogBuffer.length} buffered logs...`);
+        const buffer = [...window._activityLogBuffer];
+        window._activityLogBuffer = []; // Clear immediately to avoid duplicates
+
+        for (const entry of buffer) {
+            await this.log(entry.action, entry.meta, entry.timestamp);
         }
     },
 
@@ -230,4 +260,8 @@ window.ActivityLog = {
 // Auto-init modal wiring when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.ActivityLog.initAuditModal();
+    // Use a small delay to ensure Auth.user is populated before flushing
+    setTimeout(() => {
+        window.ActivityLog._flushBuffer();
+    }, 2000);
 });
