@@ -85,6 +85,7 @@ window.Store = {
     saveDayData(dateString, data) {
         try {
             localStorage.setItem(`barakah_day_${dateString}`, JSON.stringify(data));
+            if (window.DbSync) window.DbSync.syncToCloud(`day_${dateString}`, data);
         } catch (e) {
             console.error('[Store] Failed to save day data:', e);
         }
@@ -103,6 +104,7 @@ window.Store = {
     saveGoals(goals) {
         try {
             localStorage.setItem('barakah_goals', JSON.stringify(goals));
+            if (window.DbSync) window.DbSync.syncToCloud('goals', goals);
         } catch (e) {
             console.error('[Store] Failed to save goals:', e);
         }

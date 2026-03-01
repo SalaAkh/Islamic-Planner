@@ -41,7 +41,8 @@ const translations = {
         "ph_task_family": "Семья, ужин...", "ph_task_rest": "Уединение, отдых...",
         "ph_task_reading": "Чтение перед сном...", "ai_modal_subtitle": "На базе Google Gemini 3",
         "donate_toast_title": "Поддержите проект", "donate_toast_text": "Ваша помощь помогает проекту расти. Джазакаллаху Хайран!",
-        "kaspi_label": "Kaspi.kz (Перевод по номеру)", "kaspi_copy": "Скопировать номер", "kaspi_success": "Номер скопирован!"
+        "kaspi_label": "Kaspi.kz (Перевод по номеру)", "kaspi_copy": "Скопировать номер", "kaspi_success": "Номер скопирован!",
+        "auth_title": "Облачная синхронизация", "auth_subtitle": "Сохраните свои данные онлайн", "auth_login_btn": "Войти", "profile_title": "Ваш профиль", "auth_logout": "Выйти"
     },
     kk: {
         "tab_daily": "Күн", "tab_calendar": "Күнтізбе", "tab_goals": "Мақсаттар", "tab_board": "Тақта",
@@ -84,7 +85,8 @@ const translations = {
         "ph_task_family": "Отбасы, кешкі ас...", "ph_task_rest": "Оңашалану, демалыс...",
         "ph_task_reading": "Ұйықтар алдында оқу...", "ai_modal_subtitle": "Google Gemini 3 негізінде",
         "donate_toast_title": "Жобаға қолдау көрсетіңіз", "donate_toast_text": "Сіздің көмегіңіз жобаның өсуіне ықпал етеді. Жазакаллаһу Хайран!",
-        "kaspi_label": "Kaspi.kz (Нөмір бойынша аударым)", "kaspi_copy": "Нөмірді көшіру", "kaspi_success": "Нөмір көшірілді!"
+        "kaspi_label": "Kaspi.kz (Нөмір бойынша аударым)", "kaspi_copy": "Нөмірді көшіру", "kaspi_success": "Нөмір көшірілді!",
+        "auth_title": "Бұлтты синхрондау", "auth_subtitle": "Деректеріңізді онлайн сақтаңыз", "auth_login_btn": "Кіру", "profile_title": "Сіздің профиліңіз", "auth_logout": "Шығу"
     },
     ar: {
         "tab_daily": "اليوم", "tab_calendar": "التقويم", "tab_goals": "الأهداف", "tab_board": "اللوحة",
@@ -127,7 +129,8 @@ const translations = {
         "ph_task_family": "العائلة، العشاء...", "ph_task_rest": "الخلوة، الراحة...",
         "ph_task_reading": "القراءة قبل النوم...", "ai_modal_subtitle": "بدعم من Google Gemini 3",
         "donate_toast_title": "ادعم المشروع", "donate_toast_text": "مساعدتك تساعد المشروع على النمو. جزاكم الله خيراً!",
-        "kaspi_label": "Kaspi.kz (تحويل عن طريق الرقم)", "kaspi_copy": "نسخ الرقم", "kaspi_success": "تم نسخ الرقم!"
+        "kaspi_label": "Kaspi.kz (تحويل عن طريق الرقم)", "kaspi_copy": "نسخ الرقم", "kaspi_success": "تم نسخ الرقم!",
+        "auth_title": "المزامنة السحابية", "auth_subtitle": "احفظ بياناتك عبر الإنترنت", "auth_login_btn": "تسجيل الدخول", "profile_title": "ملفك الشخصي", "auth_logout": "تسجيل الخروج"
     },
     en: {
         "tab_daily": "Daily", "tab_calendar": "Calendar", "tab_goals": "Goals", "tab_board": "Board",
@@ -170,7 +173,8 @@ const translations = {
         "ph_task_family": "Family, dinner...", "ph_task_rest": "Solitude, rest...",
         "ph_task_reading": "Reading before sleep...", "ai_modal_subtitle": "Powered by Google Gemini 3",
         "donate_toast_title": "Support the Project", "donate_toast_text": "Your help helps the project grow. Jazakallahu Khairan!",
-        "kaspi_label": "Kaspi.kz (Transfer by number)", "kaspi_copy": "Copy number", "kaspi_success": "Number copied!"
+        "kaspi_label": "Kaspi.kz (Transfer by number)", "kaspi_copy": "Copy number", "kaspi_success": "Number copied!",
+        "auth_title": "Cloud Sync", "auth_subtitle": "Save your data online", "auth_login_btn": "Login", "profile_title": "Your Profile", "auth_logout": "Logout"
     }
 };
 
