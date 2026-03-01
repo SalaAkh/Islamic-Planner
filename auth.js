@@ -309,4 +309,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Toggle Password Visibility
+    const togglePasswordBtn = document.getElementById('auth-toggle-password');
+    const passwordInput = document.getElementById('auth-password');
+    const togglePasswordIcon = document.getElementById('auth-toggle-password-icon');
+
+    if (togglePasswordBtn && passwordInput && togglePasswordIcon) {
+        togglePasswordBtn.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+
+            if (type === 'text') {
+                togglePasswordIcon.classList.remove('fa-eye');
+                togglePasswordIcon.classList.add('fa-eye-slash');
+            } else {
+                togglePasswordIcon.classList.remove('fa-eye-slash');
+                togglePasswordIcon.classList.add('fa-eye');
+            }
+        });
+    }
 });
