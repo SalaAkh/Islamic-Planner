@@ -382,6 +382,7 @@ window.initBoard = function (showToast) {
             state.notes = state.notes.filter(n => n.id !== noteData.id);
             saveBoardData();
             showToastSafe('Стикер удален');
+            window.ActivityLog?.log('note_deleted', { noteId: noteData.id, color: noteData.color });
         });
 
         textarea.addEventListener('input', () => {
@@ -449,6 +450,7 @@ window.initBoard = function (showToast) {
         saveBoardData();
         setTimeout(() => el.querySelector('textarea').focus(), 50);
         showToastSafe('МашаАллах, стикер добавлен 🌱');
+        window.ActivityLog?.log('note_created', { noteId: newNote.id, color });
     }
 
     if (btnAddYellow) btnAddYellow.addEventListener('click', () => addNewNote('yellow'));
@@ -473,6 +475,7 @@ window.initBoard = function (showToast) {
         try {
             const dataUrl = drawingCanvas.toDataURL();
             await Store.saveDrawing(dataUrl);
+            window.ActivityLog?.log('drawing_stroke_saved');
         } catch (e) {
             console.error('[Board] Failed to save drawing:', e);
         }

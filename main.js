@@ -317,10 +317,12 @@ function toggleTask(btn) {
         btn.classList.add('task-done', 'text-green-700', 'border-green-700');
         btn.innerHTML = '<i class="fas fa-check"></i>';
         input.classList.add('line-through', 'text-gray-400', 'opacity-60');
+        window.ActivityLog?.log('task_toggled', { state: 'done', task: input.value?.slice(0, 60) });
     } else {
         btn.classList.remove('task-done', 'text-green-700', 'border-green-700');
         btn.innerHTML = '';
         input.classList.remove('line-through', 'text-gray-400', 'opacity-60');
+        window.ActivityLog?.log('task_toggled', { state: 'undone', task: input.value?.slice(0, 60) });
     }
 }
 
@@ -457,6 +459,7 @@ function addDynamicGoal(type) {
     goals.dynamic.push({ id: 'dyn_' + Date.now(), type, title: '', content: '' });
     Store.saveGoals(goals);
     renderDynamicGoals();
+    window.ActivityLog?.log('goal_added', { type });
 }
 
 function renderDynamicGoals() {
@@ -622,6 +625,7 @@ function initBackupRestore() {
             a.click();
             URL.revokeObjectURL(url);
             showToast('Резервная копия скачана');
+            window.ActivityLog?.log('backup_exported');
         });
     }
 
@@ -639,6 +643,7 @@ function initBackupRestore() {
                 try {
                     await Store.importAllData(event.target.result);
                     showToast('Данные восстановлены! Перезагрузка...');
+                    window.ActivityLog?.log('backup_imported', { filename: file.name });
                     setTimeout(() => window.location.reload(), 1500);
                 } catch (err) {
                     showToast('Ошибка при импорте данных!');

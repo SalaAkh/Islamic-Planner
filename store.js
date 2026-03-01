@@ -86,6 +86,7 @@ window.Store = {
         try {
             localStorage.setItem(`barakah_day_${dateString}`, JSON.stringify(data));
             if (window.DbSync) window.DbSync.syncToCloud(`day_${dateString}`, data);
+            window.ActivityLog?.log('day_saved', { date: dateString });
         } catch (e) {
             console.error('[Store] Failed to save day data:', e);
         }
@@ -105,6 +106,7 @@ window.Store = {
         try {
             localStorage.setItem('barakah_goals', JSON.stringify(goals));
             if (window.DbSync) window.DbSync.syncToCloud('goals', goals);
+            window.ActivityLog?.log('goals_saved');
         } catch (e) {
             console.error('[Store] Failed to save goals:', e);
         }
@@ -146,12 +148,16 @@ window.Store = {
             if (window.DbSync && !window._isSyncingDrawing) window.DbSync.syncToCloud('board_drawing', { dataUrl: null });
             return idbDelete('board_drawing');
         }
-        if (window.DbSync && !window._isSyncingDrawing) window.DbSync.syncToCloud('board_drawing', { dataUrl });
+        if (window.DbSync && !window._isSyncingDrawing) {
+            window.DbSync.syncToCloud('board_drawing', { dataUrl });
+            window.ActivityLog?.log('drawing_saved');
+        }
         return idbSet('board_drawing', dataUrl);
     },
 
     clearDrawing() {
         if (window.DbSync && !window._isSyncingDrawing) window.DbSync.syncToCloud('board_drawing', { dataUrl: null });
+        window.ActivityLog?.log('drawing_cleared');
         return idbDelete('board_drawing');
     },
 
@@ -183,6 +189,7 @@ window.Store = {
         try {
             localStorage.setItem('barakah_events', JSON.stringify(all));
             if (window.DbSync) window.DbSync.syncToCloud('events', all);
+            window.ActivityLog?.log('event_saved', { date: dateString, eventId: event.id, title: event.title });
         } catch (e) {
             console.error('[Store] Failed to save event:', e);
         }
@@ -196,6 +203,7 @@ window.Store = {
         try {
             localStorage.setItem('barakah_events', JSON.stringify(all));
             if (window.DbSync) window.DbSync.syncToCloud('events', all);
+            window.ActivityLog?.log('event_deleted', { date: dateString, eventId });
         } catch (e) {
             console.error('[Store] Failed to delete event:', e);
         }

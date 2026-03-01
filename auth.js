@@ -113,6 +113,7 @@ window.Auth = {
         if (!window.firebaseAuth) return { error: "Firebase not configured" };
         try {
             const userCredential = await createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+            window.ActivityLog?.log('user_register', { email });
             return { user: userCredential.user };
         } catch (error) {
             console.error("[Auth] Register error:", error);
@@ -124,6 +125,7 @@ window.Auth = {
         if (!window.firebaseAuth) return { error: "Firebase not configured" };
         try {
             const userCredential = await signInWithEmailAndPassword(window.firebaseAuth, email, password);
+            window.ActivityLog?.log('user_login', { method: 'email' });
             return { user: userCredential.user };
         } catch (error) {
             console.error("[Auth] Login error:", error);
@@ -136,6 +138,7 @@ window.Auth = {
         try {
             const result = await signInWithPopup(window.firebaseAuth, window.googleProvider);
             console.log("[Auth] Google sign-in success:", result.user.email);
+            window.ActivityLog?.log('user_login', { method: 'google' });
             return { user: result.user };
         } catch (error) {
             // User closed the popup — not a real error
@@ -150,6 +153,8 @@ window.Auth = {
     async logout() {
         if (!window.firebaseAuth) return;
         try {
+            // Log before signing out (user still authenticated at this point)
+            await window.ActivityLog?.log('user_logout');
             await signOut(window.firebaseAuth);
             // ── Clear ALL local user data so next user starts clean ──
             const keysToRemove = [];
