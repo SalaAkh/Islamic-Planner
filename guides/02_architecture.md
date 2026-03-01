@@ -41,9 +41,14 @@
 
 *Примечание:* Как только пользователь входит в аккаунт через Google или Email (через `auth.js`), методы сохранения в `store.js` автоматически дублируют данные в облако Firebase (коллекция `users/{uid}/data/...`). При загрузке страницы происходит скачивание актуальных данных с облака, если локальные ключи пусты или устарели.
 
-## 🛡️ Безопасность и Защита (Security Architecture)
+## 🔐 Особенности Google Auth и Безопасность
 
-Архитектура проекта включает встроенные механизмы защиты:
+Для обеспечения безупречного входа через Google мы применили следующие решения:
 
-- **Firestore Security Rules:** Строгая валидация ключей документов (`goals`, `settings_ai`, `day_*`, `notes_*`) предотвращает атаки типа "Denial of Wallet", не позволяя злоумышленникам загружать мусорные данные.
-- **HTTP Security Headers (Firebase Hosting):** Защита от XSS, Clickjacking и MITM-атак через заголовки `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `X-XSS-Protection` и `Strict-Transport-Security` (HSTS).
+1. **signInWithPopup вместо Redirect:** Мы отказались от `signInWithRedirect` в пользу попапов. Это критично для надежной работы на `localhost` и в некоторых мобильных браузерах, где редиректы могут блокироваться или терять сессию.
+2. **Заголовки COOP (Cross-Origin-Opener-Policy):** В `firebase.json` настроен заголовок `same-origin-allow-popups`. Без него современные браузеры блокируют `postMessage` от окна Google обратно в приложение, что «убивает» процесс авторизации.
+3. **Authorized Domains:** В Google Cloud Console (OAuth Client) и Firebase Auth прописаны все три домена: `localhost`, `firebaseapp.com` и `web.app`.
+
+---
+
+*ИншаАллах, этот проект принесет баракат миллионам пользователей.*
