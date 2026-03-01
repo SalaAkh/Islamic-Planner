@@ -1,9 +1,6 @@
 /**
  * ActivityLog — Fire-and-forget user action logger to Firestore
- * + Audit UI: renderAuditLog() renders the last 50 entries in a modal.
- * Structure: users/{uid}/activity_log/{auto-id}
- * Each doc: { action: string, meta: object, timestamp: serverTimestamp }
- * Max 200 entries per user (oldest auto-pruned).
+ * + Audit UI: renderAuditLog() renders the last 50 entries with premium styling.
  */
 import {
     collection,
@@ -39,17 +36,17 @@ const ACTION_META = {
 };
 
 const COLOR_CLASS = {
-    emerald: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300',
-    green: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
-    gray: 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-300',
-    indigo: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300',
-    blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-    amber: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
-    violet: 'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300',
-    yellow: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300',
-    pink: 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300',
-    red: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-300',
-    teal: 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300',
+    emerald: 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+    green: 'bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/20',
+    gray: 'bg-slate-500/20 text-slate-500 dark:text-slate-400 border-slate-500/20',
+    indigo: 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
+    blue: 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/20',
+    amber: 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/20',
+    violet: 'bg-violet-500/20 text-violet-600 dark:text-violet-400 border-violet-500/20',
+    yellow: 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/20',
+    pink: 'bg-pink-500/20 text-pink-600 dark:text-pink-400 border-pink-500/20',
+    red: 'bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/20',
+    teal: 'bg-teal-500/20 text-teal-600 dark:text-teal-400 border-teal-500/20',
 };
 
 function formatTimestamp(ts) {
@@ -79,8 +76,8 @@ function buildMetaLabel(action, meta) {
     const parts = [];
     if (meta.date) parts.push(meta.date);
     if (meta.state) parts.push(meta.state === 'done' ? '✓ выполнено' : '× снято');
-    if (meta.task) parts.push(`"${meta.task}"`);
-    if (meta.title) parts.push(`"${meta.title}"`);
+    if (meta.task) parts.push(`<span class="font-bold">"${meta.task}"</span>`);
+    if (meta.title) parts.push(`<span class="font-bold">"${meta.title}"</span>`);
     if (meta.type) parts.push(meta.type === 'ahirat' ? 'Ахират' : 'Дунья');
     if (meta.color) parts.push({ yellow: '🟡 жёлтый', green: '🟢 зелёный', blue: '🔵 синий' }[meta.color] || meta.color);
     if (meta.method) parts.push(meta.method === 'google' ? 'Google' : 'Email');
@@ -88,22 +85,27 @@ function buildMetaLabel(action, meta) {
     return parts.join(' · ');
 }
 
-function renderEntry(doc) {
+function renderEntry(doc, index) {
     const data = doc.data();
     const info = ACTION_META[data.action] || { label: data.action, icon: 'fa-circle', color: 'gray' };
     const colorCls = COLOR_CLASS[info.color] || COLOR_CLASS.gray;
     const metaStr = buildMetaLabel(data.action, data.meta);
 
     return `
-<div class="flex items-start gap-3 py-2.5 border-b border-gray-50 dark:border-slate-800/60 last:border-0 hover:bg-gray-50 dark:hover:bg-slate-800/30 rounded-xl px-2 -mx-2 transition-colors">
-    <div class="shrink-0 w-8 h-8 rounded-lg ${colorCls} flex items-center justify-center text-xs mt-0.5">
-        <i class="fas ${info.icon}"></i>
+<div class="audit-entry-wrapper audit-animate-in" style="animation-delay: ${index * 0.05}s">
+    <div class="audit-timeline-line"></div>
+    <div class="flex items-start gap-5 py-4 audit-entry-hover group">
+        <div class="shrink-0 w-11 h-11 rounded-2xl ${colorCls} border flex items-center justify-center text-base audit-icon-container shadow-sm">
+            <i class="fas ${info.icon}"></i>
+        </div>
+        <div class="flex-1 min-w-0 pt-0.5">
+            <div class="flex justify-between items-start gap-2 mb-1">
+                <p class="text-[15px] font-bold text-gray-900 dark:text-white leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">${info.label}</p>
+                <span class="text-[11px] font-bold text-gray-400 dark:text-slate-500 shrink-0 uppercase tracking-tighter whitespace-nowrap bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded-full">${formatTimestamp(data.timestamp)}</span>
+            </div>
+            ${metaStr ? `<p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">${metaStr}</p>` : ''}
+        </div>
     </div>
-    <div class="flex-1 min-w-0">
-        <p class="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-tight">${info.label}</p>
-        ${metaStr ? `<p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate">${metaStr}</p>` : ''}
-    </div>
-    <span class="text-[11px] text-gray-400 dark:text-slate-500 shrink-0 mt-0.5 whitespace-nowrap">${formatTimestamp(data.timestamp)}</span>
 </div>`;
 }
 
@@ -143,10 +145,23 @@ window.ActivityLog = {
         const listEl = document.getElementById('audit-log-list');
         if (!listEl) return;
 
-        listEl.innerHTML = `<div class="flex items-center justify-center py-12 text-gray-300"><i class="fas fa-circle-notch fa-spin text-2xl"></i></div>`;
+        listEl.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-20 text-indigo-500/40">
+                <i class="fas fa-circle-notch fa-spin text-4xl mb-4"></i>
+                <p class="text-sm font-bold tracking-widest uppercase opacity-60">Синхронизация...</p>
+            </div>
+        `;
 
         if (!window.firebaseDb || !window.Auth?.user) {
-            listEl.innerHTML = `<p class="text-center text-sm text-gray-400 py-8">Войдите в аккаунт, чтобы увидеть историю.</p>`;
+            listEl.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
+                    <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-6 opacity-50">
+                        <i class="fas fa-user-lock text-3xl text-slate-400"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-800 dark:text-white mb-2">Доступ ограничен</h4>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Пожалуйста, войдите в аккаунт, чтобы история действий стала доступна.</p>
+                </div>
+            `;
             return;
         }
 
@@ -156,14 +171,30 @@ window.ActivityLog = {
             const snap = await getDocs(query(colRef, orderBy('timestamp', 'desc'), limit(50)));
 
             if (snap.empty) {
-                listEl.innerHTML = `<p class="text-center text-sm text-gray-400 py-10">История пока пуста — начните пользоваться планировщиком 🌱</p>`;
+                listEl.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
+                        <div class="w-24 h-24 rounded-[2rem] bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mb-8">
+                            <i class="fas fa-seedling text-5xl text-indigo-300 dark:text-indigo-800 animate-pulse"></i>
+                        </div>
+                        <h4 class="text-xl font-extrabold text-gray-900 dark:text-white mb-3">История пока пуста</h4>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-[240px] mx-auto">
+                            Начните планировать свой день, и здесь появятся ваши первые шаги 🌱
+                        </p>
+                    </div>
+                `;
                 return;
             }
 
-            listEl.innerHTML = snap.docs.map(renderEntry).join('');
+            listEl.innerHTML = snap.docs.map((d, i) => renderEntry(d, i)).join('');
         } catch (e) {
             console.error('[ActivityLog] renderAuditLog error:', e);
-            listEl.innerHTML = `<p class="text-center text-sm text-red-400 py-8">Ошибка загрузки истории.</p>`;
+            listEl.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-16 text-red-500/60 text-center">
+                    <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+                    <p class="font-bold">Не удалось загрузить данные</p>
+                    <p class="text-xs mt-1 opacity-70">Проверьте подключение к интернету</p>
+                </div>
+            `;
         }
     },
 
@@ -177,7 +208,10 @@ window.ActivityLog = {
         btnOpen?.addEventListener('click', () => {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            this.renderAuditLog();
+            // Slight delay for animation to feel smoother
+            setTimeout(() => {
+                this.renderAuditLog();
+            }, 100);
         });
 
         const closeModal = () => {
