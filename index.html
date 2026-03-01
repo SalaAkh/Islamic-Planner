@@ -929,37 +929,48 @@
 
     <!-- ===== AUDIT LOG MODAL ===== -->
     <div id="audit-modal"
-        class="fixed inset-0 bg-black/70 z-[110] hidden items-center justify-center p-4 transition-all duration-300"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[110] hidden items-center justify-center p-4 sm:p-6 transition-all duration-300"
         dir="auto">
         <div
-            class="bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden transform transition-all duration-300 border border-gray-200 dark:border-slate-800">
+            class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] w-full max-w-xl max-h-[85vh] sm:max-h-[90vh] flex flex-col overflow-hidden transform transition-all duration-300 border border-white/50 dark:border-slate-700/50">
             <!-- Header -->
             <div
-                class="flex items-center justify-between px-8 py-6 border-b border-gray-100 dark:border-slate-800/60 shrink-0">
+                class="flex items-center justify-between px-6 py-5 sm:px-8 sm:py-6 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-white/50 dark:bg-slate-900/50 z-10">
                 <div class="flex items-center gap-4">
                     <div
-                        class="w-12 h-12 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
-                        <i class="fas fa-history text-indigo-600 dark:text-indigo-400 text-xl"></i>
+                        class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30 flex items-center justify-center text-white shrink-0">
+                        <i class="fas fa-history text-xl sm:text-2xl"></i>
                     </div>
                     <div>
-                        <h3 class="font-extrabold text-gray-900 dark:text-white text-lg tracking-tight">История действий
+                        <h3
+                            class="font-extrabold text-slate-900 dark:text-white text-lg sm:text-xl tracking-tight leading-tight">
+                            История действий
                         </h3>
-                        <p
-                            class="text-[11px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold opacity-70">
-                            Последние 50 событий</p>
+                        <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
+                            Ваши последние <span class="text-indigo-600 dark:text-indigo-400 font-bold">50</span>
+                            событий</p>
                     </div>
                 </div>
                 <button id="audit-modal-close"
-                    class="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-gray-500 hover:text-gray-900 dark:hover:text-white transition-all active:scale-90">
-                    <i class="fas fa-times"></i>
+                    class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 group shrink-0">
+                    <i class="fas fa-times group-hover:rotate-90 transition-transform duration-300"></i>
                 </button>
             </div>
             <!-- Body -->
             <div id="audit-log-list"
-                class="overflow-y-auto flex-1 flex flex-col min-h-[300px] px-8 py-6 space-y-0 scroll-smooth bg-white dark:bg-slate-900">
-                <div class="flex flex-col items-center justify-center m-auto text-gray-400">
-                    <i class="fas fa-circle-notch fa-spin text-3xl mb-4 text-indigo-500/40"></i>
-                    <p class="text-sm font-medium tracking-widest uppercase opacity-60">Синхронизация...</p>
+                class="flex-1 overflow-y-auto px-4 sm:px-8 py-4 sm:py-6 scroll-smooth custom-scrollbar relative bg-slate-50/30 dark:bg-slate-900/30">
+                <div class="flex flex-col items-center justify-center h-full min-h-[300px] text-slate-400 m-auto">
+                    <div class="relative w-16 h-16 flex items-center justify-center mb-6">
+                        <div class="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800">
+                        </div>
+                        <div
+                            class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin">
+                        </div>
+                        <i class="fas fa-sync-alt text-indigo-500 text-xl absolute"></i>
+                    </div>
+                    <p
+                        class="text-sm font-bold tracking-widest uppercase opacity-80 text-indigo-600 dark:text-indigo-400">
+                        Синхронизация...</p>
                 </div>
             </div>
         </div>

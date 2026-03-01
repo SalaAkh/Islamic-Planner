@@ -406,6 +406,7 @@ function renderCalendar() {
     for (let i = 1; i <= daysInMonth; i++) {
         const dayOfWeek = new Date(year, month, i).getDay();
         const isSunnahFast = (dayOfWeek === 1 || dayOfWeek === 4);
+        const isJumuah = (dayOfWeek === 5);
         const isToday = i === today.getDate() && month === today.getMonth() && year === today.getFullYear();
         const dayDateStr = formatDate(new Date(year, month, i));
         const dayEvents = allEvents[dayDateStr] || [];
@@ -413,17 +414,20 @@ function renderCalendar() {
 
         let classes = 'calendar-cell group';
         if (isSunnahFast) classes += ' sunnah-fast';
+        if (isJumuah) classes += ' jumuah-day';
         if (isToday) classes += ' ring-2 ring-green-500';
 
         const cell = document.createElement('div');
         cell.className = classes;
 
         const sunnahText = lang === 'en' ? 'Sunnah' : lang === 'kk' ? 'Сүннет' : lang === 'ar' ? 'سنة' : 'Сунна';
+        const jumuahText = lang === 'en' ? "Jumu'ah" : lang === 'kk' ? 'Жұма' : lang === 'ar' ? 'جمعة' : 'Джума';
         const planText = lang === 'en' ? 'Plan' : lang === 'kk' ? 'Жоспар' : lang === 'ar' ? 'خطة' : 'План';
 
         cell.innerHTML = `
             <div class="calendar-date pointer-events-none">${i}</div>
             ${isSunnahFast ? '<span class="sunnah-badge">' + sunnahText + '</span>' : ''}
+            ${isJumuah ? '<span class="jumuah-badge">' + jumuahText + '</span>' : ''}
             ${hasEvents ? '<div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-0.5 pointer-events-none">' + dayEvents.slice(0, 3).map(ev => {
             const colors = { islamic: 'bg-emerald-500', work: 'bg-blue-500', personal: 'bg-purple-500', family: 'bg-rose-500', health: 'bg-amber-500' };
             return '<div class="w-1.5 h-1.5 rounded-full ' + (colors[ev.eventType] || 'bg-emerald-500') + '"></div>';

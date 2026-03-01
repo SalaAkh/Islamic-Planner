@@ -220,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (result.error.includes("auth/invalid-credential")) errorEl.textContent = "Неверный логин или пароль";
                 else if (result.error.includes("auth/email-already-in-use")) errorEl.textContent = "Email уже зарегистрирован";
                 else if (result.error.includes("auth/weak-password")) errorEl.textContent = "Пароль слишком простой (минимум 6 символов)";
+                else if (result.error.includes("auth/operation-not-allowed")) errorEl.textContent = "Глобальная регистрация по Email отключена (Firebase)";
                 else errorEl.textContent = result.error;
             } else {
                 // Success - close modal

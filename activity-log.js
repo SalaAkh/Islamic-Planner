@@ -35,18 +35,18 @@ const ACTION_META = {
     backup_imported: { label: 'Данные восстановлены', icon: 'fa-upload', color: 'teal' },
 };
 
-const COLOR_CLASS = {
-    emerald: 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-    green: 'bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/20',
-    gray: 'bg-slate-500/20 text-slate-500 dark:text-slate-400 border-slate-500/20',
-    indigo: 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border-indigo-500/20',
-    blue: 'bg-blue-500/20 text-blue-600 dark:text-blue-400 border-blue-500/20',
-    amber: 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/20',
-    violet: 'bg-violet-500/20 text-violet-600 dark:text-violet-400 border-violet-500/20',
-    yellow: 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/20',
-    pink: 'bg-pink-500/20 text-pink-600 dark:text-pink-400 border-pink-500/20',
-    red: 'bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/20',
-    teal: 'bg-teal-500/20 text-teal-600 dark:text-teal-400 border-teal-500/20',
+const PREMIUM_COLORS = {
+    emerald: { bg: 'bg-emerald-50 dark:bg-slate-800/60', icon: 'text-emerald-500 bg-white dark:bg-emerald-500/10', border: 'border-emerald-100 dark:border-emerald-500/20' },
+    green: { bg: 'bg-green-50 dark:bg-slate-800/60', icon: 'text-green-500 bg-white dark:bg-green-500/10', border: 'border-green-100 dark:border-green-500/20' },
+    gray: { bg: 'bg-slate-50 dark:bg-slate-800/40', icon: 'text-slate-500 bg-white dark:bg-slate-700/50', border: 'border-slate-200 dark:border-slate-700' },
+    indigo: { bg: 'bg-indigo-50 dark:bg-slate-800/60', icon: 'text-indigo-500 bg-white dark:bg-indigo-500/10', border: 'border-indigo-100 dark:border-indigo-500/20' },
+    blue: { bg: 'bg-blue-50 dark:bg-slate-800/60', icon: 'text-blue-500 bg-white dark:bg-blue-500/10', border: 'border-blue-100 dark:border-blue-500/20' },
+    amber: { bg: 'bg-amber-50 dark:bg-slate-800/60', icon: 'text-amber-500 bg-white dark:bg-amber-500/10', border: 'border-amber-100 dark:border-amber-500/20' },
+    violet: { bg: 'bg-violet-50 dark:bg-slate-800/60', icon: 'text-violet-500 bg-white dark:bg-violet-500/10', border: 'border-violet-100 dark:border-violet-500/20' },
+    yellow: { bg: 'bg-yellow-50 dark:bg-slate-800/60', icon: 'text-yellow-600 bg-white dark:bg-yellow-500/10', border: 'border-yellow-200 dark:border-yellow-500/20' },
+    pink: { bg: 'bg-pink-50 dark:bg-slate-800/60', icon: 'text-pink-500 bg-white dark:bg-pink-500/10', border: 'border-pink-100 dark:border-pink-500/20' },
+    red: { bg: 'bg-red-50 dark:bg-slate-800/60', icon: 'text-red-500 bg-white dark:bg-red-500/10', border: 'border-red-100 dark:border-red-500/20' },
+    teal: { bg: 'bg-teal-50 dark:bg-slate-800/60', icon: 'text-teal-500 bg-white dark:bg-teal-500/10', border: 'border-teal-100 dark:border-teal-500/20' },
 };
 
 function formatTimestamp(ts) {
@@ -87,23 +87,24 @@ function buildMetaLabel(action, meta) {
 
 function renderEntry(doc, index) {
     const data = doc.data();
-    const info = ACTION_META[data.action] || { label: data.action, icon: 'fa-circle', color: 'gray' };
-    const colorCls = COLOR_CLASS[info.color] || COLOR_CLASS.gray;
+    const info = ACTION_META[data.action] || { label: data.action, icon: 'fa-box', color: 'gray' };
+    const styles = PREMIUM_COLORS[info.color] || PREMIUM_COLORS.gray;
     const metaStr = buildMetaLabel(data.action, data.meta);
 
     return `
-<div class="audit-entry-wrapper audit-animate-in" style="animation-delay: ${index * 0.05}s">
-    <div class="audit-timeline-line"></div>
-    <div class="flex items-start gap-5 py-4 audit-entry-hover group">
-        <div class="shrink-0 w-11 h-11 rounded-2xl ${colorCls} border flex items-center justify-center text-base audit-icon-container shadow-sm">
+<div class="audit-animate-in relative group rounded-2xl p-4 sm:p-5 mb-3 border ${styles.border} ${styles.bg} hover:shadow-xl hover:shadow-${info.color}-500/5 hover:-translate-y-1 hover:-translate-x-1 transition-all duration-300" style="animation-delay: ${index * 0.04}s">
+    <div class="flex items-start gap-3 sm:gap-4 relative z-10 w-full">
+        <div class="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-[1rem] ${styles.icon} border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-lg shadow-sm group-hover:scale-110 group-hover:rotate-[5deg] transition-transform duration-300">
             <i class="fas ${info.icon}"></i>
         </div>
-        <div class="flex-1 min-w-0 pt-0.5">
-            <div class="flex justify-between items-start gap-2 mb-1">
-                <p class="text-[15px] font-bold text-gray-900 dark:text-white leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">${info.label}</p>
-                <span class="text-[11px] font-bold text-gray-400 dark:text-slate-500 shrink-0 uppercase tracking-tighter whitespace-nowrap bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded-full">${formatTimestamp(data.timestamp)}</span>
+        <div class="flex-1 min-w-0 flex flex-col mt-0.5">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2 mb-1.5 w-full">
+                <p class="text-[15px] sm:text-base font-bold text-slate-800 dark:text-gray-100 leading-tight">${info.label}</p>
+                <div class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-white/60 dark:bg-slate-800 px-2.5 py-1 rounded-lg shrink-0 border border-slate-200/50 dark:border-slate-700/50 w-fit">
+                    <i class="far fa-clock"></i> ${formatTimestamp(data.timestamp)}
+                </div>
             </div>
-            ${metaStr ? `<p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">${metaStr}</p>` : ''}
+            ${metaStr ? `<div class="text-[13px] text-slate-600 dark:text-slate-300 leading-relaxed bg-white/70 dark:bg-slate-900/50 p-2.5 px-3.5 rounded-xl border border-slate-100 dark:border-slate-700/30 mt-1 shadow-sm"><i class="fas fa-info-circle opacity-50 text-xs mr-1"></i> ${metaStr}</div>` : ''}
         </div>
     </div>
 </div>`;
@@ -176,20 +177,29 @@ window.ActivityLog = {
         if (!listEl) return;
 
         listEl.innerHTML = `
-            <div class="flex flex-col items-center justify-center m-auto text-indigo-500/40">
-                <i class="fas fa-circle-notch fa-spin text-4xl mb-4"></i>
-                <p class="text-sm font-bold tracking-widest uppercase opacity-60">Синхронизация...</p>
+            <div class="flex flex-col items-center justify-center h-full min-h-[300px] text-slate-400 m-auto">
+                <div class="relative w-16 h-16 flex items-center justify-center mb-6">
+                    <div class="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+                    <i class="fas fa-sync-alt text-indigo-500 text-xl absolute"></i>
+                </div>
+                <p class="text-sm font-bold tracking-widest uppercase opacity-80 text-indigo-600 dark:text-indigo-400">Синхронизация...</p>
             </div>
         `;
 
         if (!window.firebaseDb || !window.Auth?.user) {
             listEl.innerHTML = `
-                <div class="flex flex-col items-center justify-center m-auto px-4 text-center">
-                    <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-6 opacity-50">
+                <div class="flex flex-col items-center justify-center h-full min-h-[300px] px-6 text-center m-auto">
+                    <div class="w-20 h-20 rounded-[1.5rem] bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center mb-5 border border-slate-200 dark:border-slate-700 shadow-inner">
                         <i class="fas fa-user-lock text-3xl text-slate-400"></i>
                     </div>
-                    <h4 class="text-lg font-bold text-gray-800 dark:text-white mb-2">Доступ ограничен</h4>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Пожалуйста, войдите в аккаунт, чтобы история действий стала доступна.</p>
+                    <h4 class="text-xl font-bold text-slate-800 dark:text-white mb-2 tracking-tight">Доступ ограничен</h4>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-[260px] mx-auto hidden sm:block">
+                        Войдите в аккаунт, чтобы история действий сохранялась и была доступна на всех устройствах.
+                    </p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed sm:hidden">
+                        Войдите в аккаунт, чтобы просматривать историю.
+                    </p>
                 </div>
             `;
             return;
@@ -202,12 +212,15 @@ window.ActivityLog = {
 
             if (snap.empty) {
                 listEl.innerHTML = `
-                    <div class="flex flex-col items-center justify-center m-auto px-4 text-center">
-                        <div class="w-24 h-24 rounded-[2rem] bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mb-8">
-                            <i class="fas fa-seedling text-5xl text-indigo-300 dark:text-indigo-800 animate-pulse"></i>
+                    <div class="flex flex-col items-center justify-center h-full min-h-[300px] px-6 text-center m-auto">
+                        <div class="relative w-24 h-24 mb-6">
+                            <div class="absolute inset-0 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-xl scale-150 animate-pulse"></div>
+                            <div class="relative w-full h-full rounded-[2rem] bg-gradient-to-br from-indigo-50 dark:from-slate-800/80 to-white dark:to-slate-900 flex items-center justify-center border border-indigo-100/50 dark:border-slate-700 shadow-[0_8px_16px_-6px_rgba(99,102,241,0.2)]">
+                                <i class="fas fa-seedling text-5xl text-indigo-400 dark:text-indigo-500"></i>
+                            </div>
                         </div>
-                        <h4 class="text-xl font-extrabold text-gray-900 dark:text-white mb-3">История пока пуста</h4>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed max-w-[240px] mx-auto">
+                        <h4 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mb-3 tracking-tight">История пока пуста</h4>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-[280px] mx-auto">
                             Начните планировать свой день, и здесь появятся ваши первые шаги 🌱
                         </p>
                     </div>
@@ -219,10 +232,12 @@ window.ActivityLog = {
         } catch (e) {
             console.error('[ActivityLog] renderAuditLog error:', e);
             listEl.innerHTML = `
-                <div class="flex flex-col items-center justify-center m-auto text-red-500/60 text-center">
-                    <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
-                    <p class="font-bold">Не удалось загрузить данные</p>
-                    <p class="text-xs mt-1 opacity-70">Проверьте подключение к интернету</p>
+                <div class="flex flex-col items-center justify-center h-full min-h-[300px] text-red-500/80 text-center m-auto">
+                    <div class="w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 flex items-center justify-center mb-4 text-red-400">
+                        <i class="fas fa-exclamation-triangle text-3xl"></i>
+                    </div>
+                    <p class="font-bold text-slate-800 dark:text-slate-200">Ошибка загрузки данных</p>
+                    <p class="text-xs mt-1 text-slate-500">Проверьте подключение к интернету</p>
                 </div>
             `;
         }
