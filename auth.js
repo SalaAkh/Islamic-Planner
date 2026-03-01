@@ -13,10 +13,6 @@ window.Auth = {
     init() {
         if (!window.firebaseAuth) return;
 
-        // Synchronous check if possible, or just default state
-        const authModal = document.getElementById('auth-modal');
-        const authCloseBtn = document.getElementById('auth-close-btn');
-
         // Sync UI on auth state change
         onAuthStateChanged(window.firebaseAuth, (user) => {
             this.user = user;
@@ -26,7 +22,7 @@ window.Auth = {
             const authCloseBtn = document.getElementById('auth-close-btn');
 
             if (user) {
-                // Logged in
+                // --- LOGGED IN ---
                 if (authIcon) {
                     authIcon.classList.remove('fa-user');
                     authIcon.classList.add('fa-user-check');
@@ -34,7 +30,6 @@ window.Auth = {
                 }
                 console.log("[Auth] Logged in as:", user.email);
 
-                // Switch modal views
                 document.getElementById('auth-login-view')?.classList.add('hidden');
                 document.getElementById('auth-profile-view')?.classList.remove('hidden');
 
@@ -47,7 +42,14 @@ window.Auth = {
                 const nameInput = document.getElementById('auth-name-input');
                 if (nameInput) nameInput.value = user.displayName || '';
 
-                if (authCloseBtn) authCloseBtn.classList.remove('hidden');
+                // Show close button (user is authenticated, modal is optional)
+                if (authCloseBtn) {
+                    authCloseBtn.classList.remove('hidden');
+                    authCloseBtn.onclick = () => {
+                        authModal.classList.add('hidden');
+                        authModal.classList.remove('flex');
+                    };
+                }
                 if (authModal) {
                     authModal.classList.add('hidden');
                     authModal.classList.remove('flex');
@@ -58,7 +60,7 @@ window.Auth = {
                     window.DbSync.syncFromCloud();
                 }
             } else {
-                // Logged out
+                // --- LOGGED OUT ---
                 if (authIcon) {
                     authIcon.classList.remove('fa-user-check');
                     authIcon.classList.add('fa-user');
@@ -69,13 +71,42 @@ window.Auth = {
                 document.getElementById('auth-login-view')?.classList.remove('hidden');
                 document.getElementById('auth-profile-view')?.classList.add('hidden');
 
+                // Force modal open, hide close button — no escape!
                 if (authModal) {
                     authModal.classList.remove('hidden');
                     authModal.classList.add('flex');
                 }
-                if (authCloseBtn) authCloseBtn.classList.add('hidden');
+                if (authCloseBtn) {
+                    authCloseBtn.classList.add('hidden');
+                    authCloseBtn.onclick = null;
+                }
             }
         });
+
+        // Block Escape key from closing the modal when not logged in
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !this.user) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, true);
+
+        // Block clicks on the modal backdrop when not logged in
+        const authModal = document.getElementById('auth-modal');
+        if (authModal) {
+            authModal.addEventListener('click', (e) => {
+                // If NOT logged in, block any backdrop click from closing
+                if (!this.user && e.target === authModal) {
+                    e.stopPropagation();
+                    // Shake the modal card to give visual feedback
+                    const card = authModal.querySelector('div');
+                    if (card) {
+                        card.classList.add('animate-[shake_0.3s_ease-in-out]');
+                        setTimeout(() => card.classList.remove('animate-[shake_0.3s_ease-in-out]'), 400);
+                    }
+                }
+            });
+        }
     },
 
     async register(email, password) {
@@ -203,6 +234,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnLogout) {
         btnLogout.addEventListener('click', async () => {
             await Auth.logout();
+        });
+    }
+
+    const authBtn = document.getElementById('auth-btn');
+    if (authBtn) {
+        authBtn.addEventListener('click', () => {
+            const authModal = document.getElementById('auth-modal');
+            if (authModal) {
+                authModal.classList.remove('hidden');
+                authModal.classList.add('flex');
+            }
         });
     }
 

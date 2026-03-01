@@ -24,19 +24,22 @@ if (fs.existsSync('./tailwind.css')) {
 }
 
 // 3. Встраиваем JS файлы
-const scriptsToInline = ['i18n.js', 'store.js', 'ai.js', 'board.js', 'main.js'];
+const scriptsToInline = ['i18n.js', 'store.js', 'ai.js', 'board.js', 'main.js', 'auth.js', 'db.js', 'firebase-init.js'];
 
 scriptsToInline.forEach(script => {
     console.log(`Inlining ${script}...`);
     if (fs.existsSync(`./${script}`)) {
         const js = fs.readFileSync(`./${script}`, 'utf8');
-        // Находим тег <script src="./script"></script>
-        const regex1 = new RegExp(`<script src="\.\/${script}"><\/script>`, 'g');
-        const regex2 = new RegExp(`<script defer src="\.\/${script}"><\/script>`, 'g');
+        // Находим тег <script ... src="./script(?v=...)"></script>
+        // Регулярное выражение теперь учитывает возможные атрибуты (type, defer) и query-параметры (?v=...)
+        const regex = new RegExp(`<script[^>]*src="\\.\\/${script.replace('.', '\\.')}(?:\\?[^"]*)?"[^>]*><\\/script>`, 'g');
 
         let matchFound = false;
-        html = html.replace(regex1, () => { matchFound = true; return `<script>\n${js}\n</script>`; });
-        html = html.replace(regex2, () => { matchFound = true; return `<script defer>\n${js}\n</script>`; });
+        html = html.replace(regex, (match) => {
+            matchFound = true;
+            const isDefer = match.includes('defer');
+            return `<script${isDefer ? ' defer' : ''}>\n${js}\n</script>`;
+        });
 
         if (!matchFound) {
             console.warn(`⚠️ Could not find script tag for ${script} in index.html`);
