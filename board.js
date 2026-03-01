@@ -420,9 +420,9 @@ window.initBoard = function (showToast) {
     });
 
     function addNewNote(color) {
-        const rect = container.getBoundingClientRect();
-        const canvasX = (rect.width / 2 - state.viewport.x) / state.viewport.zoom - 100;
-        const canvasY = (rect.height / 2 - state.viewport.y) / state.viewport.zoom - 100;
+        // infinite-canvas is positioned at 50% 50% in CSS, so x=0, y=0 is already the center of the viewport
+        const canvasX = -state.viewport.x / state.viewport.zoom - 100;
+        const canvasY = -state.viewport.y / state.viewport.zoom - 100;
         state.maxZIndex++;
         const newNote = {
             id: Date.now().toString(), color,
