@@ -176,7 +176,7 @@ window.ActivityLog = {
         if (!listEl) return;
 
         listEl.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-20 text-indigo-500/40">
+            <div class="flex flex-col items-center justify-center m-auto text-indigo-500/40">
                 <i class="fas fa-circle-notch fa-spin text-4xl mb-4"></i>
                 <p class="text-sm font-bold tracking-widest uppercase opacity-60">Синхронизация...</p>
             </div>
@@ -184,7 +184,7 @@ window.ActivityLog = {
 
         if (!window.firebaseDb || !window.Auth?.user) {
             listEl.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
+                <div class="flex flex-col items-center justify-center m-auto px-4 text-center">
                     <div class="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-6 opacity-50">
                         <i class="fas fa-user-lock text-3xl text-slate-400"></i>
                     </div>
@@ -202,7 +202,7 @@ window.ActivityLog = {
 
             if (snap.empty) {
                 listEl.innerHTML = `
-                    <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
+                    <div class="flex flex-col items-center justify-center m-auto px-4 text-center">
                         <div class="w-24 h-24 rounded-[2rem] bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mb-8">
                             <i class="fas fa-seedling text-5xl text-indigo-300 dark:text-indigo-800 animate-pulse"></i>
                         </div>
@@ -219,7 +219,7 @@ window.ActivityLog = {
         } catch (e) {
             console.error('[ActivityLog] renderAuditLog error:', e);
             listEl.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-16 text-red-500/60 text-center">
+                <div class="flex flex-col items-center justify-center m-auto text-red-500/60 text-center">
                     <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
                     <p class="font-bold">Не удалось загрузить данные</p>
                     <p class="text-xs mt-1 opacity-70">Проверьте подключение к интернету</p>
