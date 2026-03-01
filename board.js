@@ -9,6 +9,7 @@ window.initBoard = function (showToast) {
     const btnAddYellow = document.getElementById('add-note-yellow');
     const btnAddGreen = document.getElementById('add-note-green');
     const btnAddBlue = document.getElementById('add-note-blue');
+    const btnAddPink = document.getElementById('add-note-pink');
     const btnReset = document.getElementById('reset-board-view');
     const btnPencil = document.getElementById('tool-pencil');
     const btnEraser = document.getElementById('tool-eraser');
@@ -456,6 +457,7 @@ window.initBoard = function (showToast) {
     if (btnAddYellow) btnAddYellow.addEventListener('click', () => addNewNote('yellow'));
     if (btnAddGreen) btnAddGreen.addEventListener('click', () => addNewNote('green'));
     if (btnAddBlue) btnAddBlue.addEventListener('click', () => addNewNote('blue'));
+    if (btnAddPink) btnAddPink.addEventListener('click', () => addNewNote('pink'));
 
     // =====================
     // HELPERS

@@ -713,6 +713,10 @@ body {
     background-color: #bee3f8;
 }
 
+.note-pink {
+    background-color: #fbcfe8;
+}
+
 .note-yellow .note-drag-handle {
     background: rgba(0, 0, 0, 0.04);
 }
@@ -722,6 +726,10 @@ body {
 }
 
 .note-blue .note-drag-handle {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.note-pink .note-drag-handle {
     background: rgba(0, 0, 0, 0.04);
 }
 
