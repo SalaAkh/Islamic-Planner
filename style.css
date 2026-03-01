@@ -1069,3 +1069,101 @@ body {
 .audit-entry-hover:hover .audit-icon-container {
     transform: scale(1.1);
 }
+
+/* ==========================================================================
+   MOBILE BOTTOM NAVIGATION (Phase 2 UX)
+   ========================================================================== */
+@media (max-width: 768px) {
+    body {
+        /* Add padding at bottom to prevent content being hidden behind the nav bar */
+        padding: 1rem 0.5rem 6.5rem 0.5rem;
+    }
+
+    .notebook-wrapper {
+        border-radius: 20px;
+    }
+
+    .notebook-page {
+        padding: 1.5rem 1rem 3rem 1rem;
+        min-height: calc(100vh - 8rem);
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .notebook-page::before {
+        display: none;
+        /* Hide binder edge on mobile */
+    }
+
+    .binder-holes {
+        display: none;
+        /* Hide binder holes on mobile */
+    }
+
+    .planner-tabs {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+        flex-direction: row;
+        justify-content: space-around;
+        background-color: var(--paper);
+        z-index: 100;
+        padding: 0.5rem 0.5rem;
+        box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.08);
+        border-top: 1px solid var(--lines);
+        border-radius: 24px 24px 0 0;
+        gap: 0;
+    }
+
+    .dark .planner-tabs {
+        box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .tab-btn {
+        writing-mode: horizontal-tb;
+        flex-direction: column;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        padding: 0.5rem 0;
+        border-radius: 16px;
+        font-size: 0.70rem;
+        box-shadow: none !important;
+        border: none;
+        color: #94a3b8;
+        /* slate-400 */
+        font-weight: 700;
+        background-color: transparent !important;
+        transform: none !important;
+        right: auto !important;
+        transition: color 0.2s, background-color 0.2s;
+    }
+
+    .tab-btn:hover {
+        transform: none;
+    }
+
+    /* Active states for mobile bottom nav */
+    .tab-btn.active.tab-daily {
+        color: var(--tab-daily);
+        background-color: rgba(100, 116, 139, 0.1) !important;
+    }
+
+    .tab-btn.active.tab-calendar {
+        color: var(--tab-calendar);
+        background-color: rgba(16, 185, 129, 0.1) !important;
+    }
+
+    .tab-btn.active.tab-goals {
+        color: var(--tab-goals);
+        background-color: rgba(245, 158, 11, 0.1) !important;
+    }
+
+    .tab-btn.active.tab-board {
+        color: var(--tab-board);
+        background-color: rgba(99, 102, 241, 0.1) !important;
+    }
+}

@@ -34,6 +34,22 @@ document.addEventListener('DOMContentLoaded', () => {
             renderCalendar();
         }
     });
+
+    // Remove skeleton loader when cloud data is ready
+    document.addEventListener('cloudDataSynced', () => {
+        const appWrapper = document.getElementById('app-wrapper');
+        if (appWrapper) {
+            appWrapper.classList.remove('animate-pulse', 'pointer-events-none');
+        }
+    });
+
+    // Fallback: remove skeleton after 5s even if no internet/sync fails
+    setTimeout(() => {
+        const appWrapper = document.getElementById('app-wrapper');
+        if (appWrapper) {
+            appWrapper.classList.remove('animate-pulse', 'pointer-events-none');
+        }
+    }, 5000);
 });
 
 // --- DONATION TOAST LOGIC ---

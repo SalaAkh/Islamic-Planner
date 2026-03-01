@@ -202,7 +202,7 @@ window.initBoard = function (showToast) {
             state.isDrawing = false;
             ctx.closePath();
             ctx.globalCompositeOperation = 'source-over';
-            saveDrawingData();  // async save to IndexedDB
+            requestDrawingSave();  // Debounced save
         }
     });
 
@@ -324,7 +324,7 @@ window.initBoard = function (showToast) {
             state.isDrawing = false;
             ctx.closePath();
             ctx.globalCompositeOperation = 'source-over';
-            saveDrawingData();  // async save to IndexedDB
+            requestDrawingSave();  // Debounced save
         }
         saveBoardData();
     });
@@ -469,6 +469,12 @@ window.initBoard = function (showToast) {
             viewport: state.viewport,
             notes: state.notes,
         });
+    }
+
+    let _drawSaveTimer = null;
+    function requestDrawingSave() {
+        if (_drawSaveTimer) clearTimeout(_drawSaveTimer);
+        _drawSaveTimer = setTimeout(saveDrawingData, 2000);
     }
 
     async function saveDrawingData() {

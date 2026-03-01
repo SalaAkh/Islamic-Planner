@@ -1,17 +1,28 @@
 import { doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
 window.DbSync = {
+    _syncTimers: {},
+
     async syncToCloud(key, data) {
         if (!window.firebaseDb || !window.Auth || !window.Auth.user) return;
-        try {
-            const uid = window.Auth.user.uid;
-            // Structure: users/UID/data/KEY
-            const docRef = doc(window.firebaseDb, `users/${uid}/data`, key);
-            await setDoc(docRef, data);
-            console.log(`[Sync] Cloud saved: ${key}`);
-        } catch (e) {
-            console.error('[Sync] Error saving to cloud:', e);
+
+        // Debounce: Clear existing timer for this key
+        if (this._syncTimers[key]) {
+            clearTimeout(this._syncTimers[key]);
         }
+
+        // Set a new timer to sync after 1.5 seconds of inactivity
+        this._syncTimers[key] = setTimeout(async () => {
+            try {
+                const uid = window.Auth.user.uid;
+                // Structure: users/UID/data/KEY
+                const docRef = doc(window.firebaseDb, `users/${uid}/data`, key);
+                await setDoc(docRef, data);
+                console.log(`[Sync] Cloud saved: ${key} (debounced)`);
+            } catch (e) {
+                console.error('[Sync] Error saving to cloud:', e);
+            }
+        }, 1500);
     },
 
     async syncFromCloud() {
@@ -73,6 +84,7 @@ window.DbSync = {
 
         } catch (e) {
             console.error('[Sync] Error reading from cloud:', e);
+            document.dispatchEvent(new CustomEvent('cloudDataSynced'));
         }
     },
 
