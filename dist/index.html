@@ -3390,7 +3390,7 @@ window.copyToClipboard = function (text, successMsgKey) {
         // Service Workers and Manifests don't work on file:// protocol due to browser security
         if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
+                navigator.serviceWorker.register('./public/sw.js')
                     .then(registration => {
                         console.log('[SurviveKit] ServiceWorker registered with scope:', registration.scope);
                     })
