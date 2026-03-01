@@ -32,6 +32,7 @@ class AiAssistant {
         this.modalContent = this.modal.querySelector('div');
 
         this.setupArea = document.getElementById('ai-setup-area');
+        this.apiForm = document.getElementById('ai-api-form');
         this.chatArea = document.getElementById('ai-chat-area');
         this.apiKeyInput = document.getElementById('ai-api-key');
         this.saveKeyBtn = document.getElementById('save-ai-key');
@@ -61,7 +62,14 @@ class AiAssistant {
             });
         }
 
-        if (this.saveKeyBtn) this.saveKeyBtn.addEventListener('click', () => this.saveApiKey());
+        if (this.apiForm) {
+            this.apiForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveApiKey();
+            });
+        } else if (this.saveKeyBtn) {
+            this.saveKeyBtn.addEventListener('click', () => this.saveApiKey());
+        }
         if (this.settingsBtn) this.settingsBtn.addEventListener('click', () => this.toggleSettings());
 
         if (this.submitBtn) this.submitBtn.addEventListener('click', () => this.generatePlan());

@@ -1,7 +1,8 @@
 import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
-    signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     signOut,
     onAuthStateChanged,
     updateProfile
@@ -12,6 +13,24 @@ window.Auth = {
 
     init() {
         if (!window.firebaseAuth) return;
+
+        // Catch errors from redirect flow
+        getRedirectResult(window.firebaseAuth).then((result) => {
+            if (result) {
+                console.log("[Auth] Вход через redirected Google:", result.user.email);
+            }
+        }).catch((error) => {
+            console.error("[Auth] Ошибка Google redirect:", error);
+            const errorEl = document.getElementById('auth-error');
+            if (errorEl) {
+                errorEl.textContent = "Ошибка входа через Google: " + error.message;
+            }
+            const authModal = document.getElementById('auth-modal');
+            if (authModal) {
+                authModal.classList.remove('hidden');
+                authModal.classList.add('flex');
+            }
+        });
 
         // Sync UI on auth state change
         onAuthStateChanged(window.firebaseAuth, (user) => {
@@ -134,8 +153,8 @@ window.Auth = {
     async signInWithGoogle() {
         if (!window.firebaseAuth) return { error: "Firebase not configured" };
         try {
-            const result = await signInWithPopup(window.firebaseAuth, window.googleProvider);
-            return { user: result.user };
+            await signInWithRedirect(window.firebaseAuth, window.googleProvider);
+            return { user: null }; // Will not be reached due to page redirect
         } catch (error) {
             console.error("[Auth] Google sign-in error:", error);
             return { error: error.message };

@@ -7,4 +7,9 @@ export default defineConfig({
         tailwindcss(),
         viteSingleFile(),
     ],
+    server: {
+        headers: {
+            "Cross-Origin-Opener-Policy": "same-origin-allow-popups"
+        }
+    }
 });

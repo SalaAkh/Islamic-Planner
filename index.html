@@ -126,9 +126,9 @@
                                 title="Следующий день" data-i18n="nav_next_day" data-i18n-target="title"></i>
                         </div>
                         <div class="flex items-center border-t border-slate-200/60 dark:border-slate-700/50 pt-3 mt-1">
-                            <span
+                            <label for="niyyah"
                                 class="text-xs font-bold text-slate-400 dark:text-slate-500 mr-3 uppercase tracking-wider"
-                                data-i18n="niyyah_label">Ният:</span>
+                                data-i18n="niyyah_label">Ният:</label>
                             <input data-id="niyyah" id="niyyah" name="niyyah" type="text"
                                 placeholder="Ради довольства Аллаха..." autocomplete="off" data-i18n="niyyah_ph"
                                 data-i18n-target="placeholder"
@@ -220,9 +220,10 @@
                         <!-- Коран -->
                         <div
                             class="bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md">
-                            <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 section-title"
+                            <label for="quran"
+                                class="block text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 section-title"
                                 data-i18n="quran_title">
-                                Чтение Корана</h2>
+                                Чтение Корана</label>
                             <input data-id="quran" id="quran" name="quran" type="text" placeholder="Сура / Аяты"
                                 data-i18n="quran_ph" autocomplete="off"
                                 class="ruled-input handwriting w-full mb-2 day-input placeholder-slate-400 dark:placeholder-slate-500">
@@ -231,9 +232,10 @@
                         <!-- Добрые дела -->
                         <div
                             class="bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md">
-                            <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2 section-title"
+                            <label for="sadaka"
+                                class="block text-lg font-bold text-slate-800 dark:text-slate-200 mb-2 section-title"
                                 data-i18n="sadaka_title">
-                                Садака / Благое дело</h2>
+                                Садака / Благое дело</label>
                             <input data-id="sadaka" id="sadaka" name="sadaka" type="text"
                                 placeholder="Кому помочь сегодня?" data-i18n="sadaka_ph" autocomplete="off"
                                 class="ruled-input handwriting w-full day-input placeholder-slate-400 dark:placeholder-slate-500">
@@ -446,9 +448,10 @@
                 </div>
 
                 <div class="mt-8">
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 section-title"
+                    <label for="month-notes"
+                        class="block text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 section-title"
                         data-i18n="month_notes_title">События
-                        месяца</h2>
+                        месяца</label>
                     <!-- Notes is saved based on current month viewing -->
                     <textarea id="month-notes" name="month-notes" class="ruled-textarea handwriting h-32"
                         autocomplete="off" aria-label="Заметки месяца"
@@ -503,6 +506,14 @@
                                     placeholder="Поучаствовать в строительстве колодца..."
                                     data-i18n-target="placeholder" data-i18n="goal_sadaka_ph"></textarea>
                             </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2"
+                                    data-i18n="goal_custom_title">Своя цель</h3>
+                                <textarea data-goal="custom_ahirat" id="goal-custom-ahirat" name="goal-custom-ahirat"
+                                    class="ruled-textarea handwriting h-24 goal-input placeholder-slate-400 dark:placeholder-slate-500"
+                                    autocomplete="off" aria-label="Своя цель" placeholder="Напишите свою цель..."
+                                    data-i18n-target="placeholder" data-i18n="goal_custom_ph"></textarea>
+                            </div>
                         </div>
                     </div>
 
@@ -538,6 +549,14 @@
                                     autocomplete="off" aria-label="Цель: Семья и Отношения"
                                     placeholder="Больше времени с родителями..." data-i18n-target="placeholder"
                                     data-i18n="goal_family_ph"></textarea>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2"
+                                    data-i18n="goal_custom_title">Своя цель</h3>
+                                <textarea data-goal="custom_dunya" id="goal-custom-dunya" name="goal-custom-dunya"
+                                    class="ruled-textarea handwriting h-24 goal-input placeholder-slate-400 dark:placeholder-slate-500"
+                                    autocomplete="off" aria-label="Своя цель" placeholder="Напишите свою цель..."
+                                    data-i18n-target="placeholder" data-i18n="goal_custom_ph"></textarea>
                             </div>
                         </div>
                     </div>
@@ -944,16 +963,16 @@
                     class="bg-indigo-50 dark:bg-slate-800 rounded-xl p-4 border border-indigo-100 dark:border-slate-700 hidden">
                     <p class="text-xs text-gray-500 mb-2" data-i18n="ai_setup_help">Для работы оффлайн-клиента требуется
                         ваш API ключ Gemini.</p>
-                    <div class="flex gap-2">
+                    <form id="ai-api-form" class="flex gap-2">
                         <label for="ai-api-key" class="sr-only">Gemini API Key</label>
                         <input type="password" id="ai-api-key" name="ai-api-key"
                             placeholder="Gemini API Key (AIzaSy...)" autocomplete="off" data-i18n-target="placeholder"
                             data-i18n="ai_setup_ph"
                             class="flex-grow bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
-                        <button id="save-ai-key"
+                        <button id="save-ai-key" type="submit"
                             class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors"
                             data-i18n="btn_save">Сохранить</button>
-                    </div>
+                    </form>
                     <p class="text-[10px] text-gray-400 mt-2 text-right"><a
                             href="https://aistudio.google.com/app/apikey" target="_blank"
                             class="underline hover:text-indigo-600" data-i18n="ai_free_key">Получить бесплатный ключ</a>
@@ -1033,7 +1052,7 @@
                         console.log('[SurviveKit] ServiceWorker registered with scope:', registration.scope);
                     })
                     .catch(err => {
-                        console.log('[SurviveKit] ServiceWorker registration skipped (expected on local file run).');
+                        console.debug('[SurviveKit] ServiceWorker registration skipped (expected on local file run).');
                     });
             });
         }
