@@ -973,19 +973,31 @@ body {
    AUDIT LOG PREMIUM STYLES
    ============================================ */
 
-/* Glassmorphism Effect */
+/* Glassmorphism Effect - Refined for readability */
 .glass-panel {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 .dark .glass-panel {
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: #1e293b;
+    /* Slate-800 */
     border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Fallback for browsers with backdrop-filter support to keep a hint of premium feel without sacrificing readability */
+@supports (backdrop-filter: blur(1px)) {
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+    }
+
+    .dark .glass-panel {
+        background: rgba(30, 41, 59, 0.96);
+        backdrop-filter: blur(16px);
+    }
 }
 
 /* Timeline Connection Line */
@@ -1018,6 +1030,7 @@ body {
         opacity: 0;
         transform: translateY(12px) scale(0.98);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
