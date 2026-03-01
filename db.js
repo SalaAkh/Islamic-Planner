@@ -35,6 +35,13 @@ window.DbSync = {
                 const data = doc.data();
                 if (key === 'goals') {
                     localStorage.setItem('barakah_goals', JSON.stringify(data));
+                } else if (key === 'settings_ai') {
+                    if (data.apiKey) {
+                        localStorage.setItem('barakah_ai_key', data.apiKey);
+                        if (window.aiAssistant) {
+                            window.aiAssistant.apiKey = data.apiKey;
+                        }
+                    }
                 } else if (key.startsWith('day_')) {
                     localStorage.setItem(`barakah_${key}`, JSON.stringify(data));
                 }
@@ -56,6 +63,9 @@ window.DbSync = {
         try {
             const goals = localStorage.getItem('barakah_goals');
             if (goals) await this.syncToCloud('goals', JSON.parse(goals));
+
+            const aiKey = localStorage.getItem('barakah_ai_key');
+            if (aiKey) await this.syncToCloud('settings_ai', { apiKey: aiKey });
 
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);

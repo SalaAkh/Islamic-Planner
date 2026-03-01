@@ -43,11 +43,11 @@ window.showDonationToast = function () {
     toast.classList.remove('-translate-y-[150%]', 'opacity-0');
     toast.classList.add('translate-y-0', 'opacity-100');
 
-    // Auto hide after 15 seconds
+    // Auto hide after 5 seconds
     clearTimeout(donationToastTimeout);
     donationToastTimeout = setTimeout(() => {
         if (window.hideDonationToast) window.hideDonationToast();
-    }, 15000);
+    }, 5000);
 };
 
 window.hideDonationToast = function () {
@@ -69,8 +69,8 @@ window.showDonateModal = function () {
 function initDonationToast() {
     // Show initially after short delay to not overlap with initial animations
     setTimeout(window.showDonationToast, 3000);
-    // Repeat every 3 minutes (180000 ms)
-    setInterval(window.showDonationToast, 180000);
+    // Repeat every 5 minutes (300000 ms)
+    setInterval(window.showDonationToast, 300000);
 }
 
 // --- TABS LOGIC ---

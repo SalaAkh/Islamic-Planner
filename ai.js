@@ -107,6 +107,12 @@ class AiAssistant {
         if (val) {
             this.apiKey = val;
             localStorage.setItem('barakah_ai_key', val);
+
+            // Sync to cloud if user is logged in
+            if (window.DbSync && typeof window.DbSync.syncToCloud === 'function') {
+                window.DbSync.syncToCloud('settings_ai', { apiKey: val });
+            }
+
             this.setupArea.classList.add('hidden');
             if (window.showToast) window.showToast('API ключ сохранен!');
             this.promptInput.focus();

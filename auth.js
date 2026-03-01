@@ -3,7 +3,8 @@ import {
     createUserWithEmailAndPassword,
     signInWithPopup,
     signOut,
-    onAuthStateChanged
+    onAuthStateChanged,
+    updateProfile
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
 window.Auth = {
@@ -12,11 +13,17 @@ window.Auth = {
     init() {
         if (!window.firebaseAuth) return;
 
+        // Synchronous check if possible, or just default state
+        const authModal = document.getElementById('auth-modal');
+        const authCloseBtn = document.getElementById('auth-close-btn');
+
         // Sync UI on auth state change
         onAuthStateChanged(window.firebaseAuth, (user) => {
             this.user = user;
             const authIcon = document.getElementById('auth-icon');
             const authBtn = document.getElementById('auth-btn');
+            const authModal = document.getElementById('auth-modal');
+            const authCloseBtn = document.getElementById('auth-close-btn');
 
             if (user) {
                 // Logged in
@@ -34,6 +41,18 @@ window.Auth = {
                 const userEmailEl = document.getElementById('auth-user-email');
                 if (userEmailEl) userEmailEl.textContent = user.email;
 
+                const userNameEl = document.getElementById('auth-user-name');
+                if (userNameEl) userNameEl.textContent = user.displayName || 'Без имени';
+
+                const nameInput = document.getElementById('auth-name-input');
+                if (nameInput) nameInput.value = user.displayName || '';
+
+                if (authCloseBtn) authCloseBtn.classList.remove('hidden');
+                if (authModal) {
+                    authModal.classList.add('hidden');
+                    authModal.classList.remove('flex');
+                }
+
                 // Sync data from cloud
                 if (window.DbSync && typeof window.DbSync.syncFromCloud === 'function') {
                     window.DbSync.syncFromCloud();
@@ -49,6 +68,12 @@ window.Auth = {
 
                 document.getElementById('auth-login-view')?.classList.remove('hidden');
                 document.getElementById('auth-profile-view')?.classList.add('hidden');
+
+                if (authModal) {
+                    authModal.classList.remove('hidden');
+                    authModal.classList.add('flex');
+                }
+                if (authCloseBtn) authCloseBtn.classList.add('hidden');
             }
         });
     },
@@ -92,6 +117,17 @@ window.Auth = {
             await signOut(window.firebaseAuth);
         } catch (error) {
             console.error("[Auth] Logout error:", error);
+        }
+    },
+
+    async updateUsername(displayName) {
+        if (!window.firebaseAuth || !this.user) return { error: "Не авторизован" };
+        try {
+            await updateProfile(this.user, { displayName });
+            return { success: true };
+        } catch (error) {
+            console.error("[Auth] Update profile error:", error);
+            return { error: error.message };
         }
     }
 };
@@ -167,6 +203,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnLogout) {
         btnLogout.addEventListener('click', async () => {
             await Auth.logout();
+        });
+    }
+
+    const btnUpdateProfile = document.getElementById('btn-update-profile');
+    if (btnUpdateProfile) {
+        btnUpdateProfile.addEventListener('click', async () => {
+            const newName = document.getElementById('auth-name-input').value.trim();
+            const msgEl = document.getElementById('auth-profile-msg');
+            msgEl.textContent = 'Сохранение...';
+            msgEl.className = 'text-xs text-center mt-1 h-4 font-medium transition-colors text-indigo-500';
+
+            const result = await Auth.updateUsername(newName);
+            if (result.success) {
+                msgEl.textContent = 'Имя обновлено!';
+                msgEl.className = 'text-xs text-center mt-1 h-4 font-medium transition-colors text-green-500';
+                const userNameEl = document.getElementById('auth-user-name');
+                if (userNameEl) userNameEl.textContent = newName || 'Без имени';
+                setTimeout(() => { msgEl.textContent = ''; }, 3000);
+            } else {
+                msgEl.textContent = 'Ошибка сохранения';
+                msgEl.className = 'text-xs text-center mt-1 h-4 font-medium transition-colors text-red-500';
+            }
         });
     }
 

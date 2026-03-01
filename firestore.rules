@@ -1,9 +1,18 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Make sure users can only read and write their own documents
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    // Make sure users can only read and write their own documents, and only specific allowed data keys
+    match /users/{userId}/data/{document} {
+      allow read, delete: if request.auth != null && request.auth.uid == userId;
+      // Allow create/update only if it matches our expected document keys (goals, settings_ai, day_*, notes_*)
+      allow create, update: if request.auth != null 
+                             && request.auth.uid == userId
+                             && (
+                               document == 'goals' || 
+                               document == 'settings_ai' || 
+                               document.matches('^day_.*') || 
+                               document.matches('^notes_.*')
+                             );
     }
   }
 }
