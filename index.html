@@ -507,13 +507,21 @@
                                     data-i18n-target="placeholder" data-i18n="goal_sadaka_ph"></textarea>
                             </div>
                             <div>
-                                <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2"
-                                    data-i18n="goal_custom_title">Своя цель</h3>
+                                <input type="text" data-goal="custom_ahirat_title" id="goal-custom-ahirat-title"
+                                    name="goal-custom-ahirat-title"
+                                    class="goal-input bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 w-full placeholder-slate-400"
+                                    autocomplete="off" placeholder="Своя цель" data-i18n-target="placeholder"
+                                    data-i18n="goal_custom_title">
                                 <textarea data-goal="custom_ahirat" id="goal-custom-ahirat" name="goal-custom-ahirat"
                                     class="ruled-textarea handwriting h-24 goal-input placeholder-slate-400 dark:placeholder-slate-500"
                                     autocomplete="off" aria-label="Своя цель" placeholder="Напишите свою цель..."
                                     data-i18n-target="placeholder" data-i18n="goal_custom_ph"></textarea>
                             </div>
+                            <div id="dynamic-goals-ahirat" class="space-y-6 mt-6"></div>
+                            <button id="add-custom-ahirat"
+                                class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition flex items-center gap-1">
+                                <i class="fas fa-plus"></i> <span data-i18n="add_custom_goal">Добавить цель</span>
+                            </button>
                         </div>
                     </div>
 
@@ -551,13 +559,21 @@
                                     data-i18n="goal_family_ph"></textarea>
                             </div>
                             <div>
-                                <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2"
-                                    data-i18n="goal_custom_title">Своя цель</h3>
+                                <input type="text" data-goal="custom_dunya_title" id="goal-custom-dunya-title"
+                                    name="goal-custom-dunya-title"
+                                    class="goal-input bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 w-full placeholder-slate-400"
+                                    autocomplete="off" placeholder="Своя цель" data-i18n-target="placeholder"
+                                    data-i18n="goal_custom_title">
                                 <textarea data-goal="custom_dunya" id="goal-custom-dunya" name="goal-custom-dunya"
                                     class="ruled-textarea handwriting h-24 goal-input placeholder-slate-400 dark:placeholder-slate-500"
                                     autocomplete="off" aria-label="Своя цель" placeholder="Напишите свою цель..."
                                     data-i18n-target="placeholder" data-i18n="goal_custom_ph"></textarea>
                             </div>
+                            <div id="dynamic-goals-dunya" class="space-y-6 mt-6"></div>
+                            <button id="add-custom-dunya"
+                                class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition flex items-center gap-1">
+                                <i class="fas fa-plus"></i> <span data-i18n="add_custom_goal">Добавить цель</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1019,15 +1035,15 @@
     <div id="event-modal"
         class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] hidden items-center justify-center p-4" dir="auto">
         <div id="event-modal-inner"
-            class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 opacity-0 transition-all duration-300 relative max-h-[90vh] flex flex-col">
+            class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 opacity-0 transition-all duration-300 relative max-h-[90vh] flex flex-col">
             <!-- Header -->
             <div class="bg-gradient-to-r from-emerald-600 to-teal-600 p-5 text-white relative flex-shrink-0">
                 <button id="close-event-modal"
-                    class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
+                    class="absolute top-4 ltr:right-4 rtl:left-4 text-white/70 hover:text-white transition-colors w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
                     <i class="fas fa-times"></i>
                 </button>
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-white/20 flex justify-center items-center">
+                <div class="flex items-center gap-3 rtl:ps-10">
+                    <div class="w-10 h-10 rounded-full bg-white/20 flex justify-center items-center flex-shrink-0">
                         <i class="fas fa-calendar-plus text-xl text-white"></i>
                     </div>
                     <h2 class="text-lg font-bold" data-i18n="event_modal_title">Новое событие</h2>

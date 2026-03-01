@@ -410,7 +410,7 @@ function renderCalendar() {
             const colors = { islamic: 'bg-emerald-500', work: 'bg-blue-500', personal: 'bg-purple-500', family: 'bg-rose-500', health: 'bg-amber-500' };
             return '<div class="w-1.5 h-1.5 rounded-full ' + (colors[ev.eventType] || 'bg-emerald-500') + '"></div>';
         }).join('') + (dayEvents.length > 3 ? '<span class="text-[8px] text-gray-400">+' + (dayEvents.length - 3) + '</span>' : '') + '</div>' : ''}
-            <div class="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-2 right-2 text-xs text-green-700 font-bold"><i class="fas fa-edit"></i> ${planText}</div>
+            <div class="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-2 ltr:right-2 rtl:left-2 text-xs text-green-700 font-bold"><i class="fas fa-edit"></i> ${planText}</div>
         `;
         cell.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -444,6 +444,77 @@ function initGoals() {
             Store.saveGoals(currentData);
         });
     });
+
+    renderDynamicGoals();
+
+    document.getElementById('add-custom-ahirat').addEventListener('click', () => addDynamicGoal('ahirat'));
+    document.getElementById('add-custom-dunya').addEventListener('click', () => addDynamicGoal('dunya'));
+}
+
+function addDynamicGoal(type) {
+    const goals = Store.getGoals();
+    if (!goals.dynamic) goals.dynamic = [];
+    goals.dynamic.push({ id: 'dyn_' + Date.now(), type, title: '', content: '' });
+    Store.saveGoals(goals);
+    renderDynamicGoals();
+}
+
+function renderDynamicGoals() {
+    const containerAhirat = document.getElementById('dynamic-goals-ahirat');
+    const containerDunya = document.getElementById('dynamic-goals-dunya');
+    if (!containerAhirat || !containerDunya) return;
+
+    containerAhirat.innerHTML = '';
+    containerDunya.innerHTML = '';
+
+    const goals = Store.getGoals();
+    if (!goals.dynamic) return;
+
+    goals.dynamic.forEach((goal, index) => {
+        const div = document.createElement('div');
+        div.className = 'relative group';
+
+        div.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <input type="text" data-i18n="goal_custom_title" data-i18n-target="placeholder" class="dyn-goal-title bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide w-[85%] placeholder-slate-400" placeholder="Своя цель" value="${goal.title || ''}">
+                <button class="delete-dyn-goal text-red-300 hover:text-red-500 opacity-0 md:group-hover:opacity-100 transition-opacity p-1" title="Удалить"><i class="fas fa-trash"></i></button>
+            </div>
+            <textarea data-i18n="goal_custom_ph" data-i18n-target="placeholder" class="dyn-goal-content ruled-textarea handwriting h-24 placeholder-slate-400 dark:placeholder-slate-500 w-full" placeholder="Напишите свою цель...">${goal.content || ''}</textarea>
+        `;
+
+        const titleInput = div.querySelector('.dyn-goal-title');
+        const contentInput = div.querySelector('.dyn-goal-content');
+        const delBtn = div.querySelector('.delete-dyn-goal');
+
+        titleInput.addEventListener('input', () => {
+            const currentData = Store.getGoals();
+            currentData.dynamic[index].title = titleInput.value;
+            Store.saveGoals(currentData);
+        });
+
+        contentInput.addEventListener('input', () => {
+            const currentData = Store.getGoals();
+            currentData.dynamic[index].content = contentInput.value;
+            Store.saveGoals(currentData);
+        });
+
+        delBtn.addEventListener('click', () => {
+            const currentData = Store.getGoals();
+            currentData.dynamic.splice(index, 1);
+            Store.saveGoals(currentData);
+            renderDynamicGoals();
+        });
+
+        if (goal.type === 'ahirat') {
+            containerAhirat.appendChild(div);
+        } else {
+            containerDunya.appendChild(div);
+        }
+    });
+
+    if (typeof applyTranslations === 'function') {
+        applyTranslations(localStorage.getItem('barakah_lang') || 'ru');
+    }
 }
 
 // --- UTILS & UX ---

@@ -164,7 +164,8 @@ try {
 import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
-    signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     signOut,
     onAuthStateChanged,
     updateProfile
@@ -175,6 +176,24 @@ window.Auth = {
 
     init() {
         if (!window.firebaseAuth) return;
+
+        // Catch errors from redirect flow
+        getRedirectResult(window.firebaseAuth).then((result) => {
+            if (result) {
+                console.log("[Auth] Вход через redirected Google:", result.user.email);
+            }
+        }).catch((error) => {
+            console.error("[Auth] Ошибка Google redirect:", error);
+            const errorEl = document.getElementById('auth-error');
+            if (errorEl) {
+                errorEl.textContent = "Ошибка входа через Google: " + error.message;
+            }
+            const authModal = document.getElementById('auth-modal');
+            if (authModal) {
+                authModal.classList.remove('hidden');
+                authModal.classList.add('flex');
+            }
+        });
 
         // Sync UI on auth state change
         onAuthStateChanged(window.firebaseAuth, (user) => {
@@ -297,8 +316,8 @@ window.Auth = {
     async signInWithGoogle() {
         if (!window.firebaseAuth) return { error: "Firebase not configured" };
         try {
-            const result = await signInWithPopup(window.firebaseAuth, window.googleProvider);
-            return { user: result.user };
+            await signInWithRedirect(window.firebaseAuth, window.googleProvider);
+            return { user: null }; // Will not be reached due to page redirect
         } catch (error) {
             console.error("[Auth] Google sign-in error:", error);
             return { error: error.message };
@@ -574,6 +593,7 @@ const translations = {
         "goal_work_title": "Работа и Финансы", "goal_work_ph": "Закрыть долги, повысить квалификацию...",
         "goal_health_title": "Здоровье и Тело", "goal_health_ph": "Спорт 3 раза в неделю, правильное питание...",
         "goal_family_title": "Семья и Отношения", "goal_family_ph": "Больше времени с родителями...",
+        "goal_custom_title": "Своя цель", "goal_custom_ph": "Напишите свою цель...", "add_custom_goal": "Добавить цель",
         "tool_hand_title": "Перемещение (V)", "tool_hand_label": "Рука",
         "tool_pencil_title": "Карандаш (P)", "tool_pencil_label": "Рисунок",
         "tool_eraser_title": "Ластик (E)", "tool_eraser_label": "Ластик",
@@ -586,7 +606,22 @@ const translations = {
         "donate_toast_title": "Поддержите проект", "donate_toast_text": "Ваша помощь помогает проекту расти. Джазакаллаху Хайран!",
         "kaspi_label": "Kaspi.kz (Перевод по номеру)", "kaspi_copy": "Скопировать номер", "kaspi_success": "Номер скопирован!",
         "auth_title": "Облачная синхронизация", "auth_subtitle": "Сохраните свои данные онлайн", "auth_login_btn": "Войти", "profile_title": "Ваш профиль", "auth_logout": "Выйти",
-        "sync_status": "Синхронизация включена. Ваши данные в безопасности (ИншаАллах)."
+        "sync_status": "Синхронизация включена. Ваши данные в безопасности (ИншаАллах).",
+        "event_modal_title": "Новое событие", "event_tab_event": "Событие", "event_tab_reminder": "Напоминание",
+        "event_title_label": "Название", "event_title_ph": "Название события...",
+        "event_type_label": "Тип события", "event_type_select_ph": "Выберите тип",
+        "event_type_islamic": "Исламское", "event_type_personal": "Личное", "event_type_work": "Работа", "event_type_family": "Семья", "event_type_health": "Здоровье",
+        "event_date_label": "Дата", "event_time_label": "Время",
+        "event_location_label": "Место", "event_location_ph": "Видеоконференция / Мечеть / ...",
+        "event_repeat_label": "Повтор", "event_allday_label": "Весь день",
+        "event_repeat_type_label": "Частота", "event_repeat_end_label": "До даты",
+        "repeat_daily": "Ежедневно", "repeat_weekly": "Еженедельно", "repeat_monthly": "Ежемесячно", "repeat_yearly": "Ежегодно",
+        "event_alert_label": "Уведомление",
+        "alert_none": "Без уведомления", "alert_5min": "За 5 минут", "alert_15min": "За 15 минут", "alert_30min": "За 30 минут", "alert_1hour": "За 1 час", "alert_1day": "За 1 день",
+        "event_tag_label": "Тег", "event_tag_ph": "#важное #встреча",
+        "event_notes_label": "Заметки", "event_notes_ph": "Дополнительные заметки...",
+        "event_save_btn": "Сохранить", "event_delete_btn": "Удалить", "event_add_btn": "Добавить",
+        "events_no_events": "Нет событий на этот день", "event_saved_toast": "Событие сохранено!", "event_deleted_toast": "Событие удалено"
     },
     kk: {
         "tab_daily": "Күн", "tab_calendar": "Күнтізбе", "tab_goals": "Мақсаттар", "tab_board": "Тақта",
@@ -619,6 +654,7 @@ const translations = {
         "goal_work_title": "Жұмыс пен Қаржы", "goal_work_ph": "Қарыздарды жабу, біліктілікті арттыру...",
         "goal_health_title": "Денсаулық пен Дене", "goal_health_ph": "Аптасына 3 рет спорт, дұрыс тамақтану...",
         "goal_family_title": "Отбасы мен Қарым-қатынас", "goal_family_ph": "Ата-анамен көбірек уақыт өткізу...",
+        "goal_custom_title": "Өз мақсатым", "goal_custom_ph": "Өз мақсатыңызды жазыңыз...", "add_custom_goal": "Мақсат қосу",
         "tool_hand_title": "Жылжыту (V)", "tool_hand_label": "Қол",
         "tool_pencil_title": "Қарындаш (P)", "tool_pencil_label": "Сурет",
         "tool_eraser_title": "Өшіргіш (E)", "tool_eraser_label": "Өшіргіш",
@@ -631,7 +667,22 @@ const translations = {
         "donate_toast_title": "Жобаға қолдау көрсетіңіз", "donate_toast_text": "Сіздің көмегіңіз жобаның өсуіне ықпал етеді. Жазакаллаһу Хайран!",
         "kaspi_label": "Kaspi.kz (Нөмір бойынша аударым)", "kaspi_copy": "Нөмірді көшіру", "kaspi_success": "Нөмір көшірілді!",
         "auth_title": "Бұлтты синхрондау", "auth_subtitle": "Деректеріңізді онлайн сақтаңыз", "auth_login_btn": "Кіру", "profile_title": "Сіздің профиліңіз", "auth_logout": "Шығу",
-        "sync_status": "Синхрондау қосулы. Сіздің деректеріңіз қауіпсіздікте (ИншаАллах)."
+        "sync_status": "Синхрондау қосулы. Сіздің деректеріңіз қауіпсіздікте (ИншаАллах).",
+        "event_modal_title": "Жаңа оқиға", "event_tab_event": "Оқиға", "event_tab_reminder": "Еске салу",
+        "event_title_label": "Атауы", "event_title_ph": "Оқиға атауы...",
+        "event_type_label": "Оқиға түрі", "event_type_select_ph": "Түрін таңдаңыз",
+        "event_type_islamic": "Ислами", "event_type_personal": "Жеке", "event_type_work": "Жұмыс", "event_type_family": "Отбасы", "event_type_health": "Денсаулық",
+        "event_date_label": "Күні", "event_time_label": "Уақыты",
+        "event_location_label": "Орны", "event_location_ph": "Бейнеконференция / Мешіт / ...",
+        "event_repeat_label": "Қайталау", "event_allday_label": "Күні бойы",
+        "event_repeat_type_label": "Жиілігі", "event_repeat_end_label": "Дейін",
+        "repeat_daily": "Күн сайын", "repeat_weekly": "Апта сайын", "repeat_monthly": "Ай сайын", "repeat_yearly": "Жыл сайын",
+        "event_alert_label": "Хабарлама",
+        "alert_none": "Хабарламасыз", "alert_5min": "5 минут бұрын", "alert_15min": "15 минут бұрын", "alert_30min": "30 минут бұрын", "alert_1hour": "1 сағат бұрын", "alert_1day": "1 күн бұрын",
+        "event_tag_label": "Тег", "event_tag_ph": "#маңызды #кездесу",
+        "event_notes_label": "Жазбалар", "event_notes_ph": "Қосымша жазбалар...",
+        "event_save_btn": "Сақтау", "event_delete_btn": "Жою", "event_add_btn": "Қосу",
+        "events_no_events": "Бұл күнге оқиға жоқ", "event_saved_toast": "Оқиға сақталды!", "event_deleted_toast": "Оқиға жойылды"
     },
     ar: {
         "tab_daily": "اليوم", "tab_calendar": "التقويم", "tab_goals": "الأهداف", "tab_board": "اللوحة",
@@ -664,6 +715,7 @@ const translations = {
         "goal_work_title": "العمل والمال", "goal_work_ph": "سداد الديون، تطوير المهارات...",
         "goal_health_title": "الصحة والجسم", "goal_health_ph": "الرياضة 3 مرات أسبوعياً، الأكل الصحي...",
         "goal_family_title": "الأسرة والعلاقات", "goal_family_ph": "قضاء المزيد من الوقت مع الوالدين...",
+        "goal_custom_title": "هدفي الخاص", "goal_custom_ph": "اكتب هدفك الخاص...", "add_custom_goal": "إضافة هدف",
         "tool_hand_title": "تحريك (V)", "tool_hand_label": "يد",
         "tool_pencil_title": "قلم (P)", "tool_pencil_label": "رسم",
         "tool_eraser_title": "ممحاة (E)", "tool_eraser_label": "ممحاة",
@@ -676,7 +728,22 @@ const translations = {
         "donate_toast_title": "ادعم المشروع", "donate_toast_text": "مساعدتك تساعد المشروع على النمو. جزاكم الله خيراً!",
         "kaspi_label": "Kaspi.kz (تحويل عن طريق الرقم)", "kaspi_copy": "نسخ الرقم", "kaspi_success": "تم نسخ الرقم!",
         "auth_title": "المزامنة السحابية", "auth_subtitle": "احفظ بياناتك عبر الإنترنت", "auth_login_btn": "تسجيل الدخول", "profile_title": "ملفك الشخصي", "auth_logout": "تسجيل الخروج",
-        "sync_status": "المزامنة قيد التشغيل. بياناتك آمنة (إن شاء الله)."
+        "sync_status": "المزامنة قيد التشغيل. بياناتك آمنة (إن شاء الله).",
+        "event_modal_title": "حدث جديد", "event_tab_event": "حدث", "event_tab_reminder": "تذكير",
+        "event_title_label": "العنوان", "event_title_ph": "عنوان الحدث...",
+        "event_type_label": "نوع الحدث", "event_type_select_ph": "اختر النوع",
+        "event_type_islamic": "إسلامي", "event_type_personal": "شخصي", "event_type_work": "عمل", "event_type_family": "عائلة", "event_type_health": "صحة",
+        "event_date_label": "التاريخ", "event_time_label": "الوقت",
+        "event_location_label": "المكان", "event_location_ph": "مؤتمر فيديو / مسجد / ...",
+        "event_repeat_label": "تكرار", "event_allday_label": "طوال اليوم",
+        "event_repeat_type_label": "التكرار", "event_repeat_end_label": "حتى",
+        "repeat_daily": "يومياً", "repeat_weekly": "أسبوعياً", "repeat_monthly": "شهرياً", "repeat_yearly": "سنوياً",
+        "event_alert_label": "تنبيه",
+        "alert_none": "بدون تنبيه", "alert_5min": "قبل 5 دقائق", "alert_15min": "قبل 15 دقيقة", "alert_30min": "قبل 30 دقيقة", "alert_1hour": "قبل ساعة", "alert_1day": "قبل يوم",
+        "event_tag_label": "وسم", "event_tag_ph": "#مهم #اجتماع",
+        "event_notes_label": "ملاحظات", "event_notes_ph": "ملاحظات إضافية...",
+        "event_save_btn": "حفظ", "event_delete_btn": "حذف", "event_add_btn": "إضافة",
+        "events_no_events": "لا توجد أحداث في هذا اليوم", "event_saved_toast": "تم حفظ الحدث!", "event_deleted_toast": "تم حذف الحدث"
     },
     en: {
         "tab_daily": "Daily", "tab_calendar": "Calendar", "tab_goals": "Goals", "tab_board": "Board",
@@ -709,6 +776,7 @@ const translations = {
         "goal_work_title": "Work and Finances", "goal_work_ph": "Pay off debts, improve skills...",
         "goal_health_title": "Health and Body", "goal_health_ph": "Sports 3 times a week, healthy eating...",
         "goal_family_title": "Family and Relationships", "goal_family_ph": "More time with parents...",
+        "goal_custom_title": "Custom Goal", "goal_custom_ph": "Write your custom goal...", "add_custom_goal": "Add Custom Goal",
         "tool_hand_title": "Pan (V)", "tool_hand_label": "Hand",
         "tool_pencil_title": "Pencil (P)", "tool_pencil_label": "Draw",
         "tool_eraser_title": "Eraser (E)", "tool_eraser_label": "Eraser",
@@ -721,7 +789,22 @@ const translations = {
         "donate_toast_title": "Support the Project", "donate_toast_text": "Your help helps the project grow. Jazakallahu Khairan!",
         "kaspi_label": "Kaspi.kz (Transfer by number)", "kaspi_copy": "Copy number", "kaspi_success": "Number copied!",
         "auth_title": "Cloud Sync", "auth_subtitle": "Save your data online", "auth_login_btn": "Login", "profile_title": "Your Profile", "auth_logout": "Logout",
-        "sync_status": "Sync is enabled. Your data is safe (InshaAllah)."
+        "sync_status": "Sync is enabled. Your data is safe (InshaAllah).",
+        "event_modal_title": "New Event", "event_tab_event": "Event", "event_tab_reminder": "Reminder",
+        "event_title_label": "Title", "event_title_ph": "Event title...",
+        "event_type_label": "Event Type", "event_type_select_ph": "Select type",
+        "event_type_islamic": "Islamic", "event_type_personal": "Personal", "event_type_work": "Work", "event_type_family": "Family", "event_type_health": "Health",
+        "event_date_label": "Date", "event_time_label": "Time",
+        "event_location_label": "Location", "event_location_ph": "Video conference / Mosque / ...",
+        "event_repeat_label": "Repeat", "event_allday_label": "All Day",
+        "event_repeat_type_label": "Frequency", "event_repeat_end_label": "Until",
+        "repeat_daily": "Daily", "repeat_weekly": "Weekly", "repeat_monthly": "Monthly", "repeat_yearly": "Yearly",
+        "event_alert_label": "Alert",
+        "alert_none": "No alert", "alert_5min": "5 minutes before", "alert_15min": "15 minutes before", "alert_30min": "30 minutes before", "alert_1hour": "1 hour before", "alert_1day": "1 day before",
+        "event_tag_label": "Tag", "event_tag_ph": "#important #meeting",
+        "event_notes_label": "Notes", "event_notes_ph": "Additional notes...",
+        "event_save_btn": "Save", "event_delete_btn": "Delete", "event_add_btn": "Add",
+        "events_no_events": "No events for this day", "event_saved_toast": "Event saved!", "event_deleted_toast": "Event deleted"
     }
 };
 
@@ -956,6 +1039,52 @@ window.Store = {
         return idbDelete('board_drawing');
     },
 
+    // ── Events & Reminders ─────────────────────────────────────────
+    getEvents() {
+        try {
+            const events = localStorage.getItem('barakah_events');
+            return events ? JSON.parse(events) : {};
+        } catch (e) {
+            return {};
+        }
+    },
+
+    getEventsForDate(dateString) {
+        const all = this.getEvents();
+        return all[dateString] || [];
+    },
+
+    saveEvent(dateString, event) {
+        const all = this.getEvents();
+        if (!all[dateString]) all[dateString] = [];
+        // Check if editing existing event by id
+        const idx = all[dateString].findIndex(e => e.id === event.id);
+        if (idx >= 0) {
+            all[dateString][idx] = event;
+        } else {
+            all[dateString].push(event);
+        }
+        try {
+            localStorage.setItem('barakah_events', JSON.stringify(all));
+            if (window.DbSync) window.DbSync.syncToCloud('events', all);
+        } catch (e) {
+            console.error('[Store] Failed to save event:', e);
+        }
+    },
+
+    deleteEvent(dateString, eventId) {
+        const all = this.getEvents();
+        if (!all[dateString]) return;
+        all[dateString] = all[dateString].filter(e => e.id !== eventId);
+        if (all[dateString].length === 0) delete all[dateString];
+        try {
+            localStorage.setItem('barakah_events', JSON.stringify(all));
+            if (window.DbSync) window.DbSync.syncToCloud('events', all);
+        } catch (e) {
+            console.error('[Store] Failed to delete event:', e);
+        }
+    },
+
     // ── Data Backup & Restore (SurviveKit) ─────────────────────────
     async exportAllData() {
         const data = {
@@ -1051,6 +1180,7 @@ class AiAssistant {
         this.modalContent = this.modal.querySelector('div');
 
         this.setupArea = document.getElementById('ai-setup-area');
+        this.apiForm = document.getElementById('ai-api-form');
         this.chatArea = document.getElementById('ai-chat-area');
         this.apiKeyInput = document.getElementById('ai-api-key');
         this.saveKeyBtn = document.getElementById('save-ai-key');
@@ -1080,7 +1210,14 @@ class AiAssistant {
             });
         }
 
-        if (this.saveKeyBtn) this.saveKeyBtn.addEventListener('click', () => this.saveApiKey());
+        if (this.apiForm) {
+            this.apiForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.saveApiKey();
+            });
+        } else if (this.saveKeyBtn) {
+            this.saveKeyBtn.addEventListener('click', () => this.saveApiKey());
+        }
         if (this.settingsBtn) this.settingsBtn.addEventListener('click', () => this.toggleSettings());
 
         if (this.submitBtn) this.submitBtn.addEventListener('click', () => this.generatePlan());
@@ -1835,6 +1972,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initBackupRestore();
     initTheme();
     initDonationToast();
+    initEvents();
 
     // Обновление при смене языка
     document.addEventListener('langChanged', () => {
@@ -2194,10 +2332,14 @@ function renderCalendar() {
     }
 
     // Day cells
+    const allEvents = Store.getEvents();
     for (let i = 1; i <= daysInMonth; i++) {
         const dayOfWeek = new Date(year, month, i).getDay();
         const isSunnahFast = (dayOfWeek === 1 || dayOfWeek === 4);
         const isToday = i === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+        const dayDateStr = formatDate(new Date(year, month, i));
+        const dayEvents = allEvents[dayDateStr] || [];
+        const hasEvents = dayEvents.length > 0;
 
         let classes = 'calendar-cell group';
         if (isSunnahFast) classes += ' sunnah-fast';
@@ -2212,12 +2354,19 @@ function renderCalendar() {
         cell.innerHTML = `
             <div class="calendar-date pointer-events-none">${i}</div>
             ${isSunnahFast ? '<span class="sunnah-badge">' + sunnahText + '</span>' : ''}
-            <div class="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-2 right-2 text-xs text-green-700 font-bold"><i class="fas fa-edit"></i> ${planText}</div>
+            ${hasEvents ? '<div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-0.5 pointer-events-none">' + dayEvents.slice(0, 3).map(ev => {
+            const colors = { islamic: 'bg-emerald-500', work: 'bg-blue-500', personal: 'bg-purple-500', family: 'bg-rose-500', health: 'bg-amber-500' };
+            return '<div class="w-1.5 h-1.5 rounded-full ' + (colors[ev.eventType] || 'bg-emerald-500') + '"></div>';
+        }).join('') + (dayEvents.length > 3 ? '<span class="text-[8px] text-gray-400">+' + (dayEvents.length - 3) + '</span>' : '') + '</div>' : ''}
+            <div class="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-2 ltr:right-2 rtl:left-2 text-xs text-green-700 font-bold"><i class="fas fa-edit"></i> ${planText}</div>
         `;
-        cell.addEventListener('click', () => {
-            currentDate = new Date(year, month, i);
-            renderDailyPlanner();
-            switchToTab('daily');
+        cell.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (hasEvents) {
+                openEventsPopup(dayDateStr, dayEvents);
+            } else {
+                openEventModal(dayDateStr);
+            }
         });
 
         fragment.appendChild(cell);
@@ -2243,6 +2392,77 @@ function initGoals() {
             Store.saveGoals(currentData);
         });
     });
+
+    renderDynamicGoals();
+
+    document.getElementById('add-custom-ahirat').addEventListener('click', () => addDynamicGoal('ahirat'));
+    document.getElementById('add-custom-dunya').addEventListener('click', () => addDynamicGoal('dunya'));
+}
+
+function addDynamicGoal(type) {
+    const goals = Store.getGoals();
+    if (!goals.dynamic) goals.dynamic = [];
+    goals.dynamic.push({ id: 'dyn_' + Date.now(), type, title: '', content: '' });
+    Store.saveGoals(goals);
+    renderDynamicGoals();
+}
+
+function renderDynamicGoals() {
+    const containerAhirat = document.getElementById('dynamic-goals-ahirat');
+    const containerDunya = document.getElementById('dynamic-goals-dunya');
+    if (!containerAhirat || !containerDunya) return;
+
+    containerAhirat.innerHTML = '';
+    containerDunya.innerHTML = '';
+
+    const goals = Store.getGoals();
+    if (!goals.dynamic) return;
+
+    goals.dynamic.forEach((goal, index) => {
+        const div = document.createElement('div');
+        div.className = 'relative group';
+
+        div.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <input type="text" data-i18n="goal_custom_title" data-i18n-target="placeholder" class="dyn-goal-title bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide w-[85%] placeholder-slate-400" placeholder="Своя цель" value="${goal.title || ''}">
+                <button class="delete-dyn-goal text-red-300 hover:text-red-500 opacity-0 md:group-hover:opacity-100 transition-opacity p-1" title="Удалить"><i class="fas fa-trash"></i></button>
+            </div>
+            <textarea data-i18n="goal_custom_ph" data-i18n-target="placeholder" class="dyn-goal-content ruled-textarea handwriting h-24 placeholder-slate-400 dark:placeholder-slate-500 w-full" placeholder="Напишите свою цель...">${goal.content || ''}</textarea>
+        `;
+
+        const titleInput = div.querySelector('.dyn-goal-title');
+        const contentInput = div.querySelector('.dyn-goal-content');
+        const delBtn = div.querySelector('.delete-dyn-goal');
+
+        titleInput.addEventListener('input', () => {
+            const currentData = Store.getGoals();
+            currentData.dynamic[index].title = titleInput.value;
+            Store.saveGoals(currentData);
+        });
+
+        contentInput.addEventListener('input', () => {
+            const currentData = Store.getGoals();
+            currentData.dynamic[index].content = contentInput.value;
+            Store.saveGoals(currentData);
+        });
+
+        delBtn.addEventListener('click', () => {
+            const currentData = Store.getGoals();
+            currentData.dynamic.splice(index, 1);
+            Store.saveGoals(currentData);
+            renderDynamicGoals();
+        });
+
+        if (goal.type === 'ahirat') {
+            containerAhirat.appendChild(div);
+        } else {
+            containerDunya.appendChild(div);
+        }
+    });
+
+    if (typeof applyTranslations === 'function') {
+        applyTranslations(localStorage.getItem('barakah_lang') || 'ru');
+    }
 }
 
 // --- UTILS & UX ---
@@ -2407,8 +2627,6 @@ function initTheme() {
 window.copyToClipboard = function (text, successMsgKey) {
     navigator.clipboard.writeText(text).then(() => {
         const lang = localStorage.getItem('barakah_lang') || 'ru';
-        // We need a way to access translations within main.js if it's not global
-        // but translations is usually global from i18n.js
         const msg = (window.translations && window.translations[lang] && window.translations[lang][successMsgKey]) || 'Copied!';
         if (window.showToast) {
             window.showToast(msg);
@@ -2417,6 +2635,302 @@ window.copyToClipboard = function (text, successMsgKey) {
         }
     });
 }
+
+// --- EVENTS / REMINDERS LOGIC ---
+let _eventEditingId = null;
+let _eventEditingDate = null;
+let _eventCurrentType = 'event'; // 'event' or 'reminder'
+
+function initEvents() {
+    const modal = document.getElementById('event-modal');
+    const inner = document.getElementById('event-modal-inner');
+    const closeBtn = document.getElementById('close-event-modal');
+    const saveBtn = document.getElementById('event-save-btn');
+    const deleteBtn = document.getElementById('event-delete-btn');
+    const repeatChk = document.getElementById('event-repeat');
+    const alldayChk = document.getElementById('event-allday');
+    const repeatSettings = document.getElementById('event-repeat-settings');
+    const timeWrapper = document.getElementById('event-time-wrapper');
+
+    // Tab switching
+    document.querySelectorAll('.event-type-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            _eventCurrentType = tab.getAttribute('data-type');
+            document.querySelectorAll('.event-type-tab').forEach(t => {
+                t.className = 'event-type-tab flex-1 py-2 rounded-lg text-sm font-bold transition-all text-white/80 hover:text-white hover:bg-white/10';
+            });
+            tab.className = 'event-type-tab flex-1 py-2 rounded-lg text-sm font-bold transition-all bg-white text-emerald-700 shadow-sm';
+
+            // Hide location & type for reminders
+            const locationRow = document.getElementById('event-location-row');
+            const typeRow = document.getElementById('event-type-row');
+            if (_eventCurrentType === 'reminder') {
+                locationRow.classList.add('hidden');
+                typeRow.classList.add('hidden');
+            } else {
+                locationRow.classList.remove('hidden');
+                typeRow.classList.remove('hidden');
+            }
+        });
+    });
+
+    // Repeat toggle
+    repeatChk.addEventListener('change', () => {
+        if (repeatChk.checked) {
+            repeatSettings.classList.remove('hidden');
+            repeatSettings.classList.add('grid');
+        } else {
+            repeatSettings.classList.add('hidden');
+            repeatSettings.classList.remove('grid');
+        }
+    });
+
+    // All day toggle — hide time when all-day is on
+    alldayChk.addEventListener('change', () => {
+        if (alldayChk.checked) {
+            timeWrapper.classList.add('hidden');
+        } else {
+            timeWrapper.classList.remove('hidden');
+        }
+    });
+
+    // Close modal
+    closeBtn.addEventListener('click', closeEventModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeEventModal();
+    });
+
+    // Save
+    saveBtn.addEventListener('click', () => {
+        const title = document.getElementById('event-title').value.trim();
+        if (!title) {
+            document.getElementById('event-title').focus();
+            document.getElementById('event-title').classList.add('ring-2', 'ring-red-400');
+            setTimeout(() => document.getElementById('event-title').classList.remove('ring-2', 'ring-red-400'), 1500);
+            return;
+        }
+
+        const dateStr = document.getElementById('event-date').value;
+        if (!dateStr) return;
+
+        const event = {
+            id: _eventEditingId || 'evt_' + Date.now(),
+            type: _eventCurrentType,
+            title: title,
+            eventType: document.getElementById('event-type-select').value,
+            date: dateStr,
+            time: document.getElementById('event-time').value,
+            location: document.getElementById('event-location').value,
+            repeat: repeatChk.checked,
+            repeatType: document.getElementById('event-repeat-type').value,
+            repeatEnd: document.getElementById('event-repeat-end').value,
+            allDay: alldayChk.checked,
+            alert: document.getElementById('event-alert').value,
+            tag: document.getElementById('event-tag').value,
+            notes: document.getElementById('event-notes').value
+        };
+
+        // If we were editing and the date changed, delete from old date first
+        if (_eventEditingId && _eventEditingDate && _eventEditingDate !== dateStr) {
+            Store.deleteEvent(_eventEditingDate, _eventEditingId);
+        }
+
+        Store.saveEvent(dateStr, event);
+
+        const lang = localStorage.getItem('barakah_lang') || 'ru';
+        const msg = (window.translations && window.translations[lang] && window.translations[lang]['event_saved_toast']) || 'Event saved!';
+        showToast(msg);
+
+        closeEventModal();
+        renderCalendar();
+    });
+
+    // Delete
+    deleteBtn.addEventListener('click', () => {
+        if (_eventEditingId && _eventEditingDate) {
+            Store.deleteEvent(_eventEditingDate, _eventEditingId);
+
+            const lang = localStorage.getItem('barakah_lang') || 'ru';
+            const msg = (window.translations && window.translations[lang] && window.translations[lang]['event_deleted_toast']) || 'Event deleted';
+            showToast(msg);
+
+            closeEventModal();
+            renderCalendar();
+        }
+    });
+
+    // Close events popup
+    document.getElementById('close-events-popup').addEventListener('click', closeEventsPopup);
+    document.getElementById('events-popup-add-btn').addEventListener('click', () => {
+        const dateStr = document.getElementById('events-day-popup').getAttribute('data-date');
+        closeEventsPopup();
+        openEventModal(dateStr);
+    });
+
+    // Click outside popup to close
+    document.addEventListener('click', (e) => {
+        const popup = document.getElementById('events-day-popup');
+        if (!popup.classList.contains('hidden') && !popup.contains(e.target)) {
+            closeEventsPopup();
+        }
+    });
+}
+
+function openEventModal(dateStr, existingEvent = null) {
+    const modal = document.getElementById('event-modal');
+    const inner = document.getElementById('event-modal-inner');
+
+    // Reset form
+    document.getElementById('event-title').value = '';
+    document.getElementById('event-type-select').value = '';
+    document.getElementById('event-date').value = dateStr || formatDate(new Date());
+    document.getElementById('event-time').value = '';
+    document.getElementById('event-location').value = '';
+    document.getElementById('event-repeat').checked = false;
+    document.getElementById('event-allday').checked = false;
+    document.getElementById('event-repeat-type').value = 'daily';
+    document.getElementById('event-repeat-end').value = '';
+    document.getElementById('event-alert').value = 'none';
+    document.getElementById('event-tag').value = '';
+    document.getElementById('event-notes').value = '';
+    document.getElementById('event-repeat-settings').classList.add('hidden');
+    document.getElementById('event-repeat-settings').classList.remove('grid');
+    document.getElementById('event-time-wrapper').classList.remove('hidden');
+    document.getElementById('event-delete-btn').classList.add('hidden');
+    document.getElementById('event-location-row').classList.remove('hidden');
+    document.getElementById('event-type-row').classList.remove('hidden');
+
+    _eventEditingId = null;
+    _eventEditingDate = null;
+    _eventCurrentType = 'event';
+
+    // Reset tabs to 'event'
+    document.getElementById('event-tab-event').className = 'event-type-tab flex-1 py-2 rounded-lg text-sm font-bold transition-all bg-white text-emerald-700 shadow-sm';
+    document.getElementById('event-tab-reminder').className = 'event-type-tab flex-1 py-2 rounded-lg text-sm font-bold transition-all text-white/80 hover:text-white hover:bg-white/10';
+
+    // If editing existing event, populate
+    if (existingEvent) {
+        _eventEditingId = existingEvent.id;
+        _eventEditingDate = existingEvent.date;
+        _eventCurrentType = existingEvent.type || 'event';
+
+        document.getElementById('event-title').value = existingEvent.title || '';
+        document.getElementById('event-type-select').value = existingEvent.eventType || '';
+        document.getElementById('event-date').value = existingEvent.date || dateStr;
+        document.getElementById('event-time').value = existingEvent.time || '';
+        document.getElementById('event-location').value = existingEvent.location || '';
+        document.getElementById('event-repeat').checked = !!existingEvent.repeat;
+        document.getElementById('event-allday').checked = !!existingEvent.allDay;
+        document.getElementById('event-repeat-type').value = existingEvent.repeatType || 'daily';
+        document.getElementById('event-repeat-end').value = existingEvent.repeatEnd || '';
+        document.getElementById('event-alert').value = existingEvent.alert || 'none';
+        document.getElementById('event-tag').value = existingEvent.tag || '';
+        document.getElementById('event-notes').value = existingEvent.notes || '';
+        document.getElementById('event-delete-btn').classList.remove('hidden');
+
+        // Apply repeat settings visibility
+        if (existingEvent.repeat) {
+            document.getElementById('event-repeat-settings').classList.remove('hidden');
+            document.getElementById('event-repeat-settings').classList.add('grid');
+        }
+
+        // Apply all-day visibility
+        if (existingEvent.allDay) {
+            document.getElementById('event-time-wrapper').classList.add('hidden');
+        }
+
+        // Set correct tab
+        if (_eventCurrentType === 'reminder') {
+            document.getElementById('event-tab-reminder').click();
+        }
+    }
+
+    // Show modal
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    requestAnimationFrame(() => {
+        inner.classList.remove('scale-95', 'opacity-0');
+        inner.classList.add('scale-100', 'opacity-100');
+    });
+
+    // Apply translations to newly visible elements
+    if (typeof applyTranslations === 'function') {
+        const lang = localStorage.getItem('barakah_lang') || 'ru';
+        applyTranslations(lang);
+    }
+}
+
+function closeEventModal() {
+    const modal = document.getElementById('event-modal');
+    const inner = document.getElementById('event-modal-inner');
+    inner.classList.add('scale-95', 'opacity-0');
+    inner.classList.remove('scale-100', 'opacity-100');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }, 300);
+}
+
+function openEventsPopup(dateStr, events) {
+    const popup = document.getElementById('events-day-popup');
+    const list = document.getElementById('events-day-list');
+    const title = document.getElementById('events-day-popup-title');
+
+    popup.setAttribute('data-date', dateStr);
+
+    // Format title date
+    const d = new Date(dateStr + 'T00:00:00');
+    const lang = localStorage.getItem('barakah_lang') || 'ru';
+    const monthFormat = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'long' });
+    title.textContent = monthFormat.format(d);
+
+    // Build events list
+    list.innerHTML = '';
+    if (events.length === 0) {
+        const noEvents = (window.translations && window.translations[lang] && window.translations[lang]['events_no_events']) || 'No events';
+        list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4"><i class="fas fa-calendar-xmark mr-1"></i> ' + noEvents + '</p>';
+    } else {
+        events.forEach(ev => {
+            const typeColors = {
+                islamic: 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20',
+                work: 'border-blue-400 bg-blue-50 dark:bg-blue-900/20',
+                personal: 'border-purple-400 bg-purple-50 dark:bg-purple-900/20',
+                family: 'border-rose-400 bg-rose-50 dark:bg-rose-900/20',
+                health: 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
+            };
+            const colorClass = typeColors[ev.eventType] || 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20';
+            const typeIcon = ev.type === 'reminder' ? 'fa-bell' : 'fa-calendar-day';
+
+            const item = document.createElement('div');
+            item.className = 'flex items-center gap-3 p-3 rounded-xl border-l-4 cursor-pointer hover:shadow-md transition-all ' + colorClass;
+            item.innerHTML = `
+                <i class="fas ${typeIcon} text-gray-500 dark:text-gray-400"></i>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-gray-800 dark:text-gray-200 truncate">${ev.title}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        ${ev.time ? '<i class="fas fa-clock mr-1"></i>' + ev.time : ''}
+                        ${ev.location ? ' <i class="fas fa-map-marker-alt ml-2 mr-1"></i>' + ev.location : ''}
+                    </p>
+                </div>
+                <i class="fas fa-chevron-right text-gray-300 dark:text-gray-600"></i>
+            `;
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeEventsPopup();
+                openEventModal(dateStr, ev);
+            });
+            list.appendChild(item);
+        });
+    }
+
+    popup.classList.remove('hidden');
+}
+
+function closeEventsPopup() {
+    document.getElementById('events-day-popup').classList.add('hidden');
+}
+
+window.openEventModal = openEventModal;
 
 </script>
 </head>
@@ -2488,9 +3002,9 @@ window.copyToClipboard = function (text, successMsgKey) {
                                 title="Следующий день" data-i18n="nav_next_day" data-i18n-target="title"></i>
                         </div>
                         <div class="flex items-center border-t border-slate-200/60 dark:border-slate-700/50 pt-3 mt-1">
-                            <span
+                            <label for="niyyah"
                                 class="text-xs font-bold text-slate-400 dark:text-slate-500 mr-3 uppercase tracking-wider"
-                                data-i18n="niyyah_label">Ният:</span>
+                                data-i18n="niyyah_label">Ният:</label>
                             <input data-id="niyyah" id="niyyah" name="niyyah" type="text"
                                 placeholder="Ради довольства Аллаха..." autocomplete="off" data-i18n="niyyah_ph"
                                 data-i18n-target="placeholder"
@@ -2582,9 +3096,10 @@ window.copyToClipboard = function (text, successMsgKey) {
                         <!-- Коран -->
                         <div
                             class="bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md">
-                            <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 section-title"
+                            <label for="quran"
+                                class="block text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 section-title"
                                 data-i18n="quran_title">
-                                Чтение Корана</h2>
+                                Чтение Корана</label>
                             <input data-id="quran" id="quran" name="quran" type="text" placeholder="Сура / Аяты"
                                 data-i18n="quran_ph" autocomplete="off"
                                 class="ruled-input handwriting w-full mb-2 day-input placeholder-slate-400 dark:placeholder-slate-500">
@@ -2593,9 +3108,10 @@ window.copyToClipboard = function (text, successMsgKey) {
                         <!-- Добрые дела -->
                         <div
                             class="bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md">
-                            <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2 section-title"
+                            <label for="sadaka"
+                                class="block text-lg font-bold text-slate-800 dark:text-slate-200 mb-2 section-title"
                                 data-i18n="sadaka_title">
-                                Садака / Благое дело</h2>
+                                Садака / Благое дело</label>
                             <input data-id="sadaka" id="sadaka" name="sadaka" type="text"
                                 placeholder="Кому помочь сегодня?" data-i18n="sadaka_ph" autocomplete="off"
                                 class="ruled-input handwriting w-full day-input placeholder-slate-400 dark:placeholder-slate-500">
@@ -2808,9 +3324,10 @@ window.copyToClipboard = function (text, successMsgKey) {
                 </div>
 
                 <div class="mt-8">
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 section-title"
+                    <label for="month-notes"
+                        class="block text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 section-title"
                         data-i18n="month_notes_title">События
-                        месяца</h2>
+                        месяца</label>
                     <!-- Notes is saved based on current month viewing -->
                     <textarea id="month-notes" name="month-notes" class="ruled-textarea handwriting h-32"
                         autocomplete="off" aria-label="Заметки месяца"
@@ -2865,6 +3382,22 @@ window.copyToClipboard = function (text, successMsgKey) {
                                     placeholder="Поучаствовать в строительстве колодца..."
                                     data-i18n-target="placeholder" data-i18n="goal_sadaka_ph"></textarea>
                             </div>
+                            <div>
+                                <input type="text" data-goal="custom_ahirat_title" id="goal-custom-ahirat-title"
+                                    name="goal-custom-ahirat-title"
+                                    class="goal-input bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 w-full placeholder-slate-400"
+                                    autocomplete="off" placeholder="Своя цель" data-i18n-target="placeholder"
+                                    data-i18n="goal_custom_title">
+                                <textarea data-goal="custom_ahirat" id="goal-custom-ahirat" name="goal-custom-ahirat"
+                                    class="ruled-textarea handwriting h-24 goal-input placeholder-slate-400 dark:placeholder-slate-500"
+                                    autocomplete="off" aria-label="Своя цель" placeholder="Напишите свою цель..."
+                                    data-i18n-target="placeholder" data-i18n="goal_custom_ph"></textarea>
+                            </div>
+                            <div id="dynamic-goals-ahirat" class="space-y-6 mt-6"></div>
+                            <button id="add-custom-ahirat"
+                                class="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition flex items-center gap-1">
+                                <i class="fas fa-plus"></i> <span data-i18n="add_custom_goal">Добавить цель</span>
+                            </button>
                         </div>
                     </div>
 
@@ -2901,6 +3434,22 @@ window.copyToClipboard = function (text, successMsgKey) {
                                     placeholder="Больше времени с родителями..." data-i18n-target="placeholder"
                                     data-i18n="goal_family_ph"></textarea>
                             </div>
+                            <div>
+                                <input type="text" data-goal="custom_dunya_title" id="goal-custom-dunya-title"
+                                    name="goal-custom-dunya-title"
+                                    class="goal-input bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2 w-full placeholder-slate-400"
+                                    autocomplete="off" placeholder="Своя цель" data-i18n-target="placeholder"
+                                    data-i18n="goal_custom_title">
+                                <textarea data-goal="custom_dunya" id="goal-custom-dunya" name="goal-custom-dunya"
+                                    class="ruled-textarea handwriting h-24 goal-input placeholder-slate-400 dark:placeholder-slate-500"
+                                    autocomplete="off" aria-label="Своя цель" placeholder="Напишите свою цель..."
+                                    data-i18n-target="placeholder" data-i18n="goal_custom_ph"></textarea>
+                            </div>
+                            <div id="dynamic-goals-dunya" class="space-y-6 mt-6"></div>
+                            <button id="add-custom-dunya"
+                                class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition flex items-center gap-1">
+                                <i class="fas fa-plus"></i> <span data-i18n="add_custom_goal">Добавить цель</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -3306,16 +3855,16 @@ window.copyToClipboard = function (text, successMsgKey) {
                     class="bg-indigo-50 dark:bg-slate-800 rounded-xl p-4 border border-indigo-100 dark:border-slate-700 hidden">
                     <p class="text-xs text-gray-500 mb-2" data-i18n="ai_setup_help">Для работы оффлайн-клиента требуется
                         ваш API ключ Gemini.</p>
-                    <div class="flex gap-2">
+                    <form id="ai-api-form" class="flex gap-2">
                         <label for="ai-api-key" class="sr-only">Gemini API Key</label>
                         <input type="password" id="ai-api-key" name="ai-api-key"
                             placeholder="Gemini API Key (AIzaSy...)" autocomplete="off" data-i18n-target="placeholder"
                             data-i18n="ai_setup_ph"
                             class="flex-grow bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
-                        <button id="save-ai-key"
+                        <button id="save-ai-key" type="submit"
                             class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors"
                             data-i18n="btn_save">Сохранить</button>
-                    </div>
+                    </form>
                     <p class="text-[10px] text-gray-400 mt-2 text-right"><a
                             href="https://aistudio.google.com/app/apikey" target="_blank"
                             class="underline hover:text-indigo-600" data-i18n="ai_free_key">Получить бесплатный ключ</a>
@@ -3358,6 +3907,222 @@ window.copyToClipboard = function (text, successMsgKey) {
         </div>
     </div>
 
+    <!-- Event / Reminder Modal -->
+    <div id="event-modal"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] hidden items-center justify-center p-4" dir="auto">
+        <div id="event-modal-inner"
+            class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 opacity-0 transition-all duration-300 relative max-h-[90vh] flex flex-col">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-emerald-600 to-teal-600 p-5 text-white relative flex-shrink-0">
+                <button id="close-event-modal"
+                    class="absolute top-4 ltr:right-4 rtl:left-4 text-white/70 hover:text-white transition-colors w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-white/20 flex justify-center items-center">
+                        <i class="fas fa-calendar-plus text-xl text-white"></i>
+                    </div>
+                    <h2 class="text-lg font-bold" data-i18n="event_modal_title">Новое событие</h2>
+                </div>
+                <!-- Tab switcher: Event / Reminder -->
+                <div class="flex mt-4 bg-white/10 rounded-xl p-1 gap-1">
+                    <button id="event-tab-event"
+                        class="event-type-tab flex-1 py-2 rounded-lg text-sm font-bold transition-all bg-white text-emerald-700 shadow-sm"
+                        data-type="event">
+                        <i class="fas fa-calendar-day mr-1"></i> <span data-i18n="event_tab_event">Событие</span>
+                    </button>
+                    <button id="event-tab-reminder"
+                        class="event-type-tab flex-1 py-2 rounded-lg text-sm font-bold transition-all text-white/80 hover:text-white hover:bg-white/10"
+                        data-type="reminder">
+                        <i class="fas fa-bell mr-1"></i> <span data-i18n="event_tab_reminder">Напоминание</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Body (scrollable) -->
+            <div class="p-5 space-y-4 overflow-y-auto flex-1 hidden-scrollbar">
+                <!-- Event Title -->
+                <div>
+                    <label for="event-title"
+                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
+                        data-i18n="event_title_label">Название</label>
+                    <input type="text" id="event-title" name="event-title" autocomplete="off"
+                        class="w-full bg-gray-50 dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent dark:text-white transition-all"
+                        data-i18n="event_title_ph" data-i18n-target="placeholder" placeholder="Название события...">
+                </div>
+
+                <!-- Event Type (dropdown) -->
+                <div id="event-type-row">
+                    <label for="event-type-select"
+                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
+                        data-i18n="event_type_label">Тип события</label>
+                    <select id="event-type-select" name="event-type-select"
+                        class="w-full bg-gray-50 dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-white transition-all appearance-none cursor-pointer">
+                        <option value="" data-i18n="event_type_select_ph">Выберите тип</option>
+                        <option value="islamic" data-i18n="event_type_islamic">Исламское</option>
+                        <option value="personal" data-i18n="event_type_personal">Личное</option>
+                        <option value="work" data-i18n="event_type_work">Работа</option>
+                        <option value="family" data-i18n="event_type_family">Семья</option>
+                        <option value="health" data-i18n="event_type_health">Здоровье</option>
+                    </select>
+                </div>
+
+                <!-- Date & Time row -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="event-date"
+                            class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
+                            data-i18n="event_date_label">Дата</label>
+                        <div class="relative">
+                            <input type="date" id="event-date" name="event-date"
+                                class="w-full bg-gray-50 dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-white transition-all">
+                        </div>
+                    </div>
+                    <div id="event-time-wrapper">
+                        <label for="event-time"
+                            class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
+                            data-i18n="event_time_label">Время</label>
+                        <div class="relative">
+                            <input type="time" id="event-time" name="event-time"
+                                class="w-full bg-gray-50 dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-white transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location (only for events) -->
+                <div id="event-location-row">
+                    <label for="event-location"
+                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
+                        data-i18n="event_location_label">Место</label>
+                    <input type="text" id="event-location" name="event-location" autocomplete="off"
+                        class="w-full bg-gray-50 dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-white transition-all"
+                        data-i18n="event_location_ph" data-i18n-target="placeholder"
+                        placeholder="Видеоконференция / Мечеть / ...">
+                </div>
+
+                <!-- Toggle switches row: Repeat + All Day -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div
+                        class="flex items-center justify-between bg-gray-50 dark:bg-slate-800 rounded-xl px-4 py-3 border-2 border-emerald-200 dark:border-emerald-800/50">
+                        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300"
+                            data-i18n="event_repeat_label">Повтор</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="event-repeat" name="event-repeat" class="sr-only peer">
+                            <div
+                                class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-slate-600 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500">
+                            </div>
+                        </label>
+                    </div>
+                    <div
+                        class="flex items-center justify-between bg-gray-50 dark:bg-slate-800 rounded-xl px-4 py-3 border-2 border-emerald-200 dark:border-emerald-800/50">
+                        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300"
+                            data-i18n="event_allday_label">Весь день</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="event-allday" name="event-allday" class="sr-only peer">
+                            <div
+                                class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-slate-600 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Repeat settings (shown when repeat is on) -->
+                <div id="event-repeat-settings" class="hidden grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="event-repeat-type"
+                            class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
+                            data-i18n="event_repeat_type_label">Частота</label>
+                        <select id="event-repeat-type" name="event-repeat-type"
+                            class="w-full bg-gray-50 dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-white transition-all appearance-none cursor-pointer">
+                            <option value="daily" data-i18n="repeat_daily">Ежедневно</option>
+                            <option value="weekly" data-i18n="repeat_weekly">Еженедельно</option>
+                            <option value="monthly" data-i18n="repeat_monthly">Ежемесячно</option>
+                            <option value="yearly" data-i18n="repeat_yearly">Ежегодно</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="event-repeat-end"
+                            class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
+                            data-i18n="event_repeat_end_label">До даты</label>
+                        <input type="date" id="event-repeat-end" name="event-repeat-end"
+                            class="w-full bg-gray-50 dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-white transition-all">
+                    </div>
+                </div>
+
+                <!-- Alert -->
+                <div>
+                    <label for="event-alert"
+                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
+                        data-i18n="event_alert_label">Уведомление</label>
+                    <select id="event-alert" name="event-alert"
+                        class="w-full bg-gray-50 dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-white transition-all appearance-none cursor-pointer">
+                        <option value="none" data-i18n="alert_none">Без уведомления</option>
+                        <option value="5min" data-i18n="alert_5min">За 5 минут</option>
+                        <option value="15min" data-i18n="alert_15min">За 15 минут</option>
+                        <option value="30min" data-i18n="alert_30min">За 30 минут</option>
+                        <option value="1hour" data-i18n="alert_1hour">За 1 час</option>
+                        <option value="1day" data-i18n="alert_1day">За 1 день</option>
+                    </select>
+                </div>
+
+                <!-- Tag -->
+                <div>
+                    <label for="event-tag"
+                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
+                        data-i18n="event_tag_label">Тег</label>
+                    <input type="text" id="event-tag" name="event-tag" autocomplete="off"
+                        class="w-full bg-gray-50 dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-white transition-all"
+                        data-i18n="event_tag_ph" data-i18n-target="placeholder" placeholder="#важное #встреча">
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <label for="event-notes"
+                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
+                        data-i18n="event_notes_label">Заметки</label>
+                    <textarea id="event-notes" name="event-notes" rows="3" autocomplete="off"
+                        class="w-full bg-gray-50 dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-white transition-all resize-none"
+                        data-i18n="event_notes_ph" data-i18n-target="placeholder"
+                        placeholder="Дополнительные заметки..."></textarea>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div
+                class="bg-gray-50 dark:bg-slate-800/50 p-4 px-5 flex justify-between items-center border-t border-gray-100 dark:border-slate-700 flex-shrink-0">
+                <button id="event-delete-btn"
+                    class="text-red-400 hover:text-red-600 text-sm font-semibold flex items-center gap-1 transition-colors hidden">
+                    <i class="fas fa-trash-alt"></i> <span data-i18n="event_delete_btn">Удалить</span>
+                </button>
+                <div class="flex-1"></div>
+                <button id="event-save-btn"
+                    class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-2.5 rounded-full font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                    <i class="fas fa-check"></i> <span data-i18n="event_save_btn">Сохранить</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events List Popup (mini popup on calendar cell click) -->
+    <div id="events-day-popup"
+        class="fixed z-[110] hidden bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700 w-80 max-h-96 overflow-hidden"
+        style="top: 50%; left: 50%; transform: translate(-50%, -50%);">
+        <div
+            class="bg-emerald-50 dark:bg-emerald-900/30 px-5 py-3 flex justify-between items-center border-b border-emerald-100 dark:border-emerald-800/50">
+            <h3 id="events-day-popup-title" class="font-bold text-emerald-800 dark:text-emerald-300 text-sm"></h3>
+            <button id="close-events-popup" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="events-day-list" class="p-3 space-y-2 overflow-y-auto max-h-64 hidden-scrollbar"></div>
+        <div class="p-3 pt-0">
+            <button id="events-popup-add-btn"
+                class="w-full py-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-sm font-bold hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors flex items-center justify-center gap-2">
+                <i class="fas fa-plus"></i> <span data-i18n="event_add_btn">Добавить</span>
+            </button>
+        </div>
+    </div>
+
     <!-- Toast Message for Settings/Saving -->
     <div id="toast-message"
         class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-2xl opacity-0 pointer-events-none transition-opacity duration-300 z-50 flex items-center gap-3">
@@ -3395,7 +4160,7 @@ window.copyToClipboard = function (text, successMsgKey) {
                         console.log('[SurviveKit] ServiceWorker registered with scope:', registration.scope);
                     })
                     .catch(err => {
-                        console.log('[SurviveKit] ServiceWorker registration skipped (expected on local file run).');
+                        console.debug('[SurviveKit] ServiceWorker registration skipped (expected on local file run).');
                     });
             });
         }
