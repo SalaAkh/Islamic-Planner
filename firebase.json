@@ -4,9 +4,26 @@
         "ignore": [
             "firebase.json",
             "**/.*",
-            "**/node_modules/**"
+            "**/node_modules/**",
+            "package.json",
+            "package-lock.json",
+            "vite.config.js",
+            "build-monolith.js",
+            "guides/**",
+            "dist/**",
+            "README.md",
+            "*.log"
         ],
         "headers": [
+            {
+                "source": "/sitemap.xml",
+                "headers": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/xml"
+                    }
+                ]
+            },
             {
                 "source": "**",
                 "headers": [
@@ -34,6 +51,14 @@
             }
         ],
         "rewrites": [
+            {
+                "source": "/sitemap.xml",
+                "destination": "/sitemap.xml"
+            },
+            {
+                "source": "/robots.txt",
+                "destination": "/robots.txt"
+            },
             {
                 "source": "**",
                 "destination": "/index.html"
