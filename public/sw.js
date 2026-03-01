@@ -1,9 +1,9 @@
-const CACHE_NAME = 'barakah-planner-v3';
+const CACHE_NAME = 'barakah-planner-v4';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
-    './manifest.json',
-    './favicon.ico',
+    './public/manifest.json',
+    './public/favicon.ico',
     'https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
