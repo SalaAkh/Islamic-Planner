@@ -147,6 +147,52 @@ window.Store = {
         return idbDelete('board_drawing');
     },
 
+    // ── Events & Reminders ─────────────────────────────────────────
+    getEvents() {
+        try {
+            const events = localStorage.getItem('barakah_events');
+            return events ? JSON.parse(events) : {};
+        } catch (e) {
+            return {};
+        }
+    },
+
+    getEventsForDate(dateString) {
+        const all = this.getEvents();
+        return all[dateString] || [];
+    },
+
+    saveEvent(dateString, event) {
+        const all = this.getEvents();
+        if (!all[dateString]) all[dateString] = [];
+        // Check if editing existing event by id
+        const idx = all[dateString].findIndex(e => e.id === event.id);
+        if (idx >= 0) {
+            all[dateString][idx] = event;
+        } else {
+            all[dateString].push(event);
+        }
+        try {
+            localStorage.setItem('barakah_events', JSON.stringify(all));
+            if (window.DbSync) window.DbSync.syncToCloud('events', all);
+        } catch (e) {
+            console.error('[Store] Failed to save event:', e);
+        }
+    },
+
+    deleteEvent(dateString, eventId) {
+        const all = this.getEvents();
+        if (!all[dateString]) return;
+        all[dateString] = all[dateString].filter(e => e.id !== eventId);
+        if (all[dateString].length === 0) delete all[dateString];
+        try {
+            localStorage.setItem('barakah_events', JSON.stringify(all));
+            if (window.DbSync) window.DbSync.syncToCloud('events', all);
+        } catch (e) {
+            console.error('[Store] Failed to delete event:', e);
+        }
+    },
+
     // ── Data Backup & Restore (SurviveKit) ─────────────────────────
     async exportAllData() {
         const data = {

@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initBackupRestore();
     initTheme();
     initDonationToast();
+    initEvents();
 
     // Обновление при смене языка
     document.addEventListener('langChanged', () => {
@@ -383,10 +384,14 @@ function renderCalendar() {
     }
 
     // Day cells
+    const allEvents = Store.getEvents();
     for (let i = 1; i <= daysInMonth; i++) {
         const dayOfWeek = new Date(year, month, i).getDay();
         const isSunnahFast = (dayOfWeek === 1 || dayOfWeek === 4);
         const isToday = i === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+        const dayDateStr = formatDate(new Date(year, month, i));
+        const dayEvents = allEvents[dayDateStr] || [];
+        const hasEvents = dayEvents.length > 0;
 
         let classes = 'calendar-cell group';
         if (isSunnahFast) classes += ' sunnah-fast';
@@ -401,12 +406,19 @@ function renderCalendar() {
         cell.innerHTML = `
             <div class="calendar-date pointer-events-none">${i}</div>
             ${isSunnahFast ? '<span class="sunnah-badge">' + sunnahText + '</span>' : ''}
+            ${hasEvents ? '<div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-0.5 pointer-events-none">' + dayEvents.slice(0, 3).map(ev => {
+            const colors = { islamic: 'bg-emerald-500', work: 'bg-blue-500', personal: 'bg-purple-500', family: 'bg-rose-500', health: 'bg-amber-500' };
+            return '<div class="w-1.5 h-1.5 rounded-full ' + (colors[ev.eventType] || 'bg-emerald-500') + '"></div>';
+        }).join('') + (dayEvents.length > 3 ? '<span class="text-[8px] text-gray-400">+' + (dayEvents.length - 3) + '</span>' : '') + '</div>' : ''}
             <div class="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-2 right-2 text-xs text-green-700 font-bold"><i class="fas fa-edit"></i> ${planText}</div>
         `;
-        cell.addEventListener('click', () => {
-            currentDate = new Date(year, month, i);
-            renderDailyPlanner();
-            switchToTab('daily');
+        cell.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (hasEvents) {
+                openEventsPopup(dayDateStr, dayEvents);
+            } else {
+                openEventModal(dayDateStr);
+            }
         });
 
         fragment.appendChild(cell);
@@ -596,8 +608,6 @@ function initTheme() {
 window.copyToClipboard = function (text, successMsgKey) {
     navigator.clipboard.writeText(text).then(() => {
         const lang = localStorage.getItem('barakah_lang') || 'ru';
-        // We need a way to access translations within main.js if it's not global
-        // but translations is usually global from i18n.js
         const msg = (window.translations && window.translations[lang] && window.translations[lang][successMsgKey]) || 'Copied!';
         if (window.showToast) {
             window.showToast(msg);
@@ -606,3 +616,299 @@ window.copyToClipboard = function (text, successMsgKey) {
         }
     });
 }
+
+// --- EVENTS / REMINDERS LOGIC ---
+let _eventEditingId = null;
+let _eventEditingDate = null;
+let _eventCurrentType = 'event'; // 'event' or 'reminder'
+
+function initEvents() {
+    const modal = document.getElementById('event-modal');
+    const inner = document.getElementById('event-modal-inner');
+    const closeBtn = document.getElementById('close-event-modal');
+    const saveBtn = document.getElementById('event-save-btn');
+    const deleteBtn = document.getElementById('event-delete-btn');
+    const repeatChk = document.getElementById('event-repeat');
+    const alldayChk = document.getElementById('event-allday');
+    const repeatSettings = document.getElementById('event-repeat-settings');
+    const timeWrapper = document.getElementById('event-time-wrapper');
+
+    // Tab switching
+    document.querySelectorAll('.event-type-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            _eventCurrentType = tab.getAttribute('data-type');
+            document.querySelectorAll('.event-type-tab').forEach(t => {
+                t.className = 'event-type-tab flex-1 py-2 rounded-lg text-sm font-bold transition-all text-white/80 hover:text-white hover:bg-white/10';
+            });
+            tab.className = 'event-type-tab flex-1 py-2 rounded-lg text-sm font-bold transition-all bg-white text-emerald-700 shadow-sm';
+
+            // Hide location & type for reminders
+            const locationRow = document.getElementById('event-location-row');
+            const typeRow = document.getElementById('event-type-row');
+            if (_eventCurrentType === 'reminder') {
+                locationRow.classList.add('hidden');
+                typeRow.classList.add('hidden');
+            } else {
+                locationRow.classList.remove('hidden');
+                typeRow.classList.remove('hidden');
+            }
+        });
+    });
+
+    // Repeat toggle
+    repeatChk.addEventListener('change', () => {
+        if (repeatChk.checked) {
+            repeatSettings.classList.remove('hidden');
+            repeatSettings.classList.add('grid');
+        } else {
+            repeatSettings.classList.add('hidden');
+            repeatSettings.classList.remove('grid');
+        }
+    });
+
+    // All day toggle — hide time when all-day is on
+    alldayChk.addEventListener('change', () => {
+        if (alldayChk.checked) {
+            timeWrapper.classList.add('hidden');
+        } else {
+            timeWrapper.classList.remove('hidden');
+        }
+    });
+
+    // Close modal
+    closeBtn.addEventListener('click', closeEventModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeEventModal();
+    });
+
+    // Save
+    saveBtn.addEventListener('click', () => {
+        const title = document.getElementById('event-title').value.trim();
+        if (!title) {
+            document.getElementById('event-title').focus();
+            document.getElementById('event-title').classList.add('ring-2', 'ring-red-400');
+            setTimeout(() => document.getElementById('event-title').classList.remove('ring-2', 'ring-red-400'), 1500);
+            return;
+        }
+
+        const dateStr = document.getElementById('event-date').value;
+        if (!dateStr) return;
+
+        const event = {
+            id: _eventEditingId || 'evt_' + Date.now(),
+            type: _eventCurrentType,
+            title: title,
+            eventType: document.getElementById('event-type-select').value,
+            date: dateStr,
+            time: document.getElementById('event-time').value,
+            location: document.getElementById('event-location').value,
+            repeat: repeatChk.checked,
+            repeatType: document.getElementById('event-repeat-type').value,
+            repeatEnd: document.getElementById('event-repeat-end').value,
+            allDay: alldayChk.checked,
+            alert: document.getElementById('event-alert').value,
+            tag: document.getElementById('event-tag').value,
+            notes: document.getElementById('event-notes').value
+        };
+
+        // If we were editing and the date changed, delete from old date first
+        if (_eventEditingId && _eventEditingDate && _eventEditingDate !== dateStr) {
+            Store.deleteEvent(_eventEditingDate, _eventEditingId);
+        }
+
+        Store.saveEvent(dateStr, event);
+
+        const lang = localStorage.getItem('barakah_lang') || 'ru';
+        const msg = (window.translations && window.translations[lang] && window.translations[lang]['event_saved_toast']) || 'Event saved!';
+        showToast(msg);
+
+        closeEventModal();
+        renderCalendar();
+    });
+
+    // Delete
+    deleteBtn.addEventListener('click', () => {
+        if (_eventEditingId && _eventEditingDate) {
+            Store.deleteEvent(_eventEditingDate, _eventEditingId);
+
+            const lang = localStorage.getItem('barakah_lang') || 'ru';
+            const msg = (window.translations && window.translations[lang] && window.translations[lang]['event_deleted_toast']) || 'Event deleted';
+            showToast(msg);
+
+            closeEventModal();
+            renderCalendar();
+        }
+    });
+
+    // Close events popup
+    document.getElementById('close-events-popup').addEventListener('click', closeEventsPopup);
+    document.getElementById('events-popup-add-btn').addEventListener('click', () => {
+        const dateStr = document.getElementById('events-day-popup').getAttribute('data-date');
+        closeEventsPopup();
+        openEventModal(dateStr);
+    });
+
+    // Click outside popup to close
+    document.addEventListener('click', (e) => {
+        const popup = document.getElementById('events-day-popup');
+        if (!popup.classList.contains('hidden') && !popup.contains(e.target)) {
+            closeEventsPopup();
+        }
+    });
+}
+
+function openEventModal(dateStr, existingEvent = null) {
+    const modal = document.getElementById('event-modal');
+    const inner = document.getElementById('event-modal-inner');
+
+    // Reset form
+    document.getElementById('event-title').value = '';
+    document.getElementById('event-type-select').value = '';
+    document.getElementById('event-date').value = dateStr || formatDate(new Date());
+    document.getElementById('event-time').value = '';
+    document.getElementById('event-location').value = '';
+    document.getElementById('event-repeat').checked = false;
+    document.getElementById('event-allday').checked = false;
+    document.getElementById('event-repeat-type').value = 'daily';
+    document.getElementById('event-repeat-end').value = '';
+    document.getElementById('event-alert').value = 'none';
+    document.getElementById('event-tag').value = '';
+    document.getElementById('event-notes').value = '';
+    document.getElementById('event-repeat-settings').classList.add('hidden');
+    document.getElementById('event-repeat-settings').classList.remove('grid');
+    document.getElementById('event-time-wrapper').classList.remove('hidden');
+    document.getElementById('event-delete-btn').classList.add('hidden');
+    document.getElementById('event-location-row').classList.remove('hidden');
+    document.getElementById('event-type-row').classList.remove('hidden');
+
+    _eventEditingId = null;
+    _eventEditingDate = null;
+    _eventCurrentType = 'event';
+
+    // Reset tabs to 'event'
+    document.getElementById('event-tab-event').className = 'event-type-tab flex-1 py-2 rounded-lg text-sm font-bold transition-all bg-white text-emerald-700 shadow-sm';
+    document.getElementById('event-tab-reminder').className = 'event-type-tab flex-1 py-2 rounded-lg text-sm font-bold transition-all text-white/80 hover:text-white hover:bg-white/10';
+
+    // If editing existing event, populate
+    if (existingEvent) {
+        _eventEditingId = existingEvent.id;
+        _eventEditingDate = existingEvent.date;
+        _eventCurrentType = existingEvent.type || 'event';
+
+        document.getElementById('event-title').value = existingEvent.title || '';
+        document.getElementById('event-type-select').value = existingEvent.eventType || '';
+        document.getElementById('event-date').value = existingEvent.date || dateStr;
+        document.getElementById('event-time').value = existingEvent.time || '';
+        document.getElementById('event-location').value = existingEvent.location || '';
+        document.getElementById('event-repeat').checked = !!existingEvent.repeat;
+        document.getElementById('event-allday').checked = !!existingEvent.allDay;
+        document.getElementById('event-repeat-type').value = existingEvent.repeatType || 'daily';
+        document.getElementById('event-repeat-end').value = existingEvent.repeatEnd || '';
+        document.getElementById('event-alert').value = existingEvent.alert || 'none';
+        document.getElementById('event-tag').value = existingEvent.tag || '';
+        document.getElementById('event-notes').value = existingEvent.notes || '';
+        document.getElementById('event-delete-btn').classList.remove('hidden');
+
+        // Apply repeat settings visibility
+        if (existingEvent.repeat) {
+            document.getElementById('event-repeat-settings').classList.remove('hidden');
+            document.getElementById('event-repeat-settings').classList.add('grid');
+        }
+
+        // Apply all-day visibility
+        if (existingEvent.allDay) {
+            document.getElementById('event-time-wrapper').classList.add('hidden');
+        }
+
+        // Set correct tab
+        if (_eventCurrentType === 'reminder') {
+            document.getElementById('event-tab-reminder').click();
+        }
+    }
+
+    // Show modal
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    requestAnimationFrame(() => {
+        inner.classList.remove('scale-95', 'opacity-0');
+        inner.classList.add('scale-100', 'opacity-100');
+    });
+
+    // Apply translations to newly visible elements
+    if (typeof applyTranslations === 'function') {
+        const lang = localStorage.getItem('barakah_lang') || 'ru';
+        applyTranslations(lang);
+    }
+}
+
+function closeEventModal() {
+    const modal = document.getElementById('event-modal');
+    const inner = document.getElementById('event-modal-inner');
+    inner.classList.add('scale-95', 'opacity-0');
+    inner.classList.remove('scale-100', 'opacity-100');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }, 300);
+}
+
+function openEventsPopup(dateStr, events) {
+    const popup = document.getElementById('events-day-popup');
+    const list = document.getElementById('events-day-list');
+    const title = document.getElementById('events-day-popup-title');
+
+    popup.setAttribute('data-date', dateStr);
+
+    // Format title date
+    const d = new Date(dateStr + 'T00:00:00');
+    const lang = localStorage.getItem('barakah_lang') || 'ru';
+    const monthFormat = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'long' });
+    title.textContent = monthFormat.format(d);
+
+    // Build events list
+    list.innerHTML = '';
+    if (events.length === 0) {
+        const noEvents = (window.translations && window.translations[lang] && window.translations[lang]['events_no_events']) || 'No events';
+        list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4"><i class="fas fa-calendar-xmark mr-1"></i> ' + noEvents + '</p>';
+    } else {
+        events.forEach(ev => {
+            const typeColors = {
+                islamic: 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20',
+                work: 'border-blue-400 bg-blue-50 dark:bg-blue-900/20',
+                personal: 'border-purple-400 bg-purple-50 dark:bg-purple-900/20',
+                family: 'border-rose-400 bg-rose-50 dark:bg-rose-900/20',
+                health: 'border-amber-400 bg-amber-50 dark:bg-amber-900/20'
+            };
+            const colorClass = typeColors[ev.eventType] || 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/20';
+            const typeIcon = ev.type === 'reminder' ? 'fa-bell' : 'fa-calendar-day';
+
+            const item = document.createElement('div');
+            item.className = 'flex items-center gap-3 p-3 rounded-xl border-l-4 cursor-pointer hover:shadow-md transition-all ' + colorClass;
+            item.innerHTML = `
+                <i class="fas ${typeIcon} text-gray-500 dark:text-gray-400"></i>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-gray-800 dark:text-gray-200 truncate">${ev.title}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        ${ev.time ? '<i class="fas fa-clock mr-1"></i>' + ev.time : ''}
+                        ${ev.location ? ' <i class="fas fa-map-marker-alt ml-2 mr-1"></i>' + ev.location : ''}
+                    </p>
+                </div>
+                <i class="fas fa-chevron-right text-gray-300 dark:text-gray-600"></i>
+            `;
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeEventsPopup();
+                openEventModal(dateStr, ev);
+            });
+            list.appendChild(item);
+        });
+    }
+
+    popup.classList.remove('hidden');
+}
+
+function closeEventsPopup() {
+    document.getElementById('events-day-popup').classList.add('hidden');
+}
+
+window.openEventModal = openEventModal;
