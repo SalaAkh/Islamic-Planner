@@ -9,7 +9,7 @@ const translations = {
         "fajr": "Фаджр", "morning_azkar": "Уттренние азкары", "zuhr": "Зухр", "asr": "Аср",
         "evening_azkar": "Вечерние азкары", "maghrib": "Магриб", "isha": "Иша", "witr": "Витр",
         "fajr_zuhr": "Фаджр — Зухр", "zuhr_asr": "Зухр — Аср", "asr_maghrib": "Аср — Магриб",
-        "maghrib_isha": "Магриб — Иша", "isha_sleep": "Иша — Сон",
+        "maghrib_isha": "Магриб — Иша", "isha_sleep": "Иша — Сон", "nav_prev_day": "Предыдущий день", "nav_next_day": "Следующий день",
         "focus_label": "Фокус", "routine_label": "Рутина", "add_task": "+ Добавить задачу",
         "task1_ph": "Главная задача дня...", "task5_ph": "Бытовые дела...", "task7_ph": "Семья, ужин...", "task9_ph": "Уединение, отдых...", "task10_ph": "Чтение перед сном...",
         "btn_import": "Импорт", "btn_export": "Экспорт", "btn_ai": "ИИ Ассистент",
@@ -52,7 +52,7 @@ const translations = {
         "fajr": "Бамдат", "morning_azkar": "Таңғы зікірлер", "zuhr": "Бесін", "asr": "Екінті",
         "evening_azkar": "Кешкі зікірлер", "maghrib": "Ақшам", "isha": "Құптан", "witr": "Үтір",
         "fajr_zuhr": "Бамдат — Бесін", "zuhr_asr": "Бесін — Екінті", "asr_maghrib": "Екінті — Ақшам",
-        "maghrib_isha": "Ақшам — Құптан", "isha_sleep": "Құптан — Ұйқы",
+        "maghrib_isha": "Ақшам — Құптан", "isha_sleep": "Құптан — Ұйқы", "nav_prev_day": "Алдыңғы күн", "nav_next_day": "Келесі күн",
         "focus_label": "Фокус", "routine_label": "Рутина", "add_task": "+ Тапсырма",
         "task1_ph": "Күннің басты міндеті...", "task5_ph": "Тұрмыстық істер...", "task7_ph": "Отбасы, кешкі ас...", "task9_ph": "Демалыс...", "task10_ph": "Ұйқы алдында оқу...",
         "btn_import": "Импорт", "btn_export": "Экспорт", "btn_ai": "ЖИ Көмекшісі",
@@ -95,7 +95,7 @@ const translations = {
         "fajr": "الفجر", "morning_azkar": "أذكار الصباح", "zuhr": "الظهر", "asr": "العصر",
         "evening_azkar": "أذكار المساء", "maghrib": "المغرب", "isha": "العشاء", "witr": "الوتر",
         "fajr_zuhr": "الفجر — الظهر", "zuhr_asr": "الظهر — العصر", "asr_maghrib": "العصر — المغرب",
-        "maghrib_isha": "المغرب — العشاء", "isha_sleep": "العشاء — النوم",
+        "maghrib_isha": "المغرب — العشاء", "isha_sleep": "العشاء — النوم", "nav_prev_day": "اليوم السابق", "nav_next_day": "اليوم التالي",
         "focus_label": "التركيز", "routine_label": "العادات", "add_task": "+ إضافة مهمة",
         "task1_ph": "المهمة الرئيسية اليوم...", "task5_ph": "الأعمال المنزلية...", "task7_ph": "العائلة، العشاء...", "task9_ph": "استراحة...", "task10_ph": "القراءة قبل النوم...",
         "btn_import": "استيراد", "btn_export": "تصدير", "btn_ai": "المساعد الذكي",
@@ -138,7 +138,7 @@ const translations = {
         "fajr": "Fajr", "morning_azkar": "Morning Azkar", "zuhr": "Zuhr", "asr": "Asr",
         "evening_azkar": "Evening Azkar", "maghrib": "Maghrib", "isha": "Isha", "witr": "Witr",
         "fajr_zuhr": "Fajr — Zuhr", "zuhr_asr": "Zuhr — Asr", "asr_maghrib": "Asr — Maghrib",
-        "maghrib_isha": "Maghrib — Isha", "isha_sleep": "Isha — Sleep",
+        "maghrib_isha": "Maghrib — Isha", "isha_sleep": "Isha — Sleep", "nav_prev_day": "Previous day", "nav_next_day": "Next day",
         "focus_label": "Focus", "routine_label": "Routine", "add_task": "+ Add task",
         "task1_ph": "Main task of the day...", "task5_ph": "Household chores...", "task7_ph": "Family, dinner...", "task9_ph": "Rest, me time...", "task10_ph": "Reading before sleep...",
         "btn_import": "Import", "btn_export": "Export", "btn_ai": "AI Assistant",
@@ -183,13 +183,25 @@ function applyTranslations(lang) {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (dict[key]) {
-            // Если это инпут или текстарея с data-i18n-target="placeholder"
-            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                el.placeholder = dict[key];
+            const target = el.getAttribute('data-i18n-target');
+            if (target) {
+                if (target === 'placeholder') el.placeholder = dict[key];
+                else if (target === 'value') el.value = dict[key];
+                else if (target === 'title') el.title = dict[key];
+                else el[target] = dict[key];
             } else {
-                // Если внутри кнопки есть иконка, надо найти текстовую ноду или span, но для простоты
-                // мы обернем текст кнопок в <span data-i18n="...">
-                el.textContent = dict[key];
+                // Если это инпут или текстарея с data-i18n-target="placeholder"
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    if (el.type === 'text' || el.tagName === 'TEXTAREA') {
+                        el.placeholder = dict[key];
+                    } else {
+                        el.value = dict[key];
+                    }
+                } else {
+                    // Если внутри кнопки есть иконка, надо найти текстовую ноду или span, но для простоты
+                    // мы обернем текст кнопок в <span data-i18n="...">
+                    el.textContent = dict[key];
+                }
             }
         }
     });
@@ -230,9 +242,14 @@ function initI18n() {
             localStorage.setItem('barakah_lang', currentLang);
             applyTranslations(currentLang);
             updateLangIcon(currentLang);
+
+            // Отправляем событие о смене языка
+            document.dispatchEvent(new CustomEvent('langChanged', { detail: currentLang }));
+
             showToast('Язык изменен / Тіл өзгертілді / تم تغيير اللغة');
         });
     }
 }
 
 window.initI18n = initI18n;
+window.translations = translations;

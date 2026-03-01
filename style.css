@@ -1,31 +1,31 @@
 @import "tailwindcss";
 
 :root {
-    --bg-main: #cbd5e1;
-    --bg-dots: #94a3b8;
-    --paper: #fdfbf7;
+    --bg-main: #f1f5f9;
+    --bg-dots: #cbd5e1;
+    --paper: #ffffff;
     --ink: #1e293b;
-    --primary: #2d5a27;
-    --primary-light: rgba(45, 90, 39, 0.05);
+    --primary: #10b981;
+    --primary-light: rgba(16, 185, 129, 0.1);
     --lines: #e2e8f0;
-    --tab-daily: #475569;
-    --tab-calendar: #2d5a27;
-    --tab-goals: #b45309;
-    --tab-board: #4f46e5;
+    --tab-daily: #64748b;
+    --tab-calendar: #10b981;
+    --tab-goals: #f59e0b;
+    --tab-board: #6366f1;
 }
 
 .dark {
     --bg-main: #0f172a;
     --bg-dots: #334155;
     --paper: #1e293b;
-    --ink: #e2e8f0;
-    --primary: #4ade80;
-    --primary-light: rgba(74, 222, 128, 0.1);
+    --ink: #f8fafc;
+    --primary: #34d399;
+    --primary-light: rgba(52, 211, 153, 0.15);
     --lines: #334155;
-    --tab-daily: #334155;
-    --tab-calendar: #166534;
-    --tab-goals: #78350f;
-    --tab-board: #3730a3;
+    --tab-daily: #475569;
+    --tab-calendar: #059669;
+    --tab-goals: #d97706;
+    --tab-board: #4f46e5;
 }
 
 body {
@@ -51,13 +51,14 @@ body {
     background-color: var(--paper);
     width: 100%;
     min-height: 1100px;
-    border-radius: 4px 20px 20px 4px;
+    border-radius: 4px 24px 24px 4px;
     box-shadow:
-        20px 20px 40px rgba(0, 0, 0, 0.1),
-        -5px 0 15px rgba(0, 0, 0, 0.05);
+        12px 15px 40px rgba(0, 0, 0, 0.08),
+        -5px 0 20px rgba(0, 0, 0, 0.03);
     position: relative;
     padding: 3rem 4rem 8rem 5rem;
     z-index: 2;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .notebook-page::before {

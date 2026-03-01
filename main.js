@@ -24,6 +24,15 @@ document.addEventListener('DOMContentLoaded', () => {
     initBackupRestore();
     initTheme();
     initDonationToast();
+
+    // Обновление при смене языка
+    document.addEventListener('langChanged', () => {
+        if (document.getElementById('view-daily').classList.contains('active')) {
+            renderDailyPlanner();
+        } else if (document.getElementById('view-calendar').classList.contains('active')) {
+            renderCalendar();
+        }
+    });
 });
 
 // --- DONATION TOAST LOGIC ---
@@ -180,10 +189,7 @@ function renderDailyPlanner() {
 
     let displayStr = `${currentDate.getDate()} ${monthName}`;
     if (dateStr === todayStr) {
-        let todayWord = 'Сегодня';
-        if (lang === 'kk') todayWord = 'Бүгін';
-        else if (lang === 'ar') todayWord = 'اليوم';
-        else if (lang === 'en') todayWord = 'Today';
+        const todayWord = (window.translations && window.translations[lang] && window.translations[lang]['date_val_today']) || 'Сегодня';
         displayStr += ` (${todayWord})`;
     }
     const displayInput = document.getElementById('date-display');
@@ -431,23 +437,73 @@ function initGoals() {
 // --- UTILS & UX ---
 function getHijriDate(date) {
     const lang = localStorage.getItem('barakah_lang') || 'ru';
-    // Нам нужен язык локали, а для ISO он 2 буквы
     const localePrefix = lang === 'en' ? 'en-US' : lang === 'ar' ? 'ar-SA' : lang === 'kk' ? 'kk-KZ' : 'ru-RU';
 
+    let formattedDate = '';
+
     try {
-        return new Intl.DateTimeFormat(`${localePrefix}-u-ca-islamic-umalqura`, {
+        formattedDate = new Intl.DateTimeFormat(`${localePrefix}-u-ca-islamic-umalqura`, {
             day: 'numeric',
             month: 'long',
             year: 'numeric'
-        }).format(date).replace(' г.', '').replace(' AH', '');
+        }).format(date);
     } catch (e) {
         // Fallback
-        return new Intl.DateTimeFormat(`${localePrefix}-u-ca-islamic`, {
+        formattedDate = new Intl.DateTimeFormat(`${localePrefix}-u-ca-islamic`, {
             day: 'numeric',
             month: 'long',
             year: 'numeric'
-        }).format(date).replace(' г.', '').replace(' AH', '');
+        }).format(date);
     }
+
+    formattedDate = formattedDate.replace(' г.', '').replace(' AH', '').replace('ж.', '').replace(' AH', '').trim();
+
+    // Fix for Kazakh language where Intl often falls back to standard Gregorian months
+    if (lang === 'kk') {
+        const gregorianEngOrKk = [
+            "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
+            "Қаңтар", "Ақпан", "Наурыз", "Сәуір", "Мамыр", "Маусым", "Шілде", "Тамыз", "Қыркүйек", "Қазан", "Қараша", "Желтоқсан"
+        ];
+
+        const isGregorianFallback = gregorianEngOrKk.some(m => formattedDate.includes(m));
+
+        // If Intl completely failed and gave us a Gregorian month, force fetch Hijri info via Arabic/English locale
+        if (isGregorianFallback) {
+            try {
+                formattedDate = new Intl.DateTimeFormat(`en-US-u-ca-islamic-umalqura`, {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                }).format(date);
+            } catch (e) {
+                formattedDate = new Intl.DateTimeFormat(`en-US-u-ca-islamic`, {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                }).format(date);
+            }
+            formattedDate = formattedDate.replace(' AH', '').trim();
+        }
+
+        const hijriMonthsKk = {
+            "Muharram": "Мұхаррам", "Safar": "Сафар", "Rabiʻ I": "Рабиғ әл-әуәл", "Rabiʻ II": "Рабиғ әс-сәни",
+            "Jumada I": "Жұмада әл-улә", "Jumada II": "Жұмада әс-сәни", "Rajab": "Ережеп", "Shaʻban": "Шағбан",
+            "Ramadan": "Рамазан", "Shawwal": "Шәууәл", "Dhuʻl-Qiʻdah": "Зұлқағда", "Dhuʻl-Hijjah": "Зұлхижжа",
+            // Sometime browsers output standard names instead of hijri names in fallback
+            "Rabiʻ al-Awwal": "Рабиғ әл-әуәл", "Rabiʻ al-Thani": "Рабиғ әс-сәни",
+            "Jumada al-Awwal": "Жұмада әл-улә", "Jumada al-Thani": "Жұмада әс-сәни",
+            "Dhu al-Qiʻdah": "Зұлқағда", "Dhu al-Hijjah": "Зұлхижжа"
+        };
+
+        for (const [eng, kk] of Object.entries(hijriMonthsKk)) {
+            if (formattedDate.includes(eng)) {
+                formattedDate = formattedDate.replace(eng, kk);
+                break;
+            }
+        }
+    }
+
+    return formattedDate;
 }
 
 window.showToast = function (message = 'МашаАллах, сохранено!') {
