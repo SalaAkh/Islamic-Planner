@@ -20,13 +20,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Fix binary permissions
-        run: chmod +x ./node_modules/.bin/tailwindcss || true
+      - name: Install Tailwind CLI globally
+        run: npm install -g @tailwindcss/cli
 
-      - name: Build
+      - name: Build CSS
+        run: tailwindcss -i ./style.css -o ./tailwind.css --minify
+
+      - name: Build monolith
         env:
           FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-        run: npm run build
+        run: node build-monolith.js
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
