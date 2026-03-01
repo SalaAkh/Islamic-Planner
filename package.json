@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tailwindcss -i ./style.css -o ./tailwind.css --watch",
-    "build": "tailwindcss -i ./style.css -o ./tailwind.css --minify && node build-monolith.js"
+    "dev": "npx @tailwindcss/cli -i ./style.css -o ./tailwind.css --watch",
+    "build": "npx @tailwindcss/cli -i ./style.css -o ./tailwind.css --minify && node build-monolith.js"
   },
   "repository": {
     "type": "git",
