@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import 'dotenv/config';
 
 console.log('[SurviveKit Builder] Starting monolithic build...');
 
@@ -38,7 +39,18 @@ scriptsToInline.forEach(script => {
         html = html.replace(regex, (match) => {
             matchFound = true;
             const isDefer = match.includes('defer');
-            return `<script${isDefer ? ' defer' : ''}>\n${js}\n</script>`;
+
+            // Замена ключа Firebase, если мы внедряем firebase-init.js
+            let finalJs = js;
+            if (script === 'firebase-init.js') {
+                const apiKey = process.env.FIREBASE_API_KEY || '';
+                finalJs = finalJs.replace('__FIREBASE_API_KEY__', apiKey);
+                if (!apiKey) {
+                    console.warn('⚠️ WARNING: FIREBASE_API_KEY is not set in environment. Firebase won\'t initialize properly.');
+                }
+            }
+
+            return `<script${isDefer ? ' defer' : ''}>\n${finalJs}\n</script>`;
         });
 
         if (!matchFound) {

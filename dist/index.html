@@ -4,7 +4,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barakah Planner — Исламский Блокнот</title>
+    <title>Barakah Planner — Исламский Ежедневник и Планировщик</title>
+    <meta name="description"
+        content="Планируй свой день по Исламу: трекер намазов, цели Ахирата и Дуньи, доска Tafakkur, облачная синхронизация. Бесплатно и без рекламы.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://islamic-planer.web.app">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://islamic-planer.web.app">
+    <meta property="og:title" content="Barakah Planner — Исламский Ежедневник">
+    <meta property="og:description"
+        content="Трекер намазов, цели Ахирата и Дуньи, доска идей Tafakkur — всё в одном месте. Бесплатно.">
+    <meta property="og:image" content="https://islamic-planer.web.app/public/og-image.png">
+    <meta property="og:locale" content="ru_RU">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Barakah Planner",
+      "description": "Исламский ежедневник с трекером намазов, целями Ахирата и Дуньи, доской идей Tafakkur и облачной синхронизацией.",
+      "url": "https://islamic-planer.web.app",
+      "applicationCategory": "ProductivityApplication",
+      "operatingSystem": "Web",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "inLanguage": ["ru", "en", "kk", "ar"]
+    }
+    </script>
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1850,7 +1880,7 @@ function initDailyPlanner() {
             newRow.className = 'flex items-center';
             newRow.innerHTML = `
                 <button data-task-id="t_dyn_${newIndex}" class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                <input data-id="task_dyn_${newIndex}" type="text" placeholder="Новая задача..." class="ruled-input handwriting day-input">
+                <input data-id="task_dyn_${newIndex}" id="task_dyn_${newIndex}" name="task_dyn_${newIndex}" type="text" placeholder="Новая задача..." autocomplete="off" aria-label="Новая задача" class="ruled-input handwriting day-input">
             `;
 
             if (listContainer) {
@@ -1908,7 +1938,7 @@ function renderDailyPlanner() {
                 const dynId = key.replace('task_dyn_', '');
                 newRow.innerHTML = `
                     <button data-task-id="t_dyn_${dynId}" class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                    <input data-id="${key}" type="text" class="ruled-input handwriting day-input">
+                    <input data-id="${key}" id="${key}" name="${key}" type="text" autocomplete="off" aria-label="Задача" class="ruled-input handwriting day-input">
                 `;
                 block1Container.appendChild(newRow);
             }
@@ -2352,7 +2382,7 @@ window.copyToClipboard = function (text, successMsgKey) {
                                     <span
                                         class="text-xs font-bold text-slate-400 dark:text-slate-500 mr-2 uppercase tracking-wider"
                                         data-i18n="date_today">Дата:</span>
-                                    <input id="date-display" type="text" readonly
+                                    <input id="date-display" name="date-display" type="text" readonly autocomplete="off"
                                         class="handwriting w-full text-center text-xl text-slate-800 dark:text-white cursor-default bg-transparent border-none outline-none focus:ring-0"
                                         value="Сегодня">
                                 </div>
@@ -2367,8 +2397,9 @@ window.copyToClipboard = function (text, successMsgKey) {
                             <span
                                 class="text-xs font-bold text-slate-400 dark:text-slate-500 mr-3 uppercase tracking-wider"
                                 data-i18n="niyyah_label">Ният:</span>
-                            <input data-id="niyyah" type="text" placeholder="Ради довольства Аллаха..."
-                                data-i18n="niyyah_ph" data-i18n-target="placeholder"
+                            <input data-id="niyyah" id="niyyah" name="niyyah" type="text"
+                                placeholder="Ради довольства Аллаха..." autocomplete="off" data-i18n="niyyah_ph"
+                                data-i18n-target="placeholder"
                                 class="ruled-input handwriting w-full text-emerald-800 dark:text-emerald-300 day-input text-lg">
                         </div>
                     </div>
@@ -2394,51 +2425,59 @@ window.copyToClipboard = function (text, successMsgKey) {
                             </div>
                             <div class="space-y-3 pl-2 border-l-2 border-dashed border-gray-200" id="ibadah-list">
                                 <label class="flex items-center space-x-3 cursor-pointer group">
-                                    <input data-id="fajr" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <input data-id="fajr" id="chk-fajr" name="fajr" type="checkbox"
+                                        class="paper-checkbox day-checkbox">
                                     <span
                                         class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
                                         data-i18n="fajr">Фаджр</span>
                                 </label>
                                 <label class="flex items-center space-x-3 cursor-pointer group">
-                                    <input data-id="morning_azkar" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <input data-id="morning_azkar" id="chk-morning-azkar" name="morning_azkar"
+                                        type="checkbox" class="paper-checkbox day-checkbox">
                                     <span
                                         class="text-slate-500 dark:text-slate-400 text-sm group-hover:text-emerald-700 dark:text-emerald-400 transition"
                                         data-i18n="morning_azkar">Утренние
                                         азкары</span>
                                 </label>
                                 <label class="flex items-center space-x-3 cursor-pointer group mt-4">
-                                    <input data-id="zuhr" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <input data-id="zuhr" id="chk-zuhr" name="zuhr" type="checkbox"
+                                        class="paper-checkbox day-checkbox">
                                     <span
                                         class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
                                         data-i18n="zuhr">Зухр</span>
                                 </label>
                                 <label class="flex items-center space-x-3 cursor-pointer group">
-                                    <input data-id="asr" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <input data-id="asr" id="chk-asr" name="asr" type="checkbox"
+                                        class="paper-checkbox day-checkbox">
                                     <span
                                         class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
                                         data-i18n="asr">Аср</span>
                                 </label>
                                 <label class="flex items-center space-x-3 cursor-pointer group">
-                                    <input data-id="evening_azkar" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <input data-id="evening_azkar" id="chk-evening-azkar" name="evening_azkar"
+                                        type="checkbox" class="paper-checkbox day-checkbox">
                                     <span
                                         class="text-slate-500 dark:text-slate-400 text-sm group-hover:text-emerald-700 dark:text-emerald-400 transition"
                                         data-i18n="evening_azkar">Вечерние
                                         азкары</span>
                                 </label>
                                 <label class="flex items-center space-x-3 cursor-pointer group mt-4">
-                                    <input data-id="maghrib" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <input data-id="maghrib" id="chk-maghrib" name="maghrib" type="checkbox"
+                                        class="paper-checkbox day-checkbox">
                                     <span
                                         class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
                                         data-i18n="maghrib">Магриб</span>
                                 </label>
                                 <label class="flex items-center space-x-3 cursor-pointer group">
-                                    <input data-id="isha" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <input data-id="isha" id="chk-isha" name="isha" type="checkbox"
+                                        class="paper-checkbox day-checkbox">
                                     <span
                                         class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
                                         data-i18n="isha">Иша</span>
                                 </label>
                                 <label class="flex items-center space-x-3 cursor-pointer group">
-                                    <input data-id="witr" type="checkbox" class="paper-checkbox day-checkbox">
+                                    <input data-id="witr" id="chk-witr" name="witr" type="checkbox"
+                                        class="paper-checkbox day-checkbox">
                                     <span
                                         class="text-slate-500 dark:text-slate-400 text-sm group-hover:text-emerald-700 dark:text-emerald-400 transition"
                                         data-i18n="witr">Витр</span>
@@ -2452,7 +2491,8 @@ window.copyToClipboard = function (text, successMsgKey) {
                             <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 section-title"
                                 data-i18n="quran_title">
                                 Чтение Корана</h2>
-                            <input data-id="quran" type="text" placeholder="Сура / Аяты" data-i18n="quran_ph"
+                            <input data-id="quran" id="quran" name="quran" type="text" placeholder="Сура / Аяты"
+                                data-i18n="quran_ph" autocomplete="off"
                                 class="ruled-input handwriting w-full mb-2 day-input placeholder-slate-400 dark:placeholder-slate-500">
                         </div>
 
@@ -2462,7 +2502,8 @@ window.copyToClipboard = function (text, successMsgKey) {
                             <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-2 section-title"
                                 data-i18n="sadaka_title">
                                 Садака / Благое дело</h2>
-                            <input data-id="sadaka" type="text" placeholder="Кому помочь сегодня?" data-i18n="sadaka_ph"
+                            <input data-id="sadaka" id="sadaka" name="sadaka" type="text"
+                                placeholder="Кому помочь сегодня?" data-i18n="sadaka_ph" autocomplete="off"
                                 class="ruled-input handwriting w-full day-input placeholder-slate-400 dark:placeholder-slate-500">
                         </div>
                     </div>
@@ -2484,14 +2525,16 @@ window.copyToClipboard = function (text, successMsgKey) {
                                 <div class="flex items-center">
                                     <button data-task-id="t1"
                                         class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                                    <input data-id="task1" type="text" placeholder="Главная задача дня..."
+                                    <input data-id="task1" id="task1" name="task1" type="text"
+                                        placeholder="Главная задача дня..." autocomplete="off" aria-label="Задача 1"
                                         data-i18n-target="placeholder" data-i18n="ph_task_main"
                                         class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500">
                                 </div>
                                 <div class="flex items-center">
                                     <button data-task-id="t2"
                                         class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                                    <input data-id="task2" type="text" class="ruled-input handwriting day-input">
+                                    <input data-id="task2" id="task2" name="task2" type="text" autocomplete="off"
+                                        aria-label="Задача 2" class="ruled-input handwriting day-input">
                                 </div>
                             </div>
                             <!-- Add row button -->
@@ -2518,12 +2561,14 @@ window.copyToClipboard = function (text, successMsgKey) {
                                 <div class="flex items-center">
                                     <button data-task-id="t3"
                                         class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                                    <input data-id="task3" type="text" class="ruled-input handwriting day-input">
+                                    <input data-id="task3" id="task3" name="task3" type="text" autocomplete="off"
+                                        aria-label="Задача 3" class="ruled-input handwriting day-input">
                                 </div>
                                 <div class="flex items-center">
                                     <button data-task-id="t4"
                                         class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                                    <input data-id="task4" type="text" class="ruled-input handwriting day-input">
+                                    <input data-id="task4" id="task4" name="task4" type="text" autocomplete="off"
+                                        aria-label="Задача 4" class="ruled-input handwriting day-input">
                                 </div>
                             </div>
                             <!-- Add row button -->
@@ -2548,14 +2593,16 @@ window.copyToClipboard = function (text, successMsgKey) {
                                 <div class="flex items-center">
                                     <button data-task-id="t5"
                                         class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                                    <input data-id="task5" type="text" placeholder="Бытовые дела..."
+                                    <input data-id="task5" id="task5" name="task5" type="text"
+                                        placeholder="Бытовые дела..." autocomplete="off" aria-label="Задача 5"
                                         data-i18n-target="placeholder" data-i18n="ph_task_household"
                                         class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500">
                                 </div>
                                 <div class="flex items-center">
                                     <button data-task-id="t6"
                                         class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                                    <input data-id="task6" type="text" class="ruled-input handwriting day-input">
+                                    <input data-id="task6" id="task6" name="task6" type="text" autocomplete="off"
+                                        aria-label="Задача 6" class="ruled-input handwriting day-input">
                                 </div>
                             </div>
                             <!-- Add row button -->
@@ -2580,14 +2627,16 @@ window.copyToClipboard = function (text, successMsgKey) {
                                 <div class="flex items-center">
                                     <button data-task-id="t7"
                                         class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                                    <input data-id="task7" type="text" placeholder="Семья, ужин..."
+                                    <input data-id="task7" id="task7" name="task7" type="text"
+                                        placeholder="Семья, ужин..." autocomplete="off" aria-label="Задача 7"
                                         data-i18n-target="placeholder" data-i18n="ph_task_family"
                                         class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500">
                                 </div>
                                 <div class="flex items-center">
                                     <button data-task-id="t8"
                                         class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                                    <input data-id="task8" type="text" class="ruled-input handwriting day-input">
+                                    <input data-id="task8" id="task8" name="task8" type="text" autocomplete="off"
+                                        aria-label="Задача 8" class="ruled-input handwriting day-input">
                                 </div>
                             </div>
                             <!-- Add row button -->
@@ -2612,14 +2661,16 @@ window.copyToClipboard = function (text, successMsgKey) {
                                 <div class="flex items-center">
                                     <button data-task-id="t9"
                                         class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                                    <input data-id="task9" type="text" placeholder="Уединение, отдых..."
+                                    <input data-id="task9" id="task9" name="task9" type="text"
+                                        placeholder="Уединение, отдых..." autocomplete="off" aria-label="Задача 9"
                                         data-i18n-target="placeholder" data-i18n="ph_task_rest"
                                         class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500">
                                 </div>
                                 <div class="flex items-center">
                                     <button data-task-id="t10"
                                         class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                                    <input data-id="task10" type="text" placeholder="Чтение перед сном..."
+                                    <input data-id="task10" id="task10" name="task10" type="text"
+                                        placeholder="Чтение перед сном..." autocomplete="off" aria-label="Задача 10"
                                         data-i18n-target="placeholder" data-i18n="ph_task_reading"
                                         class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500">
                                 </div>
@@ -2667,7 +2718,8 @@ window.copyToClipboard = function (text, successMsgKey) {
                         data-i18n="month_notes_title">События
                         месяца</h2>
                     <!-- Notes is saved based on current month viewing -->
-                    <textarea id="month-notes" class="ruled-textarea handwriting h-32"
+                    <textarea id="month-notes" name="month-notes" class="ruled-textarea handwriting h-32"
+                        autocomplete="off" aria-label="Заметки месяца"
                         placeholder="Запланированные встречи, поездки, долги по постам..."
                         data-i18n="month_notes_ph"></textarea>
                 </div>
@@ -2695,24 +2747,27 @@ window.copyToClipboard = function (text, successMsgKey) {
                             <div>
                                 <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2"
                                     data-i18n="goal_religion_title">Изучение Религии</h3>
-                                <textarea data-goal="religion"
+                                <textarea data-goal="religion" id="goal-religion" name="goal-religion"
                                     class="ruled-textarea handwriting h-24 goal-input placeholder-slate-400 dark:placeholder-slate-500"
+                                    autocomplete="off" aria-label="Цель: Изучение Религии"
                                     placeholder="Выучить Джуз Амма, прочитать Сиру..." data-i18n-target="placeholder"
                                     data-i18n="goal_religion_ph"></textarea>
                             </div>
                             <div>
                                 <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2"
                                     data-i18n="goal_habits_title">Характер и Привычки</h3>
-                                <textarea data-goal="habits"
+                                <textarea data-goal="habits" id="goal-habits" name="goal-habits"
                                     class="ruled-textarea handwriting h-24 goal-input placeholder-slate-400 dark:placeholder-slate-500"
+                                    autocomplete="off" aria-label="Цель: Характер и Привычки"
                                     placeholder="Перестать гневаться, совершать тахаджуд..."
                                     data-i18n-target="placeholder" data-i18n="goal_habits_ph"></textarea>
                             </div>
                             <div>
                                 <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2"
                                     data-i18n="goal_sadaka_title">Садака Джария</h3>
-                                <textarea data-goal="sadaka"
+                                <textarea data-goal="sadaka" id="goal-sadaka" name="goal-sadaka"
                                     class="ruled-textarea handwriting h-24 goal-input placeholder-slate-400 dark:placeholder-slate-500"
+                                    autocomplete="off" aria-label="Цель: Садака Джария"
                                     placeholder="Поучаствовать в строительстве колодца..."
                                     data-i18n-target="placeholder" data-i18n="goal_sadaka_ph"></textarea>
                             </div>
@@ -2728,24 +2783,27 @@ window.copyToClipboard = function (text, successMsgKey) {
                             <div>
                                 <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2"
                                     data-i18n="goal_work_title">Работа и Финансы</h3>
-                                <textarea data-goal="work"
+                                <textarea data-goal="work" id="goal-work" name="goal-work"
                                     class="ruled-textarea handwriting h-24 goal-input placeholder-slate-400 dark:placeholder-slate-500"
+                                    autocomplete="off" aria-label="Цель: Работа и Финансы"
                                     placeholder="Закрыть долги, повысить квалификацию..." data-i18n-target="placeholder"
                                     data-i18n="goal_work_ph"></textarea>
                             </div>
                             <div>
                                 <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2"
                                     data-i18n="goal_health_title">Здоровье и Тело</h3>
-                                <textarea data-goal="health"
+                                <textarea data-goal="health" id="goal-health" name="goal-health"
                                     class="ruled-textarea handwriting h-24 goal-input placeholder-slate-400 dark:placeholder-slate-500"
+                                    autocomplete="off" aria-label="Цель: Здоровье и Тело"
                                     placeholder="Спорт 3 раза в неделю, правильное питание..."
                                     data-i18n-target="placeholder" data-i18n="goal_health_ph"></textarea>
                             </div>
                             <div>
                                 <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2"
                                     data-i18n="goal_family_title">Семья и Отношения</h3>
-                                <textarea data-goal="family"
+                                <textarea data-goal="family" id="goal-family" name="goal-family"
                                     class="ruled-textarea handwriting h-24 goal-input placeholder-slate-400 dark:placeholder-slate-500"
+                                    autocomplete="off" aria-label="Цель: Семья и Отношения"
                                     placeholder="Больше времени с родителями..." data-i18n-target="placeholder"
                                     data-i18n="goal_family_ph"></textarea>
                             </div>
@@ -2803,11 +2861,13 @@ window.copyToClipboard = function (text, successMsgKey) {
                     <div class="toolbar-divider"></div>
                     <div class="toolbar-group items-center">
                         <label class="tool-label-sm" data-i18n="tool_color_label">Цвет</label>
-                        <input type="color" id="draw-color" value="#1e293b" class="color-picker-btn" title="Цвет кисти">
+                        <input type="color" id="draw-color" name="draw-color" value="#1e293b" class="color-picker-btn"
+                            title="Цвет кисти" aria-label="Цвет кисти">
                     </div>
                     <div class="toolbar-group items-center">
                         <label class="tool-label-sm" data-i18n="tool_size_label">Размер</label>
-                        <input type="range" id="brush-size" min="1" max="20" value="3" class="brush-slider">
+                        <input type="range" id="brush-size" name="brush-size" min="1" max="20" value="3"
+                            class="brush-slider" aria-label="Размер кисти">
                     </div>
                     <div class="toolbar-divider hidden md:block"></div>
                     <button id="clear-drawing" class="tool-btn text-red-400 hover:text-red-600" title="Очистить рисунок"
@@ -2847,7 +2907,7 @@ window.copyToClipboard = function (text, successMsgKey) {
             class="px-5 py-3 rounded-full bg-indigo-600 text-white shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2 hover:bg-indigo-700 font-semibold text-sm">
             <i class="fas fa-download"></i> <span data-i18n="btn_export">Экспорт</span>
         </button>
-        <input type="file" id="file-import" class="hidden" accept=".json">
+        <input type="file" id="file-import" name="file-import" class="hidden" accept=".json" aria-label="Импорт данных">
     </div>
 
     <!-- Right Action Buttons (AI, Theme, Lang) -->
@@ -2909,15 +2969,19 @@ window.copyToClipboard = function (text, successMsgKey) {
 
                 <form id="auth-form" class="flex flex-col gap-4">
                     <div>
-                        <input type="email" id="auth-email" placeholder="Email" required
+                        <label for="auth-email" class="sr-only">Email</label>
+                        <input type="email" id="auth-email" name="email" placeholder="Email" required
+                            autocomplete="email"
                             class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
                     </div>
                     <div>
-                        <input type="password" id="auth-password" placeholder="Пароль" required minlength="6"
+                        <label for="auth-password" class="sr-only">Пароль</label>
+                        <input type="password" id="auth-password" name="password" placeholder="Пароль" required
+                            minlength="6" autocomplete="current-password"
                             class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
                     </div>
                     <div class="flex items-center gap-2 px-1">
-                        <input type="checkbox" id="auth-is-register"
+                        <input type="checkbox" id="auth-is-register" name="is-register"
                             class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
                         <label for="auth-is-register" class="text-sm text-gray-600 dark:text-gray-400">Нет аккаунта?
                             Зарегистрироваться</label>
@@ -2959,7 +3023,8 @@ window.copyToClipboard = function (text, successMsgKey) {
                 <div class="mb-4">
                     <label class="block text-xs text-gray-500 mb-1" data-i18n="auth_name_label">Имя пользователя</label>
                     <div class="flex gap-2">
-                        <input type="text" id="auth-name-input" placeholder="Ваше имя"
+                        <input type="text" id="auth-name-input" name="display-name" placeholder="Ваше имя"
+                            autocomplete="name"
                             class="flex-grow bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
                         <button type="button" id="btn-update-profile"
                             class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow-sm transition-all focus:outline-none">
@@ -3083,7 +3148,7 @@ window.copyToClipboard = function (text, successMsgKey) {
                             <label for="name"
                                 class="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
                                 data-i18n="label_name">Ваше имя</label>
-                            <input type="text" id="name" name="name"
+                            <input type="text" id="name" name="name" autocomplete="name"
                                 class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-shadow"
                                 data-i18n-target="placeholder" data-i18n="placeholder_name" placeholder="Ваше имя"
                                 required>
@@ -3092,7 +3157,7 @@ window.copyToClipboard = function (text, successMsgKey) {
                             <label for="contact"
                                 class="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
                                 data-i18n="label_contact">Email</label>
-                            <input type="email" id="contact" name="email"
+                            <input type="email" id="contact" name="email" autocomplete="email"
                                 class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-shadow"
                                 data-i18n-target="placeholder" data-i18n="placeholder_contact" placeholder="Email"
                                 required>
@@ -3148,8 +3213,10 @@ window.copyToClipboard = function (text, successMsgKey) {
                     <p class="text-xs text-gray-500 mb-2" data-i18n="ai_setup_help">Для работы оффлайн-клиента требуется
                         ваш API ключ Gemini.</p>
                     <div class="flex gap-2">
-                        <input type="password" id="ai-api-key" placeholder="Gemini API Key (AIzaSy...)"
-                            data-i18n-target="placeholder" data-i18n="ai_setup_ph"
+                        <label for="ai-api-key" class="sr-only">Gemini API Key</label>
+                        <input type="password" id="ai-api-key" name="ai-api-key"
+                            placeholder="Gemini API Key (AIzaSy...)" autocomplete="off" data-i18n-target="placeholder"
+                            data-i18n="ai_setup_ph"
                             class="flex-grow bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
                         <button id="save-ai-key"
                             class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors"
@@ -3167,7 +3234,7 @@ window.copyToClipboard = function (text, successMsgKey) {
                         data-i18n="ai_prompt_label">Как
                         распланировать день?</label>
                     <div class="relative">
-                        <textarea id="ai-prompt" rows="3" data-i18n="placeholder_ai"
+                        <textarea id="ai-prompt" name="ai-prompt" rows="3" data-i18n="placeholder_ai" autocomplete="off"
                             placeholder="Например: Утром тренировка, днем кодинг стартапа, Аср - чтение 10 страниц Корана..."
                             class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-4 text-gray-700 dark:text-gray-300 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"></textarea>
 
