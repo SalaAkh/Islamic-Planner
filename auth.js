@@ -151,6 +151,22 @@ window.Auth = {
         if (!window.firebaseAuth) return;
         try {
             await signOut(window.firebaseAuth);
+            // ── Clear ALL local user data so next user starts clean ──
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('barakah_')) keysToRemove.push(key);
+            }
+            keysToRemove.forEach(k => localStorage.removeItem(k));
+
+            // Clear IndexedDB drawing too — call Store's method
+            if (window.Store && typeof window.Store.clearDrawing === 'function') {
+                await window.Store.clearDrawing();
+            }
+
+            console.log('[Auth] Local data cleared on logout.');
+            // Reload page to ensure all internal states are reset
+            window.location.reload();
         } catch (error) {
             console.error("[Auth] Logout error:", error);
         }

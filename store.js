@@ -128,6 +128,9 @@ window.Store = {
             // Strip drawingData before saving to LocalStorage — it's too heavy!
             const { drawingData, ...lightData } = boardData;
             localStorage.setItem('barakah_board_state', JSON.stringify(lightData));
+
+            // Sync to cloud
+            if (window.DbSync) window.DbSync.syncToCloud('board_state', lightData);
         } catch (e) {
             console.error('[Store] Failed to save board data:', e);
         }
@@ -139,11 +142,16 @@ window.Store = {
     },
 
     saveDrawing(dataUrl) {
-        if (!dataUrl) return idbDelete('board_drawing');
+        if (!dataUrl) {
+            if (window.DbSync && !window._isSyncingDrawing) window.DbSync.syncToCloud('board_drawing', { dataUrl: null });
+            return idbDelete('board_drawing');
+        }
+        if (window.DbSync && !window._isSyncingDrawing) window.DbSync.syncToCloud('board_drawing', { dataUrl });
         return idbSet('board_drawing', dataUrl);
     },
 
     clearDrawing() {
+        if (window.DbSync && !window._isSyncingDrawing) window.DbSync.syncToCloud('board_drawing', { dataUrl: null });
         return idbDelete('board_drawing');
     },
 

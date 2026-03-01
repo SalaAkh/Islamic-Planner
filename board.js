@@ -48,6 +48,12 @@ window.initBoard = function (showToast) {
     loadBoardData();     // async — loads notes from LocalStorage, drawing from IndexedDB
     setActiveTool('pan');
 
+    // Re-load on cloud sync
+    document.addEventListener('cloudDataSynced', () => {
+        console.log('[Board] Cloud data updated, refreshing...');
+        loadBoardData();
+    });
+
     // =====================
     // TOOL SWITCHER
     // =====================
@@ -127,6 +133,10 @@ window.initBoard = function (showToast) {
 
     // Container-level for PAN
     container.addEventListener('mousedown', (e) => {
+        // Skip if clicking on inputs/textareas
+        const tag = e.target.tagName;
+        if (tag === 'TEXTAREA' || tag === 'INPUT') return;
+
         if (state.activeTool === 'pan' || state.isSpaceDown || e.button === 1) {
             e.preventDefault();
             state.isPanning = true;
