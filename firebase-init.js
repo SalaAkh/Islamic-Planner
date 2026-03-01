@@ -4,7 +4,7 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.9.0/firebase
 
 // User's actual Firebase Config
 const firebaseConfig = {
-    apiKey: "AIzaSyAo7qZrXlVmx53rhmoyLgbJccVL7EMtNoU",
+    apiKey: "AIzaSyAo7qZrXlVMx53rhmoyLgbJccVL7EMtNoU",
     authDomain: "islamic-planer.firebaseapp.com",
     projectId: "islamic-planer",
     storageBucket: "islamic-planer.firebasestorage.app",
