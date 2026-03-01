@@ -36,17 +36,17 @@ const ACTION_META = {
 };
 
 const PREMIUM_COLORS = {
-    emerald: { bg: 'bg-emerald-50 dark:bg-slate-800/60', icon: 'text-emerald-500 bg-white dark:bg-emerald-500/10', border: 'border-emerald-100 dark:border-emerald-500/20' },
-    green: { bg: 'bg-green-50 dark:bg-slate-800/60', icon: 'text-green-500 bg-white dark:bg-green-500/10', border: 'border-green-100 dark:border-green-500/20' },
-    gray: { bg: 'bg-slate-50 dark:bg-slate-800/40', icon: 'text-slate-500 bg-white dark:bg-slate-700/50', border: 'border-slate-200 dark:border-slate-700' },
-    indigo: { bg: 'bg-indigo-50 dark:bg-slate-800/60', icon: 'text-indigo-500 bg-white dark:bg-indigo-500/10', border: 'border-indigo-100 dark:border-indigo-500/20' },
-    blue: { bg: 'bg-blue-50 dark:bg-slate-800/60', icon: 'text-blue-500 bg-white dark:bg-blue-500/10', border: 'border-blue-100 dark:border-blue-500/20' },
-    amber: { bg: 'bg-amber-50 dark:bg-slate-800/60', icon: 'text-amber-500 bg-white dark:bg-amber-500/10', border: 'border-amber-100 dark:border-amber-500/20' },
-    violet: { bg: 'bg-violet-50 dark:bg-slate-800/60', icon: 'text-violet-500 bg-white dark:bg-violet-500/10', border: 'border-violet-100 dark:border-violet-500/20' },
-    yellow: { bg: 'bg-yellow-50 dark:bg-slate-800/60', icon: 'text-yellow-600 bg-white dark:bg-yellow-500/10', border: 'border-yellow-200 dark:border-yellow-500/20' },
-    pink: { bg: 'bg-pink-50 dark:bg-slate-800/60', icon: 'text-pink-500 bg-white dark:bg-pink-500/10', border: 'border-pink-100 dark:border-pink-500/20' },
-    red: { bg: 'bg-red-50 dark:bg-slate-800/60', icon: 'text-red-500 bg-white dark:bg-red-500/10', border: 'border-red-100 dark:border-red-500/20' },
-    teal: { bg: 'bg-teal-50 dark:bg-slate-800/60', icon: 'text-teal-500 bg-white dark:bg-teal-500/10', border: 'border-teal-100 dark:border-teal-500/20' },
+    emerald: { bg: 'bg-emerald-50 dark:bg-emerald-500/10', iconText: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-200 dark:border-emerald-500/20' },
+    green: { bg: 'bg-green-50 dark:bg-green-500/10', iconText: 'text-green-600 dark:text-green-400', border: 'border-green-200 dark:border-green-500/20' },
+    gray: { bg: 'bg-slate-100 dark:bg-slate-800', iconText: 'text-slate-600 dark:text-slate-400', border: 'border-slate-200 dark:border-slate-700' },
+    indigo: { bg: 'bg-indigo-50 dark:bg-indigo-500/10', iconText: 'text-indigo-600 dark:text-indigo-400', border: 'border-indigo-200 dark:border-indigo-500/20' },
+    blue: { bg: 'bg-blue-50 dark:bg-blue-500/10', iconText: 'text-blue-600 dark:text-blue-400', border: 'border-blue-200 dark:border-blue-500/20' },
+    amber: { bg: 'bg-amber-50 dark:bg-amber-500/10', iconText: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-500/20' },
+    violet: { bg: 'bg-violet-50 dark:bg-violet-500/10', iconText: 'text-violet-600 dark:text-violet-400', border: 'border-violet-200 dark:border-violet-500/20' },
+    yellow: { bg: 'bg-yellow-50 dark:bg-yellow-500/10', iconText: 'text-yellow-600 dark:text-yellow-400', border: 'border-yellow-200 dark:border-yellow-500/20' },
+    pink: { bg: 'bg-pink-50 dark:bg-pink-500/10', iconText: 'text-pink-600 dark:text-pink-400', border: 'border-pink-200 dark:border-pink-500/20' },
+    red: { bg: 'bg-red-50 dark:bg-red-500/10', iconText: 'text-red-600 dark:text-red-400', border: 'border-red-200 dark:border-red-500/20' },
+    teal: { bg: 'bg-teal-50 dark:bg-teal-500/10', iconText: 'text-teal-600 dark:text-teal-400', border: 'border-teal-200 dark:border-teal-500/20' },
 };
 
 function formatTimestamp(ts) {
@@ -92,19 +92,21 @@ function renderEntry(doc, index) {
     const metaStr = buildMetaLabel(data.action, data.meta);
 
     return `
-<div class="audit-animate-in relative group rounded-2xl p-4 sm:p-5 mb-3 border ${styles.border} ${styles.bg} hover:shadow-xl hover:shadow-${info.color}-500/5 hover:-translate-y-1 hover:-translate-x-1 transition-all duration-300" style="animation-delay: ${index * 0.04}s">
-    <div class="flex items-start gap-3 sm:gap-4 relative z-10 w-full">
-        <div class="shrink-0 w-11 h-11 sm:w-12 sm:h-12 rounded-[1rem] ${styles.icon} border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-lg shadow-sm group-hover:scale-110 group-hover:rotate-[5deg] transition-transform duration-300">
-            <i class="fas ${info.icon}"></i>
-        </div>
-        <div class="flex-1 min-w-0 flex flex-col mt-0.5">
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2 mb-1.5 w-full">
-                <p class="text-[15px] sm:text-base font-bold text-slate-800 dark:text-gray-100 leading-tight">${info.label}</p>
-                <div class="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-white/60 dark:bg-slate-800 px-2.5 py-1 rounded-lg shrink-0 border border-slate-200/50 dark:border-slate-700/50 w-fit">
+<div class="audit-animate-in relative flex gap-4 sm:gap-6 w-full group overflow-visible" style="animation-delay: ${index * 0.03}s">
+    <div class="absolute left-[19px] top-[40px] bottom-[-24px] w-[2px] bg-slate-200 dark:bg-slate-800 group-last:hidden"></div>
+    <div class="relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${styles.bg} ${styles.iconText} ring-4 ring-slate-50 dark:ring-slate-900 border ${styles.border}">
+        <i class="fas ${info.icon} text-sm"></i>
+    </div>
+    <div class="flex-1 pb-6 w-full min-w-0">
+        <div class="bg-white dark:bg-slate-800 rounded-[18px] p-4 sm:p-5 border border-slate-200/60 dark:border-slate-700 shadow-sm group-hover:shadow-md transition-shadow relative overflow-hidden h-full">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-transparent to-${info.color}-500/5 dark:to-${info.color}-500/10 rounded-bl-full pointer-events-none"></div>
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-1.5 w-full relative z-10">
+                <h4 class="font-bold text-slate-800 dark:text-slate-100 text-[15px] leading-tight">${info.label}</h4>
+                <div class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 px-2.5 py-1 rounded-lg shrink-0 w-fit">
                     <i class="far fa-clock"></i> ${formatTimestamp(data.timestamp)}
                 </div>
             </div>
-            ${metaStr ? `<div class="text-[13px] text-slate-600 dark:text-slate-300 leading-relaxed bg-white/70 dark:bg-slate-900/50 p-2.5 px-3.5 rounded-xl border border-slate-100 dark:border-slate-700/30 mt-1 shadow-sm"><i class="fas fa-info-circle opacity-50 text-xs mr-1"></i> ${metaStr}</div>` : ''}
+            ${metaStr ? `<div class="text-[13px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed relative z-10 break-words"><span class="mr-1.5 opacity-60"><i class="fas fa-info-circle"></i></span>${metaStr}</div>` : ''}
         </div>
     </div>
 </div>`;
@@ -250,19 +252,25 @@ window.ActivityLog = {
         const modal = document.getElementById('audit-modal');
         if (!modal) return;
 
+        const closeModal = () => {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        };
+
         btnOpen?.addEventListener('click', () => {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            // Slight delay for animation to feel smoother
+            // Allow display change to take effect before animating opacity
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+            });
             setTimeout(() => {
                 this.renderAuditLog();
-            }, 100);
+            }, 50);
         });
-
-        const closeModal = () => {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        };
 
         btnClose?.addEventListener('click', closeModal);
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });

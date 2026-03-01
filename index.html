@@ -115,7 +115,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="./tailwind.css?v=1">
+    <link rel="stylesheet" href="./tailwind.css?v=2">
 
     <!-- PWA & Favicon -->
     <link rel="icon" type="image/x-icon" href="./public/favicon.ico">
@@ -136,7 +136,7 @@
     <script type="module" src="./firebase-init.js?v=6"></script>
     <script type="module" src="./auth.js?v=6"></script>
     <script type="module" src="./db.js?v=6"></script>
-    <script type="module" src="./activity-log.js?v=1"></script>
+    <script type="module" src="./activity-log.js?v=2"></script>
     <script src="./i18n.js?v=3"></script>
     <script src="./store.js?v=3"></script>
     <script src="./ai.js?v=3"></script>
@@ -252,14 +252,16 @@
                                     style="width: 0%"></div>
                             </div>
                             <div class="space-y-3 pl-2 border-l-2 border-dashed border-gray-200" id="ibadah-list">
-                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                <label for="chk-fajr"
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
                                     <input data-id="fajr" id="chk-fajr" name="fajr" type="checkbox"
                                         class="paper-checkbox day-checkbox">
                                     <span
                                         class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
                                         data-i18n="fajr">Фаджр</span>
                                 </label>
-                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                <label for="chk-morning-azkar"
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
                                     <input data-id="morning_azkar" id="chk-morning-azkar" name="morning_azkar"
                                         type="checkbox" class="paper-checkbox day-checkbox">
                                     <span
@@ -267,21 +269,24 @@
                                         data-i18n="morning_azkar">Утренние
                                         азкары</span>
                                 </label>
-                                <label class="flex items-center space-x-3 cursor-pointer group mt-4">
+                                <label for="chk-zuhr"
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
                                     <input data-id="zuhr" id="chk-zuhr" name="zuhr" type="checkbox"
                                         class="paper-checkbox day-checkbox">
                                     <span
                                         class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
                                         data-i18n="zuhr">Зухр</span>
                                 </label>
-                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                <label for="chk-asr"
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
                                     <input data-id="asr" id="chk-asr" name="asr" type="checkbox"
                                         class="paper-checkbox day-checkbox">
                                     <span
                                         class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
                                         data-i18n="asr">Аср</span>
                                 </label>
-                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                <label for="chk-evening-azkar"
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
                                     <input data-id="evening_azkar" id="chk-evening-azkar" name="evening_azkar"
                                         type="checkbox" class="paper-checkbox day-checkbox">
                                     <span
@@ -289,21 +294,24 @@
                                         data-i18n="evening_azkar">Вечерние
                                         азкары</span>
                                 </label>
-                                <label class="flex items-center space-x-3 cursor-pointer group mt-4">
+                                <label for="chk-maghrib"
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
                                     <input data-id="maghrib" id="chk-maghrib" name="maghrib" type="checkbox"
                                         class="paper-checkbox day-checkbox">
                                     <span
                                         class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
                                         data-i18n="maghrib">Магриб</span>
                                 </label>
-                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                <label for="chk-isha"
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
                                     <input data-id="isha" id="chk-isha" name="isha" type="checkbox"
                                         class="paper-checkbox day-checkbox">
                                     <span
                                         class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
                                         data-i18n="isha">Иша</span>
                                 </label>
-                                <label class="flex items-center space-x-3 cursor-pointer group">
+                                <label for="chk-witr"
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
                                     <input data-id="witr" id="chk-witr" name="witr" type="checkbox"
                                         class="paper-checkbox day-checkbox">
                                     <span
@@ -353,16 +361,16 @@
                             </div>
                             <div class="space-y-1 pl-6">
                                 <div class="flex items-center">
-                                    <button data-task-id="t1"
-                                        class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <button data-task-id="task1" aria-label="Отметить задачу 1"
+                                        class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
                                     <input data-id="task1" id="task1" name="task1" type="text"
                                         placeholder="Главная задача дня..." autocomplete="off" aria-label="Задача 1"
                                         data-i18n-target="placeholder" data-i18n="ph_task_main"
                                         class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500">
                                 </div>
                                 <div class="flex items-center">
-                                    <button data-task-id="t2"
-                                        class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <button data-task-id="task2" aria-label="Отметить задачу 2"
+                                        class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
                                     <input data-id="task2" id="task2" name="task2" type="text" autocomplete="off"
                                         aria-label="Задача 2" class="ruled-input handwriting day-input">
                                 </div>
@@ -389,14 +397,14 @@
                             </div>
                             <div class="space-y-1 pl-6">
                                 <div class="flex items-center">
-                                    <button data-task-id="t3"
-                                        class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <button data-task-id="task3" aria-label="Отметить задачу 3"
+                                        class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
                                     <input data-id="task3" id="task3" name="task3" type="text" autocomplete="off"
                                         aria-label="Задача 3" class="ruled-input handwriting day-input">
                                 </div>
                                 <div class="flex items-center">
-                                    <button data-task-id="t4"
-                                        class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <button data-task-id="task4" aria-label="Отметить задачу 4"
+                                        class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
                                     <input data-id="task4" id="task4" name="task4" type="text" autocomplete="off"
                                         aria-label="Задача 4" class="ruled-input handwriting day-input">
                                 </div>
@@ -421,16 +429,16 @@
                             </div>
                             <div class="space-y-1 pl-6">
                                 <div class="flex items-center">
-                                    <button data-task-id="t5"
-                                        class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <button data-task-id="task5" aria-label="Отметить задачу 5"
+                                        class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
                                     <input data-id="task5" id="task5" name="task5" type="text"
                                         placeholder="Бытовые дела..." autocomplete="off" aria-label="Задача 5"
                                         data-i18n-target="placeholder" data-i18n="ph_task_household"
                                         class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500">
                                 </div>
                                 <div class="flex items-center">
-                                    <button data-task-id="t6"
-                                        class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <button data-task-id="task6" aria-label="Отметить задачу 6"
+                                        class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
                                     <input data-id="task6" id="task6" name="task6" type="text" autocomplete="off"
                                         aria-label="Задача 6" class="ruled-input handwriting day-input">
                                 </div>
@@ -455,16 +463,16 @@
                             </div>
                             <div class="space-y-1 pl-6">
                                 <div class="flex items-center">
-                                    <button data-task-id="t7"
-                                        class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <button data-task-id="task7" aria-label="Отметить задачу 7"
+                                        class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
                                     <input data-id="task7" id="task7" name="task7" type="text"
                                         placeholder="Семья, ужин..." autocomplete="off" aria-label="Задача 7"
                                         data-i18n-target="placeholder" data-i18n="ph_task_family"
                                         class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500">
                                 </div>
                                 <div class="flex items-center">
-                                    <button data-task-id="t8"
-                                        class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <button data-task-id="task8" aria-label="Отметить задачу 8"
+                                        class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
                                     <input data-id="task8" id="task8" name="task8" type="text" autocomplete="off"
                                         aria-label="Задача 8" class="ruled-input handwriting day-input">
                                 </div>
@@ -489,16 +497,16 @@
                             </div>
                             <div class="space-y-1 pl-6">
                                 <div class="flex items-center">
-                                    <button data-task-id="t9"
-                                        class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <button data-task-id="task9" aria-label="Отметить задачу 9"
+                                        class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
                                     <input data-id="task9" id="task9" name="task9" type="text"
                                         placeholder="Уединение, отдых..." autocomplete="off" aria-label="Задача 9"
                                         data-i18n-target="placeholder" data-i18n="ph_task_rest"
                                         class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500">
                                 </div>
                                 <div class="flex items-center">
-                                    <button data-task-id="t10"
-                                        class="task-toggle w-4 h-4 rounded border border-slate-400 dark:border-slate-500 mr-3 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
+                                    <button data-task-id="task10" aria-label="Отметить задачу 10"
+                                        class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
                                     <input data-id="task10" id="task10" name="task10" type="text"
                                         placeholder="Чтение перед сном..." autocomplete="off" aria-label="Задача 10"
                                         data-i18n-target="placeholder" data-i18n="ph_task_reading"
@@ -929,36 +937,38 @@
 
     <!-- ===== AUDIT LOG MODAL ===== -->
     <div id="audit-modal"
-        class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[110] hidden items-center justify-center p-4 sm:p-6 transition-all duration-300"
+        class="fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-300"
         dir="auto">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" id="audit-modal-backdrop"></div>
+
+        <!-- Dialog -->
         <div
-            class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] w-full max-w-xl max-h-[85vh] sm:max-h-[90vh] flex flex-col overflow-hidden transform transition-all duration-300 border border-white/50 dark:border-slate-700/50">
+            class="relative bg-white dark:bg-slate-900 w-full max-w-2xl max-h-[85vh] sm:max-h-[80vh] flex flex-col rounded-[24px] shadow-2xl border border-slate-200/60 dark:border-slate-800 overflow-hidden transform scale-95 transition-transform duration-300">
             <!-- Header -->
             <div
-                class="flex items-center justify-between px-6 py-5 sm:px-8 sm:py-6 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-white/50 dark:bg-slate-900/50 z-10">
+                class="px-6 py-5 sm:px-8 sm:py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-20 shrink-0">
                 <div class="flex items-center gap-4">
                     <div
-                        class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30 flex items-center justify-center text-white shrink-0">
-                        <i class="fas fa-history text-xl sm:text-2xl"></i>
+                        class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 border border-indigo-100 dark:border-indigo-500/20">
+                        <i class="fas fa-history text-xl"></i>
                     </div>
                     <div>
-                        <h3
-                            class="font-extrabold text-slate-900 dark:text-white text-lg sm:text-xl tracking-tight leading-tight">
-                            История действий
-                        </h3>
+                        <h3 class="font-bold text-slate-900 dark:text-white text-xl tracking-tight leading-tight">
+                            История активности</h3>
                         <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
-                            Ваши последние <span class="text-indigo-600 dark:text-indigo-400 font-bold">50</span>
-                            событий</p>
+                            Последние <span class="text-indigo-600 dark:text-indigo-400 font-bold">50</span> событий
+                        </p>
                     </div>
                 </div>
                 <button id="audit-modal-close"
-                    class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-95 group shrink-0">
-                    <i class="fas fa-times group-hover:rotate-90 transition-transform duration-300"></i>
+                    class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors shrink-0">
+                    <i class="fas fa-times text-sm"></i>
                 </button>
             </div>
             <!-- Body -->
             <div id="audit-log-list"
-                class="flex-1 overflow-y-auto px-4 sm:px-8 py-4 sm:py-6 scroll-smooth custom-scrollbar relative bg-slate-50/30 dark:bg-slate-900/30">
+                class="flex-1 overflow-y-auto w-full p-4 sm:p-8 custom-scrollbar relative bg-slate-50/30 dark:bg-slate-900/40 space-y-2">
                 <div class="flex flex-col items-center justify-center h-full min-h-[300px] text-slate-400 m-auto">
                     <div class="relative w-16 h-16 flex items-center justify-center mb-6">
                         <div class="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800">

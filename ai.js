@@ -278,7 +278,7 @@ class AiAssistant {
             newRow.className = 'flex items-center';
             newRow.innerHTML = `
                 <button data-task-id="t_dyn_${newIndex}" class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                <input data-id="task_dyn_${newIndex}" type="text" class="ruled-input handwriting day-input" value="${tasks[taskIndex]}">
+                <input data-id="task_dyn_${newIndex}" id="task_dyn_${newIndex}" name="task_dyn_${newIndex}" type="text" class="ruled-input handwriting day-input" value="${tasks[taskIndex]}" autocomplete="off">
             `;
             listContainer.appendChild(newRow);
             taskIndex++;
