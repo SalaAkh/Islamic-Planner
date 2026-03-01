@@ -12,7 +12,11 @@
             "guides/**",
             "dist/**",
             "README.md",
-            "*.log"
+            "SECURITY.md",
+            "*.log",
+            "dummy.css",
+            "tailwind.css",
+            ".env.example"
         ],
         "headers": [
             {
