@@ -39,7 +39,7 @@ window.DbSync = {
                     if (data.apiKey) {
                         // Encrypt before storing — satisfies CWE-312/315/359
                         if (typeof window.encryptApiKey === 'function') {
-                            await window.encryptApiKey(data.apiKey);
+                            window.encryptApiKey(data.apiKey); // fire-and-forget: async, no need to block
                         }
                         if (window.aiAssistant) {
                             window.aiAssistant.apiKey = data.apiKey;
