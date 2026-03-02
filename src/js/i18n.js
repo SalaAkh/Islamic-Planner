@@ -3,6 +3,7 @@ const translations = {
     ru: {
         "seo_title": "Barakah Planner — Исламский Ежедневник и Планировщик Намазов",
         "seo_desc": "Планируй свой день по Исламу: трекер намазов, цели Ахирата и Дуньи, доска идей Tafakkur. Бесплатно.",
+        "seo_image": "https://islamic-planer.web.app/public/og-image.png",
         "tab_daily": "День", "tab_calendar": "Календарь", "tab_goals": "Цели", "tab_board": "Доска",
         "date_today": "Дата:", "date_val_today": "Сегодня",
         "title_daily": "План на день", "niyyah_label": "Ният:", "niyyah_ph": "Ради довольства Аллаха...",
@@ -66,6 +67,7 @@ const translations = {
     kk: {
         "seo_title": "Barakah Planner — Исламдық Күнделік және Намаз Жоспарлаушы",
         "seo_desc": "Күніңізді Ислам бойынша жоспарлаңыз: намаз трекері, Ақырет пен Дүние мақсаттары, Tafakkur идеялар тақтасы. Тегін.",
+        "seo_image": "https://islamic-planer.web.app/public/og-image-kk.png",
         "tab_daily": "Күн", "tab_calendar": "Күнтізбе", "tab_goals": "Мақсаттар", "tab_board": "Тақта",
         "date_today": "Күн:", "date_val_today": "Бүгін",
         "title_daily": "Күн жоспары", "niyyah_label": "Ниет:", "niyyah_ph": "Алланың разылығы үшін...",
@@ -129,6 +131,7 @@ const translations = {
     ar: {
         "seo_title": "Barakah Planner — يوميات إسلامية ومخطط الصلاة",
         "seo_desc": "خطط ليومك وفقًا للإسلام: متتبع الصلاة، أهداف الآخرة والدنيا، لوحة أفكار تفكر. مجاني.",
+        "seo_image": "https://islamic-planer.web.app/public/og-image-ar.png",
         "tab_daily": "اليوم", "tab_calendar": "التقويم", "tab_goals": "الأهداف", "tab_board": "اللوحة",
         "date_today": "التاريخ:", "date_val_today": "اليوم",
         "title_daily": "خطة اليوم", "niyyah_label": "النية:", "niyyah_ph": "ابتغاء مرضاة الله...",
@@ -192,6 +195,7 @@ const translations = {
     en: {
         "seo_title": "Barakah Planner — Islamic Daily Planner & Prayer Tracker",
         "seo_desc": "Plan your day according to Islam: prayer tracker, Akhirah & Dunya goals, Tafakkur idea board. Free.",
+        "seo_image": "https://islamic-planer.web.app/public/og-image-en.png",
         "tab_daily": "Daily", "tab_calendar": "Calendar", "tab_goals": "Goals", "tab_board": "Board",
         "date_today": "Date:", "date_val_today": "Today",
         "title_daily": "Daily Plan", "niyyah_label": "Niyyah:", "niyyah_ph": "For the sake of Allah...",
@@ -291,6 +295,13 @@ function applyTranslations(lang) {
         if (ogDesc) ogDesc.content = dict['seo_desc'];
         const twDesc = document.querySelector('meta[name="twitter:description"]');
         if (twDesc) twDesc.content = dict['seo_desc'];
+    }
+
+    if (dict['seo_image']) {
+        const ogImage = document.querySelector('meta[property="og:image"]');
+        if (ogImage) ogImage.content = dict['seo_image'];
+        const twImage = document.querySelector('meta[name="twitter:image"]');
+        if (twImage) twImage.content = dict['seo_image'];
     }
 
     // Перевод текстовых элементов

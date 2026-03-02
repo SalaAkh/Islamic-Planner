@@ -24,5 +24,7 @@ build-error.log
 .DS_Store
 Thumbs.db
 
+# Project docs (internal)
+guides/
+
 google4a672bfea76db3c6.html
-islamic-planer-firebase-adminsdk-fbsvc-d79a50d297.json

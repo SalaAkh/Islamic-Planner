@@ -14,10 +14,10 @@ let html = fs.readFileSync('./index.html', 'utf8');
 
 // 2. Встраиваем CSS
 console.log('Inlining tailwind.css...');
-if (fs.existsSync('./tailwind.css')) {
-    const css = fs.readFileSync('./tailwind.css', 'utf8');
+if (fs.existsSync('./src/css/tailwind.css')) {
+    const css = fs.readFileSync('./src/css/tailwind.css', 'utf8');
     html = html.replace(
-        '<link rel="stylesheet" href="./tailwind.css">',
+        '<link rel="stylesheet" href="./src/css/tailwind.css?v=4">',
         `<style>\n${css}\n</style>`
     );
 } else {
@@ -29,11 +29,11 @@ const scriptsToInline = ['crypto-storage.js', 'i18n.js', 'store.js', 'ai.js', 'b
 
 scriptsToInline.forEach(script => {
     console.log(`Inlining ${script}...`);
-    if (fs.existsSync(`./${script}`)) {
-        const js = fs.readFileSync(`./${script}`, 'utf8');
-        // Находим тег <script ... src="./script(?v=...)"></script>
+    if (fs.existsSync(`./src/js/${script}`)) {
+        const js = fs.readFileSync(`./src/js/${script}`, 'utf8');
+        // Находим тег <script ... src="./src/js/script(?v=...)"></script>
         // Регулярное выражение теперь учитывает возможные атрибуты (type, defer) и query-параметры (?v=...)
-        const regex = new RegExp(`<script[^>]*src="\\.\\/${script.replace('.', '\\.')}(?:\\?[^"]*)?"[^>]*><\\/script>`, 'g');
+        const regex = new RegExp(`<script[^>]*src="\\.\\/src\\/js\\/${script.replace('.', '\\.')}(?:\\?[^"]*)?"[^>]*><\\/script>`, 'g');
 
         let matchFound = false;
         html = html.replace(regex, (match) => {

@@ -17,6 +17,7 @@
             "dummy.css",
             "guides/**",
             "dist/**",
+            "src/**",
             "README.md",
             "SECURITY.md",
             "*.log",
