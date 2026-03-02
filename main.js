@@ -4,6 +4,10 @@ let calendarDate = new Date(); // Месяц, который открыт в к�
 
 const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
 
+window.loadDay = () => typeof renderDailyPlanner === 'function' && renderDailyPlanner();
+window.loadGoals = () => typeof renderDynamicGoals === 'function' && renderDynamicGoals();
+
+
 document.addEventListener('DOMContentLoaded', () => {
     // Dynamic manifest loading to prevent CORS on file:// protocol
     if (window.location.protocol !== 'file:') {
@@ -146,7 +150,7 @@ function initDailyPlanner() {
     });
 
     // Event Delegation for dynamic elements
-    const plannerContainer = document.querySelector('.md\\:col-span-8');
+    const plannerContainer = document.getElementById('view-daily');
 
     plannerContainer.addEventListener('input', (e) => {
         if (e.target.classList.contains('day-input') || e.target.classList.contains('day-checkbox')) {
@@ -173,19 +177,20 @@ function initDailyPlanner() {
         const addBtn = e.target.closest('.add-task-btn');
         if (addBtn) {
             const listContainer = addBtn.parentElement.previousElementSibling;
-            const blockIndex = addBtn.getAttribute('data-block-index');
+            const blockIndex = addBtn.getAttribute('data-block-index') || '1';
             const newIndex = Date.now(); // Unique ID
 
             const newRow = document.createElement('div');
             newRow.className = 'flex items-center';
             newRow.innerHTML = `
-                <button data-task-id="t_dyn_${newIndex}" class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                <input data-id="task_dyn_${newIndex}" id="task_dyn_${newIndex}" name="task_dyn_${newIndex}" type="text" placeholder="Новая задача..." autocomplete="off" aria-label="Новая задача" class="ruled-input handwriting day-input">
+                <button data-task-id="t_dyn_${blockIndex}_${newIndex}" aria-label="Отметить задачу" class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors mr-3"></button>
+                <input data-id="task_dyn_${blockIndex}_${newIndex}" id="task_dyn_${blockIndex}_${newIndex}" name="task_dyn_${blockIndex}_${newIndex}" type="text" placeholder="Новая задача..." autocomplete="off" aria-label="Новая задача" class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500 w-full">
             `;
 
             if (listContainer) {
                 listContainer.appendChild(newRow);
                 newRow.querySelector('input').focus();
+                saveDailyData();
             }
         }
     });
@@ -224,23 +229,29 @@ function renderDailyPlanner() {
 
     // Reconstruct dynamic inputs from saved data
     if (data.texts) {
-        // Group dynamic tasks by guessing their block based on order, 
-        // For simplicity, we just inject them into the last block if we don't have block tracking.
-        // Actually, to make it robust for MVP, we just append them to the first block.
-        // Better solution: Save HTML structure or block mapping. 
-        // We will append all dynamic tasks to Block 1 for now if they are found.
-        const block1Container = document.querySelector('.space-y-1.pl-6');
-
         Object.keys(data.texts).forEach(key => {
             if (key.startsWith('task_dyn_') && !document.querySelector(`[data-id="${key}"]`)) {
-                const newRow = document.createElement('div');
-                newRow.className = 'flex items-center';
-                const dynId = key.replace('task_dyn_', '');
-                newRow.innerHTML = `
-                    <button data-task-id="t_dyn_${dynId}" class="task-toggle w-4 h-4 rounded border border-gray-400 mr-3 hover:bg-green-100 flex justify-center items-center text-[10px] text-transparent transition-colors"></button>
-                    <input data-id="${key}" id="${key}" name="${key}" type="text" autocomplete="off" aria-label="Задача" class="ruled-input handwriting day-input">
-                `;
-                block1Container.appendChild(newRow);
+                // Parse block index: task_dyn_{blockIndex}_{timestamp}
+                const parts = key.split('_');
+                let blockIndex = '1';
+                let dynId = parts[2];
+                if (parts.length >= 4) {
+                    blockIndex = parts[2];
+                    dynId = parts[2] + '_' + parts[3];
+                }
+
+                const addBtn = document.querySelector(`.add-task-btn[data-block-index="${blockIndex}"]`);
+                const container = addBtn ? addBtn.parentElement.previousElementSibling : document.querySelector('.add-task-btn').parentElement.previousElementSibling;
+
+                if (container) {
+                    const newRow = document.createElement('div');
+                    newRow.className = 'flex items-center';
+                    newRow.innerHTML = `
+                        <button data-task-id="t_dyn_${dynId}" aria-label="Отметить задачу" class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors mr-3"></button>
+                        <input data-id="${key}" id="${key}" name="${key}" type="text" autocomplete="off" aria-label="Задача" class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500 w-full">
+                    `;
+                    container.appendChild(newRow);
+                }
             }
         });
     }
