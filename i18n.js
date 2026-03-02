@@ -1,6 +1,8 @@
 // Словарь переводов
 const translations = {
     ru: {
+        "seo_title": "Barakah Planner — Исламский Ежедневник и Планировщик Намазов",
+        "seo_desc": "Планируй свой день по Исламу: трекер намазов, цели Ахирата и Дуньи, доска идей Tafakkur. Бесплатно.",
         "tab_daily": "День", "tab_calendar": "Календарь", "tab_goals": "Цели", "tab_board": "Доска",
         "date_today": "Дата:", "date_val_today": "Сегодня",
         "title_daily": "План на день", "niyyah_label": "Ният:", "niyyah_ph": "Ради довольства Аллаха...",
@@ -62,6 +64,8 @@ const translations = {
         "events_no_events": "Нет событий на этот день", "event_saved_toast": "Событие сохранено!", "event_deleted_toast": "Событие удалено"
     },
     kk: {
+        "seo_title": "Barakah Planner — Исламдық Күнделік және Намаз Жоспарлаушы",
+        "seo_desc": "Күніңізді Ислам бойынша жоспарлаңыз: намаз трекері, Ақырет пен Дүние мақсаттары, Tafakkur идеялар тақтасы. Тегін.",
         "tab_daily": "Күн", "tab_calendar": "Күнтізбе", "tab_goals": "Мақсаттар", "tab_board": "Тақта",
         "date_today": "Күн:", "date_val_today": "Бүгін",
         "title_daily": "Күн жоспары", "niyyah_label": "Ниет:", "niyyah_ph": "Алланың разылығы үшін...",
@@ -123,6 +127,8 @@ const translations = {
         "events_no_events": "Бұл күнге оқиға жоқ", "event_saved_toast": "Оқиға сақталды!", "event_deleted_toast": "Оқиға жойылды"
     },
     ar: {
+        "seo_title": "Barakah Planner — يوميات إسلامية ومخطط الصلاة",
+        "seo_desc": "خطط ليومك وفقًا للإسلام: متتبع الصلاة، أهداف الآخرة والدنيا، لوحة أفكار تفكر. مجاني.",
         "tab_daily": "اليوم", "tab_calendar": "التقويم", "tab_goals": "الأهداف", "tab_board": "اللوحة",
         "date_today": "التاريخ:", "date_val_today": "اليوم",
         "title_daily": "خطة اليوم", "niyyah_label": "النية:", "niyyah_ph": "ابتغاء مرضاة الله...",
@@ -184,6 +190,8 @@ const translations = {
         "events_no_events": "لا توجد أحداث في هذا اليوم", "event_saved_toast": "تم حفظ الحدث!", "event_deleted_toast": "تم حذف الحدث"
     },
     en: {
+        "seo_title": "Barakah Planner — Islamic Daily Planner & Prayer Tracker",
+        "seo_desc": "Plan your day according to Islam: prayer tracker, Akhirah & Dunya goals, Tafakkur idea board. Free.",
         "tab_daily": "Daily", "tab_calendar": "Calendar", "tab_goals": "Goals", "tab_board": "Board",
         "date_today": "Date:", "date_val_today": "Today",
         "title_daily": "Daily Plan", "niyyah_label": "Niyyah:", "niyyah_ph": "For the sake of Allah...",
@@ -250,6 +258,24 @@ let currentLang = localStorage.getItem('barakah_lang') || 'ru';
 
 function applyTranslations(lang) {
     const dict = translations[lang] || translations['ru'];
+
+    // Update Language and SEO Metadata
+    document.documentElement.lang = lang;
+    if (dict['seo_title']) {
+        document.title = dict['seo_title'];
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.content = dict['seo_title'];
+        const twTitle = document.querySelector('meta[name="twitter:title"]');
+        if (twTitle) twTitle.content = dict['seo_title'];
+    }
+    if (dict['seo_desc']) {
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) metaDesc.content = dict['seo_desc'];
+        const ogDesc = document.querySelector('meta[property="og:description"]');
+        if (ogDesc) ogDesc.content = dict['seo_desc'];
+        const twDesc = document.querySelector('meta[name="twitter:description"]');
+        if (twDesc) twDesc.content = dict['seo_desc'];
+    }
 
     // Перевод текстовых элементов
     document.querySelectorAll('[data-i18n]').forEach(el => {

@@ -71,23 +71,45 @@ window.Auth = {
                 document.getElementById('auth-login-view')?.classList.remove('hidden');
                 document.getElementById('auth-profile-view')?.classList.add('hidden');
 
-                // Force modal open, hide close button — no escape!
-                if (authModal) {
-                    authModal.classList.remove('hidden');
-                    authModal.classList.add('flex');
-                }
-                if (authCloseBtn) {
-                    authCloseBtn.classList.add('hidden');
-                    authCloseBtn.onclick = null;
+                // Force modal open, hide close button — no escape! (unless local file:)
+                if (window.location.protocol === 'file:') {
+                    if (authModal) {
+                        authModal.classList.add('hidden');
+                        authModal.classList.remove('flex');
+                    }
+                    if (authCloseBtn) {
+                        authCloseBtn.classList.remove('hidden');
+                        authCloseBtn.onclick = () => {
+                            if (authModal) {
+                                authModal.classList.add('hidden');
+                                authModal.classList.remove('flex');
+                            }
+                        };
+                    }
+                } else {
+                    if (authModal) {
+                        authModal.classList.remove('hidden');
+                        authModal.classList.add('flex');
+                    }
+                    if (authCloseBtn) {
+                        authCloseBtn.classList.add('hidden');
+                        authCloseBtn.onclick = null;
+                    }
                 }
             }
         });
 
         // Block Escape key from closing the modal when not logged in
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !this.user) {
+            if (e.key === 'Escape' && !this.user && window.location.protocol !== 'file:') {
                 e.preventDefault();
                 e.stopPropagation();
+            } else if (e.key === 'Escape' && !this.user && window.location.protocol === 'file:') {
+                const authModal = document.getElementById('auth-modal');
+                if (authModal) {
+                    authModal.classList.add('hidden');
+                    authModal.classList.remove('flex');
+                }
             }
         }, true);
 
@@ -97,6 +119,11 @@ window.Auth = {
             authModal.addEventListener('click', (e) => {
                 // If NOT logged in, block any backdrop click from closing
                 if (!this.user && e.target === authModal) {
+                    if (window.location.protocol === 'file:') {
+                        authModal.classList.add('hidden');
+                        authModal.classList.remove('flex');
+                        return;
+                    }
                     e.stopPropagation();
                     // Shake the modal card to give visual feedback
                     const card = authModal.querySelector('div');

@@ -122,8 +122,46 @@
     <meta name="theme-color" content="#059669">
 
     <!-- Подключаем скрипты -->
+    <!-- Подключаем скрипты -->
     <script>
-        // Buffer logs for ActivityLog to catch early actions (InshaAllah)
+        // Офлайн-защита и Детектор CORS (Абсолютная автономность)
+        (function () {
+            const isLocal = window.location.protocol === 'file:';
+
+            if (isLocal) {
+                const savedPwd = sessionStorage.getItem('local_planer_access');
+                if (savedPwd !== "admin") {
+                    const pwd = prompt("Ассаляму алейкум! Введите пароль для локального доступа:");
+                    if (pwd === "admin") {
+                        sessionStorage.setItem('local_planer_access', "admin");
+                    } else {
+                        document.documentElement.innerHTML = "<body style='display:flex;justify-content:center;align-items:center;height:100vh;background:#0f172a;color:#ef4444;font-family:sans-serif;text-align:center;padding:20px;'><div style='max-width:500px;'><h1>Доступ закрыт.</h1><p style='color:#94a3b8;'>ИншаАллах, в следующий раз вспомните пароль.</p><button onclick='location.reload()' style='background:#1e293b; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; margin-top:20px;'>Попробовать снова</button></div></body>";
+                        return;
+                    }
+                }
+
+                // Добавляем индикатор локального режима
+                window.addEventListener('DOMContentLoaded', () => {
+                    const banner = document.createElement('div');
+                    banner.id = "local-mode-banner";
+                    banner.style = "position:fixed; top:0; left:50%; transform:translateX(-50%); background:rgba(245, 158, 11, 0.9); color:black; padding:4px 15px; font-size:11px; font-weight:bold; border-radius:0 0 10px 10px; z-index:9999; backdrop-filter:blur(5px); pointer-events:none; text-align:center;";
+                    banner.innerHTML = "⚠️ Локальный режим (CORS ограничение). Облачная синхронизация отключена.";
+                    document.body.appendChild(banner);
+
+                    // Проверка загрузки модулей через 2 секунды
+                    setTimeout(() => {
+                        if (typeof window.firebaseAuth === 'undefined') {
+                            const errorBanner = document.createElement('div');
+                            errorBanner.style = "position:fixed; bottom:20px; left:20px; right:20px; background:#ef4444; color:white; padding:15px; border-radius:12px; z-index:10000; box-shadow:0 10px 30px rgba(0,0,0,0.3); font-size:14px; text-align:center;";
+                            errorBanner.innerHTML = "<b>Ошибка загрузки модулей:</b> Браузер блокирует скрипты при открытии через файл (CORS). <br> <span style='font-size:12px; opacity:0.8;'>Приложение работает в автономном режиме. Данные сохраняются локально.</span>";
+                            document.body.appendChild(errorBanner);
+                        }
+                    }, 2000);
+                });
+            }
+        })();
+
+        // Buffer logs for ActivityLog to catch early actions
         window._activityLogBuffer = [];
         window.ActivityLog = {
             log: (action, meta) => {
@@ -225,10 +263,10 @@
                             <label for="niyyah"
                                 class="text-xs font-bold text-slate-400 dark:text-slate-500 mr-3 uppercase tracking-wider"
                                 data-i18n="niyyah_label">Ният:</label>
-                            <input data-id="niyyah" id="niyyah" name="niyyah" type="text"
-                                placeholder="Ради довольства Аллаха..." autocomplete="off" data-i18n="niyyah_ph"
-                                data-i18n-target="placeholder"
-                                class="ruled-input handwriting w-full text-emerald-800 dark:text-emerald-300 day-input text-lg">
+                            <textarea data-id="niyyah" id="niyyah" name="niyyah" rows="1"
+                                style="resize:none; overflow:hidden;" placeholder="Ради довольства Аллаха..."
+                                autocomplete="off" data-i18n="niyyah_ph" data-i18n-target="placeholder"
+                                class="ruled-input handwriting w-full text-emerald-800 dark:text-emerald-300 day-input text-lg"></textarea>
                         </div>
                     </div>
                 </header>
@@ -328,9 +366,10 @@
                                 class="block text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 section-title"
                                 data-i18n="quran_title">
                                 Чтение Корана</label>
-                            <input data-id="quran" id="quran" name="quran" type="text" placeholder="Сура / Аяты"
-                                data-i18n="quran_ph" autocomplete="off"
-                                class="ruled-input handwriting w-full mb-2 day-input placeholder-slate-400 dark:placeholder-slate-500">
+                            <textarea data-id="quran" id="quran" name="quran" rows="1"
+                                style="resize:none; overflow:hidden;" placeholder="Сура / Аяты" data-i18n="quran_ph"
+                                autocomplete="off"
+                                class="ruled-input handwriting w-full mb-2 day-input placeholder-slate-400 dark:placeholder-slate-500"></textarea>
                         </div>
 
                         <!-- Добрые дела -->
@@ -340,9 +379,10 @@
                                 class="block text-lg font-bold text-slate-800 dark:text-slate-200 mb-2 section-title"
                                 data-i18n="sadaka_title">
                                 Садака / Благое дело</label>
-                            <input data-id="sadaka" id="sadaka" name="sadaka" type="text"
-                                placeholder="Кому помочь сегодня?" data-i18n="sadaka_ph" autocomplete="off"
-                                class="ruled-input handwriting w-full day-input placeholder-slate-400 dark:placeholder-slate-500">
+                            <textarea data-id="sadaka" id="sadaka" name="sadaka" rows="1"
+                                style="resize:none; overflow:hidden;" placeholder="Кому помочь сегодня?"
+                                data-i18n="sadaka_ph" autocomplete="off"
+                                class="ruled-input handwriting w-full day-input placeholder-slate-400 dark:placeholder-slate-500"></textarea>
                         </div>
                     </div>
 
@@ -363,16 +403,18 @@
                                 <div class="flex items-center gap-3">
                                     <button data-task-id="task1" aria-label="Отметить задачу 1"
                                         class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
-                                    <input data-id="task1" id="task1" name="task1" type="text"
-                                        placeholder="Главная задача дня..." autocomplete="off" aria-label="Задача 1"
-                                        data-i18n-target="placeholder" data-i18n="ph_task_main"
-                                        class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500">
+                                    <textarea data-id="task1" id="task1" name="task1" rows="1"
+                                        style="resize:none; overflow:hidden;" placeholder="Главная задача дня..."
+                                        autocomplete="off" aria-label="Задача 1" data-i18n-target="placeholder"
+                                        data-i18n="ph_task_main"
+                                        class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500"></textarea>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <button data-task-id="task2" aria-label="Отметить задачу 2"
                                         class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
-                                    <input data-id="task2" id="task2" name="task2" type="text" autocomplete="off"
-                                        aria-label="Задача 2" class="ruled-input handwriting day-input">
+                                    <textarea data-id="task2" id="task2" name="task2" rows="1"
+                                        style="resize:none; overflow:hidden;" autocomplete="off" aria-label="Задача 2"
+                                        class="ruled-input handwriting day-input"></textarea>
                                 </div>
                             </div>
                             <!-- Add row button -->
@@ -399,14 +441,16 @@
                                 <div class="flex items-center gap-3">
                                     <button data-task-id="task3" aria-label="Отметить задачу 3"
                                         class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
-                                    <input data-id="task3" id="task3" name="task3" type="text" autocomplete="off"
-                                        aria-label="Задача 3" class="ruled-input handwriting day-input">
+                                    <textarea data-id="task3" id="task3" name="task3" rows="1"
+                                        style="resize:none; overflow:hidden;" autocomplete="off" aria-label="Задача 3"
+                                        class="ruled-input handwriting day-input"></textarea>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <button data-task-id="task4" aria-label="Отметить задачу 4"
                                         class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
-                                    <input data-id="task4" id="task4" name="task4" type="text" autocomplete="off"
-                                        aria-label="Задача 4" class="ruled-input handwriting day-input">
+                                    <textarea data-id="task4" id="task4" name="task4" rows="1"
+                                        style="resize:none; overflow:hidden;" autocomplete="off" aria-label="Задача 4"
+                                        class="ruled-input handwriting day-input"></textarea>
                                 </div>
                             </div>
                             <!-- Add row button -->
@@ -431,16 +475,18 @@
                                 <div class="flex items-center gap-3">
                                     <button data-task-id="task5" aria-label="Отметить задачу 5"
                                         class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
-                                    <input data-id="task5" id="task5" name="task5" type="text"
-                                        placeholder="Бытовые дела..." autocomplete="off" aria-label="Задача 5"
-                                        data-i18n-target="placeholder" data-i18n="ph_task_household"
-                                        class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500">
+                                    <textarea data-id="task5" id="task5" name="task5" rows="1"
+                                        style="resize:none; overflow:hidden;" placeholder="Бытовые дела..."
+                                        autocomplete="off" aria-label="Задача 5" data-i18n-target="placeholder"
+                                        data-i18n="ph_task_household"
+                                        class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500"></textarea>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <button data-task-id="task6" aria-label="Отметить задачу 6"
                                         class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
-                                    <input data-id="task6" id="task6" name="task6" type="text" autocomplete="off"
-                                        aria-label="Задача 6" class="ruled-input handwriting day-input">
+                                    <textarea data-id="task6" id="task6" name="task6" rows="1"
+                                        style="resize:none; overflow:hidden;" autocomplete="off" aria-label="Задача 6"
+                                        class="ruled-input handwriting day-input"></textarea>
                                 </div>
                             </div>
                             <!-- Add row button -->
@@ -465,16 +511,18 @@
                                 <div class="flex items-center gap-3">
                                     <button data-task-id="task7" aria-label="Отметить задачу 7"
                                         class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
-                                    <input data-id="task7" id="task7" name="task7" type="text"
-                                        placeholder="Семья, ужин..." autocomplete="off" aria-label="Задача 7"
-                                        data-i18n-target="placeholder" data-i18n="ph_task_family"
-                                        class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500">
+                                    <textarea data-id="task7" id="task7" name="task7" rows="1"
+                                        style="resize:none; overflow:hidden;" placeholder="Семья, ужин..."
+                                        autocomplete="off" aria-label="Задача 7" data-i18n-target="placeholder"
+                                        data-i18n="ph_task_family"
+                                        class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500"></textarea>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <button data-task-id="task8" aria-label="Отметить задачу 8"
                                         class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
-                                    <input data-id="task8" id="task8" name="task8" type="text" autocomplete="off"
-                                        aria-label="Задача 8" class="ruled-input handwriting day-input">
+                                    <textarea data-id="task8" id="task8" name="task8" rows="1"
+                                        style="resize:none; overflow:hidden;" autocomplete="off" aria-label="Задача 8"
+                                        class="ruled-input handwriting day-input"></textarea>
                                 </div>
                             </div>
                             <!-- Add row button -->
@@ -499,18 +547,20 @@
                                 <div class="flex items-center gap-3">
                                     <button data-task-id="task9" aria-label="Отметить задачу 9"
                                         class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
-                                    <input data-id="task9" id="task9" name="task9" type="text"
-                                        placeholder="Уединение, отдых..." autocomplete="off" aria-label="Задача 9"
-                                        data-i18n-target="placeholder" data-i18n="ph_task_rest"
-                                        class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500">
+                                    <textarea data-id="task9" id="task9" name="task9" rows="1"
+                                        style="resize:none; overflow:hidden;" placeholder="Уединение, отдых..."
+                                        autocomplete="off" aria-label="Задача 9" data-i18n-target="placeholder"
+                                        data-i18n="ph_task_rest"
+                                        class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500"></textarea>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <button data-task-id="task10" aria-label="Отметить задачу 10"
                                         class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors"></button>
-                                    <input data-id="task10" id="task10" name="task10" type="text"
-                                        placeholder="Чтение перед сном..." autocomplete="off" aria-label="Задача 10"
-                                        data-i18n-target="placeholder" data-i18n="ph_task_reading"
-                                        class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500">
+                                    <textarea data-id="task10" id="task10" name="task10" rows="1"
+                                        style="resize:none; overflow:hidden;" placeholder="Чтение перед сном..."
+                                        autocomplete="off" aria-label="Задача 10" data-i18n-target="placeholder"
+                                        data-i18n="ph_task_reading"
+                                        class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500"></textarea>
                                 </div>
                             </div>
                             <!-- Add row button -->
@@ -827,7 +877,7 @@
 
     <!-- Auth Modal -->
     <div id="auth-modal"
-        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 text-left"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 text-left"
         dir="auto">
         <div
             class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-100 transition-all duration-300 relative">
