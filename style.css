@@ -211,6 +211,18 @@ body {
     color: var(--ink);
 }
 
+.tasks-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    /* Увеличил до 1.5rem для наглядности */
+    margin-top: 0.75rem !important;
+}
+
+.tasks-wrapper>div {
+    margin-bottom: 0.5rem !important;
+}
+
 .ruled-input {
     background: transparent;
     border: none;
