@@ -8,9 +8,9 @@
     <!-- ═══════════════════════════════════════════════════════════════ -->
     <!-- PRIMARY SEO — TITLE & DESCRIPTION (RU)                        -->
     <!-- ═══════════════════════════════════════════════════════════════ -->
-    <title>Barakah Planner — Исламский Ежедневник и Планировщик Намазов</title>
+    <title>Barakah Planner — Исламский Ежедневник</title>
     <meta name="description"
-        content="Планируй свой день по Исламу: трекер намазов (Фаджр, Зухр, Аср, Магриб, Иша), цели Ахирата и Дуньи, доска идей Tafakkur, облачная синхронизация Firebase. Бесплатно и без рекламы.">
+        content="Исламский Ежедневник: трекер намазов (Фаджр, Зухр, Аср, Магриб, Иша), цели Ахирата и Дуньи, доска идей Tafakkur, облачная синхронизация. Бесплатно и без рекламы.">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
     <meta name="application-name" content="Barakah Planner">
     <meta name="apple-mobile-web-app-title" content="Barakah Planner">
@@ -56,8 +56,8 @@
     <meta property="og:site_name" content="Barakah Planner">
     <meta property="og:title" content="Barakah Planner — Исламский Ежедневник">
     <meta property="og:description"
-        content="Цели Ахирата и Дуньи, доска идей Tafakkur, ежедневный планировщик — всё в одном месте. На 4 языках. Бесплатно.">
-    <meta property="og:image" content="https://islamic-planer.web.app/public/og-image.png">
+        content="Исламский Ежедневник: трекер намазов, цели Ахирата и Дуньи, доска Tafakkur. Бесплатно и без рекламы.">
+    <meta property="og:image" content="https://islamic-planer.web.app/public/banner-ru.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:locale" content="ru_RU">
@@ -67,10 +67,10 @@
 
     <!-- Twitter / X Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Barakah Planner — Islamic Daily Planner">
+    <meta name="twitter:title" content="Barakah Planner — Исламский Ежедневник">
     <meta name="twitter:description"
-        content="Akhirah & Dunya goals, Tafakkur board, Islamic daily planner. Free app in 4 languages.">
-    <meta name="twitter:image" content="https://islamic-planer.web.app/public/og-image.png">
+        content="Исламский Ежедневник: трекер намазов, цели Ахирата и Дуньи, доска Tafakkur. Бесплатно и без рекламы.">
+    <meta name="twitter:image" content="https://islamic-planer.web.app/public/banner-ru.png">
 
     <!-- ═══════════════════════════════════════════════════════════════ -->
     <!-- JSON-LD STRUCTURED DATA (RICH SNIPPET)                         -->
@@ -97,7 +97,7 @@
           "@id": "https://islamic-planer.web.app/#webapp",
           "name": "Barakah Planner",
           "url": "https://islamic-planer.web.app",
-          "description": "Islamic daily planner with prayer tracker (Fajr, Dhuhr, Asr, Maghrib, Isha), Akhirah & Dunya goals, Tafakkur idea board, and cloud sync. Free, no ads. Available in Russian, Kazakh, Arabic and English.",
+          "description": "Исламский Ежедневник: трекер намазов (Фаджр, Зухр, Аср, Магриб, Иша), цели Ахирата и Дуньи, доска идей Tafakkur, облачная синхронизация. Бесплатно и без рекламы.",
           "applicationCategory": "ProductivityApplication",
           "operatingSystem": "Web, Android (PWA), iOS (PWA)",
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
@@ -1045,127 +1045,130 @@
         class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 text-left"
         dir="auto">
         <div
-            class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden transform scale-100 transition-all duration-300 relative flex flex-col md:flex-row max-h-[90vh]">
+            class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden transform scale-100 transition-all duration-300 relative flex flex-col max-h-[90vh]">
             <button
                 onclick="document.getElementById('donate-modal').classList.add('hidden'); document.getElementById('donate-modal').classList.remove('flex')"
                 class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors focus:outline-none z-10 w-10 h-10 bg-white/50 dark:bg-slate-800/50 rounded-full flex items-center justify-center backdrop-blur-md">
                 <i class="fas fa-times text-xl"></i>
             </button>
 
-            <!-- Left Side: Donate -->
-            <div
-                class="w-full md:w-1/2 p-8 text-center text-gray-800 dark:text-gray-100 bg-rose-50/50 dark:bg-slate-800/30 overflow-y-auto hidden-scrollbar relative flex flex-col justify-center">
+            <div class="flex flex-col md:flex-row overflow-y-auto md:overflow-hidden hidden-scrollbar h-full w-full">
+                <!-- Left Side: Donate -->
                 <div
-                    class="w-20 h-20 rounded-full bg-rose-100 dark:bg-rose-900/40 flex justify-center items-center mx-auto mb-5 border-4 border-white dark:border-slate-800 shadow-md">
-                    <i class="fas fa-heart text-4xl text-rose-500 animate-[pulse_2s_ease-in-out_infinite]"></i>
-                </div>
-                <h2 class="text-2xl font-bold mb-3" data-i18n="donate_title">Поддержать проект</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-8 font-sans leading-relaxed px-2"
-                    data-i18n="donate_text">Ваша поддержка помогает развивать проект и приносить больше пользы Умме.
-                    Джазакаллаху Хайран!</p>
-
-                <div class="flex flex-col gap-4 mt-auto">
+                    class="w-full md:w-1/2 p-8 text-center text-gray-800 dark:text-gray-100 bg-rose-50/50 dark:bg-slate-800/30 md:overflow-y-auto hidden-scrollbar relative flex flex-col justify-center shrink-0">
                     <div
-                        class="w-full bg-white dark:bg-slate-800/80 p-4 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm flex flex-col items-center gap-3 mb-2">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-university text-yellow-500"></i>
-                            <span class="font-bold text-xs uppercase tracking-widest text-gray-500"
-                                data-i18n="kaspi_label">Kaspi.kz (Перевод по номеру)</span>
-                        </div>
+                        class="w-20 h-20 rounded-full bg-rose-100 dark:bg-rose-900/40 flex justify-center items-center mx-auto mb-5 border-4 border-white dark:border-slate-800 shadow-md">
+                        <i class="fas fa-heart text-4xl text-rose-500 animate-[pulse_2s_ease-in-out_infinite]"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-3" data-i18n="donate_title">Поддержать проект</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-8 font-sans leading-relaxed px-2"
+                        data-i18n="donate_text">Ваша поддержка помогает развивать проект и приносить больше пользы Умме.
+                        Джазакаллаху Хайран!</p>
+
+                    <div class="flex flex-col gap-4 mt-auto">
                         <div
-                            class="flex items-center justify-between bg-gray-50 dark:bg-slate-950 px-4 py-3 rounded-xl w-full border border-gray-100 dark:border-slate-800">
-                            <span
-                                class="font-mono font-bold text-sm sm:text-base tracking-tighter text-gray-800 dark:text-gray-200">4400
-                                4303 2098 5507</span>
-                            <button onclick="copyToClipboard('4400430320985507', 'kaspi_success')"
-                                class="text-indigo-500 hover:text-indigo-600 p-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors group relative"
-                                title="Скопировать" data-i18n-target="title" data-i18n="kaspi_copy">
-                                <i class="fas fa-copy"></i>
-                            </button>
+                            class="w-full bg-white dark:bg-slate-800/80 p-4 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm flex flex-col items-center gap-3 mb-2">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-university text-yellow-500"></i>
+                                <span class="font-bold text-xs uppercase tracking-widest text-gray-500"
+                                    data-i18n="kaspi_label">Kaspi.kz (Перевод по номеру)</span>
+                            </div>
+                            <div
+                                class="flex items-center justify-between bg-gray-50 dark:bg-slate-950 px-4 py-3 rounded-xl w-full border border-gray-100 dark:border-slate-800">
+                                <span
+                                    class="font-mono font-bold text-sm sm:text-base tracking-tighter text-gray-800 dark:text-gray-200">4400
+                                    4303 2098 5507</span>
+                                <button onclick="copyToClipboard('4400430320985507', 'kaspi_success')"
+                                    class="text-indigo-500 hover:text-indigo-600 p-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors group relative"
+                                    title="Скопировать" data-i18n-target="title" data-i18n="kaspi_copy">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
                         </div>
+                        <a href="https://www.patreon.com/c/Sala_ah" target="_blank"
+                            class="w-full flex items-center justify-center gap-3 bg-[#FF424D] text-white py-3.5 rounded-xl font-bold hover:bg-[#e03a44] transition-all hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(255,66,77,0.3)] border border-transparent">
+                            <i class="fab fa-patreon text-lg"></i> Patreon
+                        </a>
+                        <a href="https://boosty.to/Sala_ah" target="_blank"
+                            class="w-full flex items-center justify-center gap-3 bg-[#F15F2C] text-white py-3.5 rounded-xl font-bold hover:bg-[#d65326] transition-all hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(241,95,44,0.3)] border border-transparent">
+                            <i class="fas fa-bolt text-lg text-yellow-300"></i> Boosty
+                        </a>
                     </div>
-                    <a href="https://www.patreon.com/c/Sala_ah" target="_blank"
-                        class="w-full flex items-center justify-center gap-3 bg-[#FF424D] text-white py-3.5 rounded-xl font-bold hover:bg-[#e03a44] transition-all hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(255,66,77,0.3)] border border-transparent">
-                        <i class="fab fa-patreon text-lg"></i> Patreon
-                    </a>
-                    <a href="https://boosty.to/Sala_ah" target="_blank"
-                        class="w-full flex items-center justify-center gap-3 bg-[#F15F2C] text-white py-3.5 rounded-xl font-bold hover:bg-[#d65326] transition-all hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(241,95,44,0.3)] border border-transparent">
-                        <i class="fas fa-bolt text-lg text-yellow-300"></i> Boosty
-                    </a>
-                </div>
-            </div>
-
-            <!-- Right Side: Contacts & Message -->
-            <div
-                class="w-full md:w-1/2 p-8 text-left text-gray-800 dark:text-gray-100 bg-white dark:bg-slate-900 overflow-y-auto hidden-scrollbar">
-                <h2 class="text-2xl font-bold mb-2 flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
-                    <i class="fas fa-paper-plane"></i> <span data-i18n="section_contacts">Контакты</span>
-                </h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 font-sans leading-relaxed"
-                    data-i18n="contacts_desc">Давайте превратим вашу идею в стабильный бизнес. Пишите!</p>
-
-                <div class="flex flex-wrap gap-2 mb-8">
-                    <a href="mailto:salaahlion@gmail.com"
-                        class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
-                            class="fas fa-envelope text-indigo-500"></i> salaahlion@gmail.com</a>
-                    <a href="https://t.me/sala_akh" target="_blank"
-                        class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
-                            class="fab fa-telegram text-blue-500"></i> @sala_akh</a>
-                    <a href="https://www.linkedin.com/in/s-akh09/" target="_blank"
-                        class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
-                            class="fab fa-linkedin text-blue-700"></i> LinkedIn</a>
-                    <a href="https://github.com/SalaAkh" target="_blank"
-                        class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
-                            class="fab fa-github"></i> GitHub</a>
-                    <a href="https://kwork.ru/user/sala_ah" target="_blank"
-                        class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
-                            class="fas fa-briefcase text-green-500"></i> Kwork</a>
-                    <a href="https://salamat.vffatop.workers.dev" target="_blank"
-                        class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
-                            class="fas fa-globe text-teal-500"></i> Salamat</a>
-                    <span
-                        class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold flex items-center gap-2"><i
-                            class="fas fa-map-marker-alt text-red-500"></i> <span data-i18n="contacts_city">Караганда,
-                            Казахстан</span></span>
                 </div>
 
-                <form class="flex flex-col gap-4" id="contactForm" action="https://formspree.io/f/mpqjebol"
-                    method="POST">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="flex flex-col">
-                            <label for="name"
-                                class="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
-                                data-i18n="label_name">Ваше имя</label>
-                            <input type="text" id="name" name="name" autocomplete="name"
-                                class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-shadow"
-                                data-i18n-target="placeholder" data-i18n="placeholder_name" placeholder="Ваше имя"
-                                required>
+                <!-- Right Side: Contacts & Message -->
+                <div
+                    class="w-full md:w-1/2 p-8 text-left text-gray-800 dark:text-gray-100 bg-white dark:bg-slate-900 md:overflow-y-auto hidden-scrollbar shrink-0">
+                    <h2 class="text-2xl font-bold mb-2 flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                        <i class="fas fa-paper-plane"></i> <span data-i18n="section_contacts">Контакты</span>
+                    </h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 font-sans leading-relaxed"
+                        data-i18n="contacts_desc">Давайте превратим вашу идею в стабильный бизнес. Пишите!</p>
+
+                    <div class="flex flex-wrap gap-2 mb-8">
+                        <a href="mailto:salaahlion@gmail.com"
+                            class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
+                                class="fas fa-envelope text-indigo-500"></i> salaahlion@gmail.com</a>
+                        <a href="https://t.me/sala_akh" target="_blank"
+                            class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
+                                class="fab fa-telegram text-blue-500"></i> @sala_akh</a>
+                        <a href="https://www.linkedin.com/in/s-akh09/" target="_blank"
+                            class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
+                                class="fab fa-linkedin text-blue-700"></i> LinkedIn</a>
+                        <a href="https://github.com/SalaAkh" target="_blank"
+                            class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
+                                class="fab fa-github"></i> GitHub</a>
+                        <a href="https://kwork.ru/user/sala_ah" target="_blank"
+                            class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
+                                class="fas fa-briefcase text-green-500"></i> Kwork</a>
+                        <a href="https://salamat.vffatop.workers.dev" target="_blank"
+                            class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
+                                class="fas fa-globe text-teal-500"></i> Salamat</a>
+                        <span
+                            class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold flex items-center gap-2"><i
+                                class="fas fa-map-marker-alt text-red-500"></i> <span
+                                data-i18n="contacts_city">Караганда,
+                                Казахстан</span></span>
+                    </div>
+
+                    <form class="flex flex-col gap-4" id="contactForm" action="https://formspree.io/f/mpqjebol"
+                        method="POST">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex flex-col">
+                                <label for="name"
+                                    class="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
+                                    data-i18n="label_name">Ваше имя</label>
+                                <input type="text" id="name" name="name" autocomplete="name"
+                                    class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-shadow"
+                                    data-i18n-target="placeholder" data-i18n="placeholder_name" placeholder="Ваше имя"
+                                    required>
+                            </div>
+                            <div class="flex flex-col">
+                                <label for="contact"
+                                    class="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
+                                    data-i18n="label_contact">Email</label>
+                                <input type="email" id="contact" name="email" autocomplete="email"
+                                    class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-shadow"
+                                    data-i18n-target="placeholder" data-i18n="placeholder_contact" placeholder="Email"
+                                    required>
+                            </div>
                         </div>
                         <div class="flex flex-col">
-                            <label for="contact"
+                            <label for="message"
                                 class="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
-                                data-i18n="label_contact">Email</label>
-                            <input type="email" id="contact" name="email" autocomplete="email"
-                                class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-shadow"
-                                data-i18n-target="placeholder" data-i18n="placeholder_contact" placeholder="Email"
-                                required>
+                                data-i18n="label_message">Сообщение</label>
+                            <textarea id="message" name="message" rows="4"
+                                class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-shadow resize-none"
+                                data-i18n-target="placeholder" data-i18n="placeholder_message"
+                                placeholder="Расскажите о вашем проекте" required></textarea>
                         </div>
-                    </div>
-                    <div class="flex flex-col">
-                        <label for="message"
-                            class="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
-                            data-i18n="label_message">Сообщение</label>
-                        <textarea id="message" name="message" rows="4"
-                            class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white transition-shadow resize-none"
-                            data-i18n-target="placeholder" data-i18n="placeholder_message"
-                            placeholder="Расскажите о вашем проекте" required></textarea>
-                    </div>
-                    <button type="submit"
-                        class="w-full bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 transition-all text-white font-bold py-3.5 rounded-xl shadow-md flex items-center justify-center gap-2 mt-2">
-                        <i class="fas fa-paper-plane"></i> <span data-i18n="btn_send">Отправить</span>
-                    </button>
-                    <div class="text-center text-sm font-semibold hidden mt-2" id="formMessage"></div>
-                </form>
+                        <button type="submit"
+                            class="w-full bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg hover:-translate-y-0.5 transition-all text-white font-bold py-3.5 rounded-xl shadow-md flex items-center justify-center gap-2 mt-2">
+                            <i class="fas fa-paper-plane"></i> <span data-i18n="btn_send">Отправить</span>
+                        </button>
+                        <div class="text-center text-sm font-semibold hidden mt-2" id="formMessage"></div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -1198,7 +1201,8 @@
                 <!-- API Setup (hidden if configured) -->
                 <div id="ai-setup-area"
                     class="bg-indigo-50 dark:bg-slate-800 rounded-xl p-4 border border-indigo-100 dark:border-slate-700 hidden">
-                    <p class="text-xs text-gray-500 mb-2" data-i18n="ai_setup_help">Для работы оффлайн-клиента требуется
+                    <p class="text-xs text-gray-500 mb-2" data-i18n="ai_setup_help">Для работы оффлайн-клиента
+                        требуется
                         ваш API ключ Gemini.</p>
                     <form id="ai-api-form" class="flex gap-2">
                         <label for="ai-api-key" class="sr-only">Gemini API Key</label>
@@ -1212,7 +1216,8 @@
                     </form>
                     <p class="text-[10px] text-gray-400 mt-2 text-right"><a
                             href="https://aistudio.google.com/app/apikey" target="_blank"
-                            class="underline hover:text-indigo-600" data-i18n="ai_free_key">Получить бесплатный ключ</a>
+                            class="underline hover:text-indigo-600" data-i18n="ai_free_key">Получить бесплатный
+                            ключ</a>
                     </p>
                 </div>
 
