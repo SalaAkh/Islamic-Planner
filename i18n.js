@@ -254,7 +254,23 @@ const translations = {
     }
 };
 
-let currentLang = localStorage.getItem('barakah_lang') || 'ru';
+// Get language from URL first (for SEO indexing), then fallback to localStorage or 'ru'
+function getInitialLanguage() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const langParam = urlParams.get('lang');
+        if (langParam && ['ru', 'kk', 'en', 'ar'].includes(langParam)) {
+            // Optional: Store it so next visits remember this URL lang
+            localStorage.setItem('barakah_lang', langParam);
+            return langParam;
+        }
+    } catch (e) {
+        console.error("URL parsing error for lang", e);
+    }
+    return localStorage.getItem('barakah_lang') || 'ru';
+}
+
+let currentLang = getInitialLanguage();
 
 function applyTranslations(lang) {
     const dict = translations[lang] || translations['ru'];
@@ -338,6 +354,17 @@ function initI18n() {
             else currentLang = 'ru';
 
             localStorage.setItem('barakah_lang', currentLang);
+            // Update the URL
+            try {
+                const newUrl = new URL(window.location.href);
+                if (newUrl.searchParams.get('lang') !== currentLang) {
+                    newUrl.searchParams.set('lang', currentLang);
+                    window.history.replaceState({ path: newUrl.href }, '', newUrl.href);
+                }
+            } catch (e) {
+                console.error("Failed to update URL", e);
+            }
+
             applyTranslations(currentLang);
             updateLangIcon(currentLang);
 

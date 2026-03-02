@@ -12,8 +12,9 @@
     <meta name="description"
         content="Планируй свой день по Исламу: трекер намазов (Фаджр, Зухр, Аср, Магриб, Иша), цели Ахирата и Дуньи, доска идей Tafakkur, облачная синхронизация Firebase. Бесплатно и без рекламы.">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+    <meta name="application-name" content="Barakah Planner">
+    <meta name="apple-mobile-web-app-title" content="Barakah Planner">
     <link rel="canonical" href="https://islamic-planer.web.app">
-
     <!-- ═══════════════════════════════════════════════════════════════ -->
     <!-- KEYWORDS — РУССКИЙ                                             -->
     <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -77,35 +78,31 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Barakah Planner",
-      "alternateName": [
-        "Barakah Planner — Исламский Ежедневник",
-        "Barakah Planner — Мұсылман Жоспарлаушы",
-        "Barakah Planner — مخطط إسلامي",
-        "Barakah Planner — Islamic Daily Planner"
-      ],
-      "description": "Islamic daily planner with prayer tracker (Fajr, Dhuhr, Asr, Maghrib, Isha), Akhirah & Dunya goals, Tafakkur idea board, and cloud sync. Free, no ads. Available in Russian, Kazakh, Arabic and English.",
-      "url": "https://islamic-planer.web.app",
-      "applicationCategory": "ProductivityApplication",
-      "operatingSystem": "Web, Android (PWA), iOS (PWA)",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-      "inLanguage": ["ru", "kk", "en", "ar"],
-      "keywords": [
-        "islamic-planer", "islamic-planner", "islamic planer", "islamic planner", "Barakah Planner", "barakah-planner", "barakah planer", "barakah plan",
-        "Исламский Ежедневник", "исламский планировщик", "исламский дневник", "мусульманский ежедневник", "дневник мусульманина", "барака планер",
-        "исламдық жоспарлаушы", "мұсылман күнделігі", "барака жоспарлаушы",
-        "مخطط إسلامي", "تطبيق مسلم", "بركة بلانر", "يوميات مسلم",
-        "Akhirah goals", "Dunya goals", "Tafakkur", "adhkar", "sadaqah tracker", "islamic productivity"
-      ],
-      "audience": {
-        "@type": "Audience",
-        "audienceType": "Muslim, Islamic community, Arabic speakers, Russian speakers, Kazakh speakers"
-      },
-      "creator": {
-        "@type": "Organization",
-        "name": "Barakah Planner"
-      }
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://islamic-planer.web.app/#website",
+          "url": "https://islamic-planer.web.app",
+          "name": "Barakah Planner",
+          "alternateName": [
+            "Barakah Planner — Исламский Ежедневник",
+            "Barakah Planner — Мұсылман Жоспарлаушы",
+            "Barakah Planner — مخطط إسلامي",
+            "Исламский Ежедневник Барка"
+          ],
+          "inLanguage": ["ru", "kk", "en", "ar"]
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://islamic-planer.web.app/#webapp",
+          "name": "Barakah Planner",
+          "url": "https://islamic-planer.web.app",
+          "description": "Islamic daily planner with prayer tracker (Fajr, Dhuhr, Asr, Maghrib, Isha), Akhirah & Dunya goals, Tafakkur idea board, and cloud sync. Free, no ads. Available in Russian, Kazakh, Arabic and English.",
+          "applicationCategory": "ProductivityApplication",
+          "operatingSystem": "Web, Android (PWA), iOS (PWA)",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+        }
+      ]
     }
     </script>
 

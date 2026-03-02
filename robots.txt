@@ -1,5 +1,13 @@
 User-agent: *
 Allow: /
 Disallow: /node_modules/
+Disallow: /firebase-debug.log*
+Disallow: /.vscode/
+Disallow: /.env
+Disallow: /.gitignore
+Disallow: /.firebase/
+Disallow: /google-services.json
+Disallow: /github/
+Disallow: /guides/
 
 Sitemap: https://islamic-planer.web.app/sitemap.xml
