@@ -197,7 +197,7 @@ function initDailyPlanner() {
             const newRow = document.createElement('div');
             newRow.className = 'flex items-center';
             newRow.innerHTML = `
-                <button data-task-id="t_dyn_${blockIndex}_${newIndex}" aria-label="Отметить задачу" class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors mr-3"></button>
+                <button data-task-id="t_dyn_${blockIndex}_${newIndex}" aria-label="Отметить задачу" class="task-toggle shrink-0 mr-3"></button>
                 <textarea data-id="task_dyn_${blockIndex}_${newIndex}" id="task_dyn_${blockIndex}_${newIndex}" name="task_dyn_${blockIndex}_${newIndex}" rows="1" style="resize:none; overflow:hidden;" placeholder="Новая задача..." autocomplete="off" aria-label="Новая задача" class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500 w-full"></textarea>
             `;
 
@@ -261,7 +261,7 @@ function renderDailyPlanner() {
                     const newRow = document.createElement('div');
                     newRow.className = 'flex items-center';
                     newRow.innerHTML = `
-                        <button data-task-id="t_dyn_${dynId}" aria-label="Отметить задачу" class="task-toggle w-5 h-5 sm:w-6 sm:h-6 shrink-0 rounded-[6px] border-[1.5px] border-slate-300 dark:border-slate-500 hover:bg-green-50 dark:hover:bg-green-900/30 flex justify-center items-center text-[10px] sm:text-xs text-transparent transition-colors mr-3"></button>
+                        <button data-task-id="t_dyn_${dynId}" aria-label="Отметить задачу" class="task-toggle shrink-0 mr-3"></button>
                         <textarea data-id="${key}" id="${key}" name="${key}" rows="1" style="resize:none; overflow:hidden;" autocomplete="off" aria-label="Задача" class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500 w-full"></textarea>
                     `;
                     container.appendChild(newRow);
