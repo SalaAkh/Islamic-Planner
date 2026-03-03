@@ -100,12 +100,3 @@ if (fs.existsSync(PUBLIC_DIR)) {
 // 7. Write final monolith
 fs.writeFileSync(path.join(DIST_DIR, 'index.html'), html);
 console.log('✅ Build complete! Monolithic file generated at dist/index.html');
-
-// 8. Generate Language Pages (synchronous — must complete before firebase deploy)
-console.log('\n[Barakah Builder] Generating language pages...');
-try {
-    execSync('node build-lang-pages.js', { stdio: 'inherit' });
-} catch (e) {
-    console.error('❌ build-lang-pages.js failed:', e.message);
-    process.exit(1);
-}
