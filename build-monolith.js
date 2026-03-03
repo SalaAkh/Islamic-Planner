@@ -2,17 +2,17 @@ import fs from 'fs';
 import path from 'path';
 import 'dotenv/config';
 
-console.log('[SurviveKit Builder] Starting monolithic build...');
+console.log('[Barakah Builder] Starting monolithic build...');
 
 const DIST_DIR = './dist';
 if (!fs.existsSync(DIST_DIR)) {
     fs.mkdirSync(DIST_DIR);
 }
 
-// 1. Читаем исходный index.html
+// 1. Read source index.html
 let html = fs.readFileSync('./index.html', 'utf8');
 
-// 2. Встраиваем CSS
+// 2. Inline CSS
 console.log('Inlining tailwind.css...');
 if (fs.existsSync('./src/css/tailwind.css')) {
     const css = fs.readFileSync('./src/css/tailwind.css', 'utf8');
@@ -24,33 +24,46 @@ if (fs.existsSync('./src/css/tailwind.css')) {
     console.warn('⚠️ tailwind.css not found! Build before running this script.');
 }
 
-// 3. Встраиваем JS файлы
-const scriptsToInline = ['crypto-storage.js', 'i18n.js', 'store.js', 'ai.js', 'board.js', 'main.js', 'auth.js', 'db.js', 'firebase-init.js'];
+// 3. Inline ALL JS scripts — preserve type="module" and defer
+const scriptsToInline = [
+    'crypto-storage.js',
+    'i18n.js',
+    'store.js',
+    'ai.js',
+    'board.js',
+    'main.js',
+    'activity-log.js',
+    'auth.js',
+    'db.js',
+    'firebase-init.js'
+];
 
 scriptsToInline.forEach(script => {
     console.log(`Inlining ${script}...`);
     if (fs.existsSync(`./src/js/${script}`)) {
         const js = fs.readFileSync(`./src/js/${script}`, 'utf8');
-        // Находим тег <script ... src="./src/js/script(?v=...)"></script>
-        // Регулярное выражение теперь учитывает возможные атрибуты (type, defer) и query-параметры (?v=...)
-        const regex = new RegExp(`<script[^>]*src="\\.\\/src\\/js\\/${script.replace('.', '\\.')}(?:\\?[^"]*)?"[^>]*><\\/script>`, 'g');
+        const escapedName = script.replace('.', '\\.');
+        const regex = new RegExp(`<script([^>]*)src="\\.\\/src\\/js\\/${escapedName}(?:\\?[^"]*)?"([^>]*)><\\/script>`, 'g');
 
         let matchFound = false;
-        html = html.replace(regex, (match) => {
+        html = html.replace(regex, (match, before, after) => {
             matchFound = true;
-            const isDefer = match.includes('defer');
+            const attrs = (before + ' ' + after).trim();
+            const isModule = /type=["']module["']/.test(attrs);
+            const isDefer = /\bdefer\b/.test(attrs);
 
-            // Замена ключа Firebase, если мы внедряем firebase-init.js
             let finalJs = js;
             if (script === 'firebase-init.js') {
                 const apiKey = process.env.FIREBASE_API_KEY || '';
                 finalJs = finalJs.replace('__FIREBASE_API_KEY__', apiKey);
                 if (!apiKey) {
-                    console.warn('⚠️ WARNING: FIREBASE_API_KEY is not set in environment. Firebase won\'t initialize properly.');
+                    console.warn("⚠️ WARNING: FIREBASE_API_KEY is not set.");
                 }
             }
 
-            return `<script${isDefer ? ' defer' : ''}>\n${finalJs}\n</script>`;
+            const typeAttr = isModule ? ' type="module"' : '';
+            const deferAttr = isDefer ? ' defer' : '';
+            return `<script${typeAttr}${deferAttr}>\n${finalJs}\n</script>`;
         });
 
         if (!matchFound) {
@@ -61,16 +74,28 @@ scriptsToInline.forEach(script => {
     }
 });
 
-// 4. Копируем статику из public в dist
+// 4. Fix paths that pointed to ./public/ — in dist they're in the root
+html = html.replace(/\.\/public\/favicon\.ico/g, './favicon.ico');
+html = html.replace(/\.\/public\/sw\.js/g, './sw.js');
+html = html.replace(/\.\/public\/manifest\.json/g, './manifest.json');
+
+// 5. Copy assets from public/ to dist/ root (sw.js, manifest.json, favicon, banners, og-images)
 const PUBLIC_DIR = './public';
 if (fs.existsSync(PUBLIC_DIR)) {
-    console.log('Copying public assets (manifest.json, sw.js, favicon.ico)...');
+    console.log('Copying public assets to dist root...');
     const files = fs.readdirSync(PUBLIC_DIR);
     files.forEach(file => {
         fs.copyFileSync(path.join(PUBLIC_DIR, file), path.join(DIST_DIR, file));
     });
 }
 
-// 5. Сохраняем результат
+// 6. Copy sitemap and robots
+['sitemap.xml', 'robots.txt'].forEach(f => {
+    if (fs.existsSync(`./${f}`)) {
+        fs.copyFileSync(`./${f}`, path.join(DIST_DIR, f));
+    }
+});
+
+// 7. Write final monolith
 fs.writeFileSync(path.join(DIST_DIR, 'index.html'), html);
 console.log('✅ Build complete! Monolithic file generated at dist/index.html');
