@@ -769,16 +769,20 @@
                     <div class="flex flex-wrap gap-2 items-center">
                         <button id="add-note-yellow"
                             class="w-10 h-10 rounded-full bg-yellow-200 border-2 border-yellow-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-yellow-700 tooltip"
-                            aria-label="Жёлтый стикер"><i class="fas fa-plus"></i></button>
+                            aria-label="Жёлтый стикер" data-i18n="sticker_yellow" data-i18n-target="aria-label"><i
+                                class="fas fa-plus"></i></button>
                         <button id="add-note-green"
                             class="w-10 h-10 rounded-full bg-green-200 border-2 border-green-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-green-700 dark:text-green-400 tooltip"
-                            aria-label="Зелёный стикер"><i class="fas fa-plus"></i></button>
+                            aria-label="Зелёный стикер" data-i18n="sticker_green" data-i18n-target="aria-label"><i
+                                class="fas fa-plus"></i></button>
                         <button id="add-note-blue"
                             class="w-10 h-10 rounded-full bg-blue-200 border-2 border-blue-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-blue-700 tooltip"
-                            aria-label="Синий стикер"><i class="fas fa-plus"></i></button>
+                            aria-label="Синий стикер" data-i18n="sticker_blue" data-i18n-target="aria-label"><i
+                                class="fas fa-plus"></i></button>
                         <button id="add-note-pink"
                             class="w-10 h-10 rounded-full bg-pink-200 border-2 border-pink-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-pink-700 dark:text-pink-400 tooltip"
-                            aria-label="Розовый стикер"><i class="fas fa-plus"></i></button>
+                            aria-label="Розовый стикер" data-i18n="sticker_pink" data-i18n-target="aria-label"><i
+                                class="fas fa-plus"></i></button>
                         <div class="w-px h-8 bg-gray-200 mx-1 hidden md:block"></div>
                         <button id="reset-board-view"
                             class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold transition-colors">
@@ -1027,10 +1031,13 @@
                         <i class="fas fa-history text-xl"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-slate-900 dark:text-white text-xl tracking-tight leading-tight">
+                        <h3 class="font-bold text-slate-900 dark:text-white text-xl tracking-tight leading-tight"
+                            data-i18n="audit_title">
                             История активности</h3>
                         <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">
-                            Последние <span class="text-indigo-600 dark:text-indigo-400 font-bold">50</span> событий
+                            <span data-i18n="audit_subtitle_prefix">Последние</span> <span
+                                class="text-indigo-600 dark:text-indigo-400 font-bold">50</span> <span
+                                data-i18n="audit_subtitle_suffix">событий</span>
                         </p>
                     </div>
                 </div>

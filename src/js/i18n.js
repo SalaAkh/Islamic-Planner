@@ -78,7 +78,22 @@ const translations = {
         "lang_changed": "Язык изменен",
         "log_user_login": "Вход в аккаунт", "log_user_logout": "Выход из аккаунта", "log_user_register": "Регистрация",
         "aria_mark_task": "Отметить задачу", "aria_new_task": "Новая задача", "ph_new_task": "Новая задача...",
-        "btn_delete_goal": "Удалить"
+        "btn_delete_goal": "Удалить",
+        "goals_quran": "وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ",
+        "goals_quran_desc": "«Человеку уготовано только то, к чему он стремился» (Коран 53:39)",
+        "board_desc": "Бесконечный холст · Pinch-to-zoom на мобильном",
+        "auth_name_label": "Имя пользователя",
+        "audit_title": "История активности",
+        "audit_subtitle_prefix": "Последние",
+        "audit_subtitle_suffix": "событий",
+        "note_placeholder": "Бисмиллях...",
+        "sticker_yellow": "Жёлтый стикер",
+        "sticker_green": "Зелёный стикер",
+        "sticker_blue": "Синий стикер",
+        "sticker_pink": "Розовый стикер",
+        "drawing_cleared_toast": "Рисунок очищен",
+        "note_deleted_toast": "Стикер удален",
+        "note_created_toast": "МашаАллах, стикер добавлен 🌱"
     },
     kk: {
         "seo_title": "Barakah Planner — Исламдық Күнделік және Намаз Жоспарлаушы",
@@ -158,7 +173,22 @@ const translations = {
         "lang_changed": "Тіл өзгертілді",
         "log_user_login": "Тіркелгіге кіру", "log_user_logout": "Тіркелгіден шығу", "log_user_register": "Тіркелу",
         "aria_mark_task": "Тапсырманы белгілеу", "aria_new_task": "Жаңа тапсырма", "ph_new_task": "Жаңа тапсырма...",
-        "btn_delete_goal": "Жою"
+        "btn_delete_goal": "Жою",
+        "goals_quran": "وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ",
+        "goals_quran_desc": "«Адамға тек өзі талпынған нәрсе ғана беріледі» (Құран 53:39)",
+        "board_desc": "Шексіз кенеп · Мобильдіқ құрылғыда Pinch-to-zoom",
+        "auth_name_label": "Пайдаланушы аты",
+        "audit_title": "Белсенділік тарихы",
+        "audit_subtitle_prefix": "Соңғы",
+        "audit_subtitle_suffix": "оқиға",
+        "note_placeholder": "Бисмилләһ...",
+        "sticker_yellow": "Сары стикер",
+        "sticker_green": "Жасыл стикер",
+        "sticker_blue": "Көк стикер",
+        "sticker_pink": "Қызғылт стикер",
+        "drawing_cleared_toast": "Сурет тазартылды",
+        "note_deleted_toast": "Стикер жойылды",
+        "note_created_toast": "МашаАллах, стикер қосылды 🌱"
     },
     ar: {
         "seo_title": "Barakah Planner — يوميات إسلامية ومخطط الصلاة",
@@ -238,7 +268,22 @@ const translations = {
         "lang_changed": "تم تغيير اللغة",
         "log_user_login": "تسجيل الدخول", "log_user_logout": "تسجيل الخروج", "log_user_register": "التسجيل",
         "aria_mark_task": "تحديد المهمة", "aria_new_task": "مهمة جديدة", "ph_new_task": "مهمة جديدة...",
-        "btn_delete_goal": "حذف"
+        "btn_delete_goal": "حذف",
+        "goals_quran": "وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ",
+        "goals_quran_desc": "«وليس للإنسان إلا ما سعى» (القرآن 53:39)",
+        "board_desc": "مساحة غير محدودة · تكبير/تصغير على الموبايل",
+        "auth_name_label": "اسم المستخدم",
+        "audit_title": "سجل النشاط",
+        "audit_subtitle_prefix": "آخر",
+        "audit_subtitle_suffix": "أحداث",
+        "note_placeholder": "بسم الله...",
+        "sticker_yellow": "ملصق أصفر",
+        "sticker_green": "ملصق أخضر",
+        "sticker_blue": "ملصق أزرق",
+        "sticker_pink": "ملصق وردي",
+        "drawing_cleared_toast": "تم مسح الرسم",
+        "note_deleted_toast": "تم حذف الملصق",
+        "note_created_toast": "ما شاء الله، تم إضافة ملصق 🌱"
     },
     en: {
         "seo_title": "Barakah Planner — Islamic Daily Planner & Prayer Tracker",
@@ -318,7 +363,22 @@ const translations = {
         "lang_changed": "Language changed",
         "log_user_login": "Logged in", "log_user_logout": "Logged out", "log_user_register": "Registered",
         "aria_mark_task": "Mark task", "aria_new_task": "New task", "ph_new_task": "New task...",
-        "btn_delete_goal": "Delete"
+        "btn_delete_goal": "Delete",
+        "goals_quran": "وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ",
+        "goals_quran_desc": "\"Man will only have what he strove for\" (Quran 53:39)",
+        "board_desc": "Infinite canvas \u00b7 Pinch-to-zoom on mobile",
+        "auth_name_label": "Username",
+        "audit_title": "Activity History",
+        "audit_subtitle_prefix": "Last",
+        "audit_subtitle_suffix": "events",
+        "note_placeholder": "Bismillah...",
+        "sticker_yellow": "Yellow sticker",
+        "sticker_green": "Green sticker",
+        "sticker_blue": "Blue sticker",
+        "sticker_pink": "Pink sticker",
+        "drawing_cleared_toast": "Drawing cleared",
+        "note_deleted_toast": "Sticker removed",
+        "note_created_toast": "Mashallah, sticker added 🌱"
     }
 };
 
@@ -377,6 +437,7 @@ function applyTranslations(lang) {
                 if (target === 'placeholder') el.placeholder = dict[key];
                 else if (target === 'value') el.value = dict[key];
                 else if (target === 'title') el.title = dict[key];
+                else if (target.includes('-')) el.setAttribute(target, dict[key]);
                 else el[target] = dict[key];
             } else {
                 // Если это инпут или текстарея с data-i18n-target="placeholder"

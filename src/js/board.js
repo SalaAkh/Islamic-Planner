@@ -92,7 +92,7 @@ window.initBoard = function (showToast) {
         btnClearDrawing.addEventListener('click', () => {
             ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
             Store.clearDrawing();   // async IndexedDB delete
-            showToastSafe('Рисунок очищен');
+            showToastSafe((window.t && window.t('drawing_cleared_toast')) || 'Рисунок очищен');
         });
     }
 
@@ -361,7 +361,7 @@ window.initBoard = function (showToast) {
 
         const textarea = document.createElement('textarea');
         textarea.className = 'sticky-content handwriting';
-        textarea.placeholder = 'Бисмиллях...';
+        textarea.placeholder = (window.t && window.t('note_placeholder')) || 'Бисмиллях...';
         textarea.value = noteData.text || '';
 
         header.appendChild(deleteBtn);
@@ -382,7 +382,7 @@ window.initBoard = function (showToast) {
             setTimeout(() => el.remove(), 200);
             state.notes = state.notes.filter(n => n.id !== noteData.id);
             saveBoardData();
-            showToastSafe('Стикер удален');
+            showToastSafe((window.t && window.t('note_deleted_toast')) || 'Стикер удален');
             window.ActivityLog?.log('note_deleted', { noteId: noteData.id, color: noteData.color });
         });
 
@@ -450,7 +450,7 @@ window.initBoard = function (showToast) {
         setTimeout(() => { el.style.transform = ''; el.style.opacity = '1'; }, 10);
         saveBoardData();
         setTimeout(() => el.querySelector('textarea').focus(), 50);
-        showToastSafe('МашаАллах, стикер добавлен 🌱');
+        showToastSafe((window.t && window.t('note_created_toast')) || 'МашаАллах, стикер добавлен 🌱');
         window.ActivityLog?.log('note_created', { noteId: newNote.id, color });
     }
 
