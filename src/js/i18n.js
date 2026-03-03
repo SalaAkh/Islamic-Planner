@@ -93,7 +93,8 @@ const translations = {
         "sticker_pink": "Розовый стикер",
         "drawing_cleared_toast": "Рисунок очищен",
         "note_deleted_toast": "Стикер удален",
-        "note_created_toast": "МашаАллах, стикер добавлен 🌱"
+        "note_created_toast": "МашаАллах, стикер добавлен 🌱",
+        "shortcut_draw": "рисунок", "shortcut_eraser": "ластик", "shortcut_hand": "рука", "shortcut_pan": "пан"
     },
     kk: {
         "seo_title": "Barakah Planner — Исламдық Күнделік және Намаз Жоспарлаушы",
@@ -188,7 +189,8 @@ const translations = {
         "sticker_pink": "Қызғылт стикер",
         "drawing_cleared_toast": "Сурет тазартылды",
         "note_deleted_toast": "Стикер жойылды",
-        "note_created_toast": "МашаАллах, стикер қосылды 🌱"
+        "note_created_toast": "МашаАллах, стикер қосылды 🌱",
+        "shortcut_draw": "сурет", "shortcut_eraser": "өшіргіш", "shortcut_hand": "қол", "shortcut_pan": "жылжыту"
     },
     ar: {
         "seo_title": "Barakah Planner — يوميات إسلامية ومخطط الصلاة",
@@ -283,7 +285,8 @@ const translations = {
         "sticker_pink": "ملصق وردي",
         "drawing_cleared_toast": "تم مسح الرسم",
         "note_deleted_toast": "تم حذف الملصق",
-        "note_created_toast": "ما شاء الله، تم إضافة ملصق 🌱"
+        "note_created_toast": "ما شاء الله، تم إضافة ملصق 🌱",
+        "shortcut_draw": "رسم", "shortcut_eraser": "ممحاة", "shortcut_hand": "يد", "shortcut_pan": "تحريк"
     },
     en: {
         "seo_title": "Barakah Planner — Islamic Daily Planner & Prayer Tracker",
@@ -378,7 +381,8 @@ const translations = {
         "sticker_pink": "Pink sticker",
         "drawing_cleared_toast": "Drawing cleared",
         "note_deleted_toast": "Sticker removed",
-        "note_created_toast": "Mashallah, sticker added 🌱"
+        "note_created_toast": "Mashallah, sticker added 🌱",
+        "shortcut_draw": "draw", "shortcut_eraser": "eraser", "shortcut_hand": "hand", "shortcut_pan": "pan"
     }
 };
 

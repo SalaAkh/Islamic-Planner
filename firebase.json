@@ -79,6 +79,23 @@
                 ]
             }
         ],
+        "redirects": [
+            {
+                "source": "/kk{,/**}",
+                "destination": "/?lang=kk",
+                "type": 301
+            },
+            {
+                "source": "/en{,/**}",
+                "destination": "/?lang=en",
+                "type": 301
+            },
+            {
+                "source": "/ar{,/**}",
+                "destination": "/?lang=ar",
+                "type": 301
+            }
+        ],
         "rewrites": [
             {
                 "source": "/sitemap.xml",
