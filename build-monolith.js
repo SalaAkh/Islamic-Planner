@@ -17,7 +17,7 @@ console.log('Inlining tailwind.css...');
 if (fs.existsSync('./src/css/tailwind.css')) {
     const css = fs.readFileSync('./src/css/tailwind.css', 'utf8');
     html = html.replace(
-        '<link rel="stylesheet" href="./src/css/tailwind.css?v=4">',
+        /<link\s+rel="stylesheet"\s+href="\.\/src\/css\/tailwind\.css\?v=\d+">/g,
         `<style>\n${css}\n</style>`
     );
 } else {
