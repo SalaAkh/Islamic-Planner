@@ -24,7 +24,7 @@ jobs:
         run: npm install -g @tailwindcss/cli
 
       - name: Build CSS
-        run: tailwindcss -i ./style.css -o ./tailwind.css --minify
+        run: npx @tailwindcss/cli -i ./src/css/style.css -o ./src/css/tailwind.css --minify
 
       - name: Build monolith
         env:
