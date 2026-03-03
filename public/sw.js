@@ -1,4 +1,4 @@
-const CACHE_NAME = 'barakah-planner-v7';
+const CACHE_NAME = 'barakah-planner-v8';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -13,7 +13,7 @@ self.addEventListener('install', (event) => {
         caches.open(CACHE_NAME)
             .then((cache) => cache.addAll(ASSETS_TO_CACHE))
             .then(() => self.skipWaiting())
-            .catch(err => console.warn('[SurviveKit] SW cache addAll failed on some assets, this is acceptable for singlefile builds:', err))
+            .catch(err => console.warn('[Barakah Planner] SW cache addAll failed on some assets, this is acceptable for singlefile builds:', err))
     );
 });
 
