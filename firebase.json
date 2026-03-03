@@ -63,6 +63,38 @@
         ],
         "rewrites": [
             {
+                "source": "/sitemap.xml",
+                "destination": "/sitemap.xml"
+            },
+            {
+                "source": "/robots.txt",
+                "destination": "/robots.txt"
+            },
+            {
+                "source": "/kk",
+                "destination": "/kk/index.html"
+            },
+            {
+                "source": "/kk/**",
+                "destination": "/kk/index.html"
+            },
+            {
+                "source": "/en",
+                "destination": "/en/index.html"
+            },
+            {
+                "source": "/en/**",
+                "destination": "/en/index.html"
+            },
+            {
+                "source": "/ar",
+                "destination": "/ar/index.html"
+            },
+            {
+                "source": "/ar/**",
+                "destination": "/ar/index.html"
+            },
+            {
                 "source": "**",
                 "destination": "/index.html"
             }

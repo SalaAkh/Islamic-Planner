@@ -203,7 +203,7 @@ function initDailyPlanner() {
 
             if (listContainer) {
                 listContainer.appendChild(newRow);
-                newRow.querySelector('input').focus();
+                newRow.querySelector('textarea').focus();
                 saveDailyData();
             }
         }
@@ -297,9 +297,11 @@ function renderDailyPlanner() {
         const targetInputId = btn.nextElementSibling.getAttribute('data-id');
         if (data.tasks && data.tasks[targetInputId]) {
             btn.classList.add('task-done', 'text-green-700', 'border-green-700');
+            btn.classList.remove('text-transparent');
             btn.innerHTML = '<i class="fas fa-check"></i>';
         } else {
             btn.classList.remove('task-done', 'text-green-700', 'border-green-700');
+            btn.classList.add('text-transparent');
             btn.innerHTML = '';
         }
     });
@@ -363,11 +365,13 @@ function toggleTask(btn) {
     const input = btn.nextElementSibling;
     if (!btn.classList.contains('task-done')) {
         btn.classList.add('task-done', 'text-green-700', 'border-green-700');
+        btn.classList.remove('text-transparent');
         btn.innerHTML = '<i class="fas fa-check"></i>';
         input.classList.add('line-through', 'text-gray-400', 'opacity-60');
         window.ActivityLog?.log('task_toggled', { state: 'done', task: input.value?.slice(0, 60) });
     } else {
         btn.classList.remove('task-done', 'text-green-700', 'border-green-700');
+        btn.classList.add('text-transparent');
         btn.innerHTML = '';
         input.classList.remove('line-through', 'text-gray-400', 'opacity-60');
         window.ActivityLog?.log('task_toggled', { state: 'undone', task: input.value?.slice(0, 60) });

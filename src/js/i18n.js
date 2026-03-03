@@ -365,24 +365,25 @@ function initI18n() {
             else currentLang = 'ru';
 
             localStorage.setItem('barakah_lang', currentLang);
-            // Update the URL
-            try {
-                const newUrl = new URL(window.location.href);
-                if (newUrl.searchParams.get('lang') !== currentLang) {
-                    newUrl.searchParams.set('lang', currentLang);
-                    window.history.replaceState({ path: newUrl.href }, '', newUrl.href);
-                }
-            } catch (e) {
-                console.error("Failed to update URL", e);
+
+            // Navigate to the static language page for correct social previews
+            const langPaths = { ru: '/', kk: '/kk/', ar: '/ar/', en: '/en/' };
+            const targetPath = langPaths[currentLang];
+
+            // Only redirect if we're actually changing path
+            const currentPath = window.location.pathname;
+            const currentBase = currentPath.replace(/^\/(ru|kk|ar|en)(\/.*)?$/, '/') || currentPath;
+            const alreadyOnPath = currentPath === targetPath || currentPath === targetPath.replace(/\/$/, '');
+
+            if (!alreadyOnPath) {
+                window.location.href = targetPath;
+            } else {
+                // Same language page — just re-apply translations (edge case)
+                applyTranslations(currentLang);
+                updateLangIcon(currentLang);
+                document.dispatchEvent(new CustomEvent('langChanged', { detail: currentLang }));
+                showToast('Язык изменен / Тіл өзгертілді / تم تغيير اللغة');
             }
-
-            applyTranslations(currentLang);
-            updateLangIcon(currentLang);
-
-            // Отправляем событие о смене языка
-            document.dispatchEvent(new CustomEvent('langChanged', { detail: currentLang }));
-
-            showToast('Язык изменен / Тіл өзгертілді / تم تغيير اللغة');
         });
     }
 }

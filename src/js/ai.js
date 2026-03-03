@@ -265,6 +265,7 @@ class AiAssistant {
                 const toggle = input.previousElementSibling;
                 if (toggle && toggle.classList.contains('task-done')) {
                     toggle.classList.remove('task-done', 'text-green-700', 'border-green-700');
+                    toggle.classList.add('text-transparent');
                     toggle.innerHTML = '';
                 }
                 taskIndex++;
