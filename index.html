@@ -128,21 +128,38 @@
             if (isLocal) {
                 const savedPwd = sessionStorage.getItem('local_planer_access');
                 if (savedPwd !== "admin") {
-                    const pwd = prompt("Ассаляму алейкум! Введите пароль для локального доступа:");
+                    const lang = navigator.language.substring(0, 2);
+                    const prompts = {
+                        ru: { p: 'Ассаляму алейкум! Введите пароль для локального доступа:', title: 'Доступ закрыт.', desc: 'ИншаАллах, в следующий раз вспомните пароль.', btn: 'Попробовать снова' },
+                        kk: { p: 'Ассалаумағалейкүм! Жергілікті қолжетімділік үшін құпиясөзді енгізіңіз:', title: 'Қолжетімділік жабық.', desc: 'ИншаАллах, келесі жолы құпиясөзді есіңізге түсірерсіз.', btn: 'Қайталап көру' },
+                        ar: { p: 'السلام عليكم! أدخل كلمة المرور للوصول المحلي:', title: 'الوصول مغلق.', desc: 'إن شاء الله، تذكر كلمة المرور في المرة القادمة.', btn: 'حاول مرة أخرى' },
+                        en: { p: 'Assalamu alaikum! Enter the password for local access:', title: 'Access denied.', desc: 'Inshallah, you will remember the password next time.', btn: 'Try again' }
+                    };
+                    const tps = prompts[lang] || prompts['ru'];
+                    const pwd = prompt(tps.p);
                     if (pwd === "admin") {
                         sessionStorage.setItem('local_planer_access', "admin");
                     } else {
-                        document.documentElement.innerHTML = "<body style='display:flex;justify-content:center;align-items:center;height:100vh;background:#0f172a;color:#ef4444;font-family:sans-serif;text-align:center;padding:20px;'><div style='max-width:500px;'><h1>Доступ закрыт.</h1><p style='color:#94a3b8;'>ИншаАллах, в следующий раз вспомните пароль.</p><button onclick='location.reload()' style='background:#1e293b; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; margin-top:20px;'>Попробовать снова</button></div></body>";
+                        document.documentElement.innerHTML = "<body style='display:flex;justify-content:center;align-items:center;height:100vh;background:#0f172a;color:#ef4444;font-family:sans-serif;text-align:center;padding:20px;'><div style='max-width:500px;'><h1>" + tps.title + "</h1><p style='color:#94a3b8;'>" + tps.desc + "</p><button onclick='location.reload()' style='background:#1e293b; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; margin-top:20px;'>" + tps.btn + "</button></div></body>";
                         return;
                     }
                 }
 
                 // Добавляем индикатор локального режима
                 window.addEventListener('DOMContentLoaded', () => {
+                    const lang = navigator.language.substring(0, 2);
+                    const msg = {
+                        ru: { banner: "⚠️ Локальный режим (CORS ограничение). Облачная синхронизация отключена.", errTitle: "Ошибка загрузки модулей:", errDesc: "Браузер блокирует скрипты при открытии через файл (CORS).", errSub: "Приложение работает в автономном режиме. Данные сохраняются локально." },
+                        kk: { banner: "⚠️ Жергілікті режим (CORS шектеуі). Бұлтты синхрондау өшірілген.", errTitle: "Модульдерді жүктеу қатесі:", errDesc: "Файл арқылы ашқанда браузер скрипттерді бұғаттайды (CORS).", errSub: "Қолданба офлайн режимде жұмыс істейді. Деректер жергілікті сақталады." },
+                        ar: { banner: "⚠️ الوضع المحلي (قيود CORS). المزامنة السحابية معطلة.", errTitle: "خطأ في تحميل الوحدات:", errDesc: "يحظر المتصفح البرامج النصية عند فتحها عبر ملف (CORS).", errSub: "يعمل التطبيق في وضع عدم الاتصال. يتم حفظ البيانات محليًا." },
+                        en: { banner: "⚠️ Local mode (CORS restriction). Cloud sync is disabled.", errTitle: "Module loading error:", errDesc: "Browser blocks scripts when opening via file (CORS).", errSub: "The app works offline. Data is saved locally." }
+                    };
+                    const m = msg[lang] || msg['ru'];
+
                     const banner = document.createElement('div');
                     banner.id = "local-mode-banner";
                     banner.style = "position:fixed; top:0; left:50%; transform:translateX(-50%); background:rgba(245, 158, 11, 0.9); color:black; padding:4px 15px; font-size:11px; font-weight:bold; border-radius:0 0 10px 10px; z-index:9999; backdrop-filter:blur(5px); pointer-events:none; text-align:center;";
-                    banner.innerHTML = "⚠️ Локальный режим (CORS ограничение). Облачная синхронизация отключена.";
+                    banner.innerHTML = m.banner;
                     document.body.appendChild(banner);
 
                     // Проверка загрузки модулей через 2 секунды
@@ -150,7 +167,7 @@
                         if (typeof window.firebaseAuth === 'undefined') {
                             const errorBanner = document.createElement('div');
                             errorBanner.style = "position:fixed; bottom:20px; left:20px; right:20px; background:#ef4444; color:white; padding:15px; border-radius:12px; z-index:10000; box-shadow:0 10px 30px rgba(0,0,0,0.3); font-size:14px; text-align:center;";
-                            errorBanner.innerHTML = "<b>Ошибка загрузки модулей:</b> Браузер блокирует скрипты при открытии через файл (CORS). <br> <span style='font-size:12px; opacity:0.8;'>Приложение работает в автономном режиме. Данные сохраняются локально.</span>";
+                            errorBanner.innerHTML = "<b>" + m.errTitle + "</b> " + m.errDesc + " <br> <span style='font-size:12px; opacity:0.8;'>" + m.errSub + "</span>";
                             document.body.appendChild(errorBanner);
                         }
                     }, 2000);
@@ -624,9 +641,11 @@
                     <h1 class="text-3xl font-bold text-amber-700 dark:text-amber-400 tracking-tight"
                         data-i18n="goals_title">Глобальные Цели
                     </h1>
-                    <p class="arabic text-xl text-amber-600 italic mt-1">وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ
+                    <p class="arabic text-xl text-amber-600 italic mt-1" data-i18n="goals_quran">وَأَن لَّيْسَ
+                        لِلْإِنسَانِ إِلَّا مَا سَعَىٰ
                     </p>
-                    <p class="text-sm text-gray-500">«Человеку уготовано только то, к чему он стремился» (Коран 53:39)
+                    <p class="text-sm text-gray-500" data-i18n="goals_quran_desc">«Человеку уготовано только то, к чему
+                        он стремился» (Коран 53:39)
                     </p>
                 </header>
 
@@ -744,8 +763,8 @@
                     <div>
                         <h1 class="text-3xl font-bold text-indigo-900 dark:text-indigo-400 tracking-tight">Tafakkur
                             Board</h1>
-                        <p class="text-gray-500 mt-1 text-sm"><i class="fas fa-infinity mr-1"></i> Бесконечный холст ·
-                            Pinch-to-zoom на мобильном</p>
+                        <p class="text-gray-500 mt-1 text-sm"><i class="fas fa-infinity mr-1"></i> <span
+                                data-i18n="board_desc">Бесконечный холст · Pinch-to-zoom на мобильном</span></p>
                     </div>
                     <div class="flex flex-wrap gap-2 items-center">
                         <button id="add-note-yellow"
@@ -842,27 +861,27 @@
     <div class="fixed bottom-6 end-6 flex flex-col items-end gap-3 z-50">
         <!-- Lang Toggle -->
         <button id="lang-toggle"
-            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-gray-600 dark:text-gray-300 hover:scale-110 transition-transform border border-gray-100 dark:border-slate-700 tooltip"
-            aria-label="Смена языка">
+            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-gray-600 dark:text-gray-300 hover:scale-110 transition-transform border border-gray-100 dark:border-slate-700 tooltip tooltip-left"
+            aria-label="Смена языка" data-i18n="tooltip_lang" data-i18n-target="aria-label">
             <span id="lang-icon" class="text-xs font-bold font-sans">RU</span>
         </button>
         <!-- Theme Toggle -->
         <button id="theme-toggle"
-            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-gray-600 dark:text-gray-300 hover:scale-110 transition-transform border border-gray-100 dark:border-slate-700 tooltip"
-            aria-label="Смена темы">
+            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-gray-600 dark:text-gray-300 hover:scale-110 transition-transform border border-gray-100 dark:border-slate-700 tooltip tooltip-left"
+            aria-label="Смена темы" data-i18n="tooltip_theme" data-i18n-target="aria-label">
             <i class="fas fa-moon"></i>
         </button>
         <!-- Auth Button -->
         <button id="auth-btn" dir="auto"
-            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-indigo-500 hover:scale-110 transition-transform border border-indigo-100 dark:border-slate-700 tooltip"
-            aria-label="Войти / Профиль">
+            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-indigo-500 hover:scale-110 transition-transform border border-indigo-100 dark:border-slate-700 tooltip tooltip-left"
+            aria-label="Войти / Профиль" data-i18n="tooltip_auth" data-i18n-target="aria-label">
             <i id="auth-icon" class="fas fa-user"></i>
         </button>
         <!-- Donate Button -->
         <button id="donate-btn" dir="auto"
             onclick="document.getElementById('donate-modal').classList.remove('hidden'); document.getElementById('donate-modal').classList.add('flex')"
-            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-rose-500 hover:scale-110 transition-transform border border-rose-100 dark:border-slate-700 tooltip"
-            aria-label="Поддержать проект">
+            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-rose-500 hover:scale-110 transition-transform border border-rose-100 dark:border-slate-700 tooltip tooltip-left"
+            aria-label="Поддержать проект" data-i18n="tooltip_donate" data-i18n-target="aria-label">
             <i class="fas fa-heart"></i>
         </button>
         <!-- AI Floating Action Button -->

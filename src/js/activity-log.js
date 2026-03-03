@@ -57,29 +57,32 @@ function formatTimestamp(ts) {
     const mins = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
 
-    if (mins < 1) return 'только что';
-    if (mins < 60) return `${mins} мин назад`;
-    if (hours < 24) return `${hours} ч назад`;
+    const t = window.t || (k => k);
+
+    if (mins < 1) return t('time_just_now') || 'только что';
+    if (mins < 60) return `${mins} ${t('time_mins_ago') || 'мин назад'}`;
+    if (hours < 24) return `${hours} ${t('time_hours_ago') || 'ч назад'}`;
 
     const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
     const isToday = date.toDateString() === now.toDateString();
     const isYesterday = date.toDateString() === yesterday.toDateString();
     const time = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 
-    if (isToday) return `сегодня ${time}`;
-    if (isYesterday) return `вчера ${time}`;
+    if (isToday) return `${t('time_today') || 'сегодня'} ${time}`;
+    if (isYesterday) return `${t('time_yesterday') || 'вчера'} ${time}`;
     return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }) + ` ${time}`;
 }
 
 function buildMetaLabel(action, meta) {
     if (!meta) return '';
     const parts = [];
+    const t = window.t || (k => k);
     if (meta.date) parts.push(meta.date);
-    if (meta.state) parts.push(meta.state === 'done' ? '✓ выполнено' : '× снято');
+    if (meta.state) parts.push(meta.state === 'done' ? `✓ ${t('state_done')}` : `× ${t('state_undone')}`);
     if (meta.task) parts.push(`<span class="font-bold">"${meta.task}"</span>`);
     if (meta.title) parts.push(`<span class="font-bold">"${meta.title}"</span>`);
-    if (meta.type) parts.push(meta.type === 'ahirat' ? 'Ахират' : 'Дунья');
-    if (meta.color) parts.push({ yellow: '🟡 жёлтый', green: '🟢 зелёный', blue: '🔵 синий' }[meta.color] || meta.color);
+    if (meta.type) parts.push(meta.type === 'ahirat' ? (t('type_ahirat') || 'Ахират') : (t('type_dunya') || 'Дунья'));
+    if (meta.color) parts.push(t('log_color_' + meta.color) || meta.color);
     if (meta.method) parts.push(meta.method === 'google' ? 'Google' : 'Email');
     if (meta.filename) parts.push(meta.filename);
     return parts.join(' · ');
@@ -89,6 +92,7 @@ function renderEntry(doc, index) {
     const data = doc.data();
     const info = ACTION_META[data.action] || { label: data.action, icon: 'fa-box', color: 'gray' };
     const styles = PREMIUM_COLORS[info.color] || PREMIUM_COLORS.gray;
+    const label = (window.t && window.t('log_' + data.action)) || info.label;
     const metaStr = buildMetaLabel(data.action, data.meta);
 
     return `
@@ -101,7 +105,7 @@ function renderEntry(doc, index) {
         <div class="bg-white dark:bg-slate-800 rounded-[18px] p-4 sm:p-5 border border-slate-200/60 dark:border-slate-700 shadow-sm group-hover:shadow-md transition-shadow relative overflow-hidden h-full">
             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-transparent to-${info.color}-500/5 dark:to-${info.color}-500/10 rounded-bl-full pointer-events-none"></div>
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-1.5 w-full relative z-10">
-                <h4 class="font-bold text-slate-800 dark:text-slate-100 text-[15px] leading-tight">${info.label}</h4>
+                <h4 class="font-bold text-slate-800 dark:text-slate-100 text-[15px] leading-tight">${label}</h4>
                 <div class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700/50 px-2.5 py-1 rounded-lg shrink-0 w-fit">
                     <i class="far fa-clock"></i> ${formatTimestamp(data.timestamp)}
                 </div>
@@ -177,6 +181,7 @@ window.ActivityLog = {
     async renderAuditLog() {
         const listEl = document.getElementById('audit-log-list');
         if (!listEl) return;
+        const t = window.t || (k => k);
 
         listEl.innerHTML = `
             <div class="flex flex-col items-center justify-center h-full min-h-[300px] text-slate-400 m-auto">
@@ -185,7 +190,7 @@ window.ActivityLog = {
                     <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
                     <i class="fas fa-sync-alt text-indigo-500 text-xl absolute"></i>
                 </div>
-                <p class="text-sm font-bold tracking-widest uppercase opacity-80 text-indigo-600 dark:text-indigo-400">Синхронизация...</p>
+                <p class="text-sm font-bold tracking-widest uppercase opacity-80 text-indigo-600 dark:text-indigo-400">${t('log_syncing')}</p>
             </div>
         `;
 
@@ -195,12 +200,12 @@ window.ActivityLog = {
                     <div class="w-20 h-20 rounded-[1.5rem] bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center mb-5 border border-slate-200 dark:border-slate-700 shadow-inner">
                         <i class="fas fa-user-lock text-3xl text-slate-400"></i>
                     </div>
-                    <h4 class="text-xl font-bold text-slate-800 dark:text-white mb-2 tracking-tight">Доступ ограничен</h4>
+                    <h4 class="text-xl font-bold text-slate-800 dark:text-white mb-2 tracking-tight">${t('log_no_access_title')}</h4>
                     <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-[260px] mx-auto hidden sm:block">
-                        Войдите в аккаунт, чтобы история действий сохранялась и была доступна на всех устройствах.
+                        ${t('log_no_access_desc')}
                     </p>
                     <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed sm:hidden">
-                        Войдите в аккаунт, чтобы просматривать историю.
+                        ${t('log_no_access_desc')}
                     </p>
                 </div>
             `;
@@ -221,9 +226,9 @@ window.ActivityLog = {
                                 <i class="fas fa-seedling text-5xl text-indigo-400 dark:text-indigo-500"></i>
                             </div>
                         </div>
-                        <h4 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mb-3 tracking-tight">История пока пуста</h4>
+                        <h4 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mb-3 tracking-tight">${t('log_empty_title')}</h4>
                         <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-[280px] mx-auto">
-                            Начните планировать свой день, и здесь появятся ваши первые шаги 🌱
+                            ${t('log_empty_desc')}
                         </p>
                     </div>
                 `;
@@ -238,8 +243,8 @@ window.ActivityLog = {
                     <div class="w-16 h-16 rounded-2xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 flex items-center justify-center mb-4 text-red-400">
                         <i class="fas fa-exclamation-triangle text-3xl"></i>
                     </div>
-                    <p class="font-bold text-slate-800 dark:text-slate-200">Ошибка загрузки данных</p>
-                    <p class="text-xs mt-1 text-slate-500">Проверьте подключение к интернету</p>
+                    <p class="font-bold text-slate-800 dark:text-slate-200">${t('log_error_title')}</p>
+                    <p class="text-xs mt-1 text-slate-500">${t('log_error_desc')}</p>
                 </div>
             `;
         }

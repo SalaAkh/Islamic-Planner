@@ -672,7 +672,7 @@ function initBackupRestore() {
             a.download = `barakah_backup_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
             URL.revokeObjectURL(url);
-            showToast('Резервная копия скачана');
+            showToast((window.t && window.t('backup_downloaded')) || 'Резервная копия скачана');
             window.ActivityLog?.log('backup_exported');
         });
     }
@@ -690,11 +690,11 @@ function initBackupRestore() {
             reader.onload = async (event) => {
                 try {
                     await Store.importAllData(event.target.result);
-                    showToast('Данные восстановлены! Перезагрузка...');
+                    showToast((window.t && window.t('backup_restored')) || 'Данные восстановлены! Перезагрузка...');
                     window.ActivityLog?.log('backup_imported', { filename: file.name });
                     setTimeout(() => window.location.reload(), 1500);
                 } catch (err) {
-                    showToast('Ошибка при импорте данных!');
+                    showToast((window.t && window.t('backup_error')) || 'Ошибка при импорте данных!');
                     console.error('Import failed:', err);
                 }
             };

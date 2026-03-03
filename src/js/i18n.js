@@ -16,6 +16,11 @@ const translations = {
         "focus_label": "Фокус", "routine_label": "Рутина", "add_task": "Добавить задачу",
         "task1_ph": "Главная задача дня...", "task5_ph": "Бытовые дела...", "task7_ph": "Семья, ужин...", "task9_ph": "Уединение, отдых...", "task10_ph": "Чтение перед сном...",
         "btn_import": "Импорт", "btn_export": "Экспорт", "btn_ai": "ИИ Ассистент",
+        "auth_btn": "Войти",
+        "tooltip_lang": "Смена языка",
+        "tooltip_theme": "Смена темы",
+        "tooltip_auth": "Войти / Профиль",
+        "tooltip_donate": "Поддержать проект",
         "ai_modal_title": "ИИ Планировщик", "ai_setup_help": "Для работы требуется ваш API ключ Gemini",
         "btn_save": "Сохранить", "btn_generate": "Создать план", "ai_loading_text": "Нейросеть думает...",
         "toast_saved": "Сохранено",
@@ -62,7 +67,15 @@ const translations = {
         "event_tag_label": "Тег", "event_tag_ph": "#важное #встреча",
         "event_notes_label": "Заметки", "event_notes_ph": "Дополнительные заметки...",
         "event_save_btn": "Сохранить", "event_delete_btn": "Удалить", "event_add_btn": "Добавить",
-        "events_no_events": "Нет событий на этот день", "event_saved_toast": "Событие сохранено!", "event_deleted_toast": "Событие удалено"
+        "events_no_events": "Нет событий на этот день", "event_saved_toast": "Событие сохранено!", "event_deleted_toast": "Событие удалено",
+        "log_login": "Вход в аккаунт", "log_logout": "Выход из аккаунта", "log_register": "Регистрация", "log_task_toggled": "Задача отмечена", "log_day_saved": "День сохранён", "log_goals_saved": "Цели обновлены", "log_goal_added": "Цель добавлена", "log_event_saved": "Событие сохранено", "log_event_deleted": "Событие удалено", "log_note_created": "Стикер создан", "log_note_deleted": "Стикер удалён", "log_drawing_saved": "Рисунок сохранён", "log_drawing_stroke_saved": "Штрих на доске", "log_drawing_cleared": "Рисунок очищен", "log_backup_exported": "Резервная копия создана", "log_backup_imported": "Данные восстановлены",
+        "time_just_now": "только что", "time_mins_ago": "мин назад", "time_hours_ago": "ч назад", "time_today": "сегодня", "time_yesterday": "вчера",
+        "state_done": "выполнено", "state_undone": "снято", "type_ahirat": "Ахират", "type_dunya": "Дунья", "log_color_yellow": "🟡 жёлтый", "log_color_green": "🟢 зелёный", "log_color_blue": "🔵 синий",
+        "log_syncing": "Синхронизация...", "log_no_access_title": "Доступ ограничен", "log_no_access_desc": "Войдите в аккаунт, чтобы история действий сохранялась и была доступна на всех устройствах.", "log_empty_title": "История пока пуста", "log_empty_desc": "Начните планировать свой день, и здесь появятся ваши первые шаги 🌱", "log_error_title": "Ошибка загрузки данных", "log_error_desc": "Проверьте подключение к интернету",
+        "ai_key_saved": "API ключ сохранен!", "ai_plan_generated": "План сгенерирован! МашаАллах!", "ai_error_key": "Неверный API ключ или параметры. Проверьте настройки.", "ai_error_server": "Ошибка сервера", "ai_error_format": "Непредвиденный формат ответа от Gemini.", "ai_error": "Ошибка ИИ", "ai_error_format_retry": "ИИ вернул неверный формат ответа. Попробуйте еще раз.",
+        "ai_lang_name": "русском",
+        "backup_downloaded": "Резервная копия скачана", "backup_restored": "Данные восстановлены! Перезагрузка...", "backup_error": "Ошибка при импорте данных!",
+        "lang_changed": "Язык изменен"
     },
     kk: {
         "seo_title": "Barakah Planner — Исламдық Күнделік және Намаз Жоспарлаушы",
@@ -80,6 +93,11 @@ const translations = {
         "focus_label": "Фокус", "routine_label": "Рутина", "add_task": "Тапсырма",
         "task1_ph": "Күннің басты міндеті...", "task5_ph": "Тұрмыстық істер...", "task7_ph": "Отбасы, кешкі ас...", "task9_ph": "Демалыс...", "task10_ph": "Ұйқы алдында оқу...",
         "btn_import": "Импорт", "btn_export": "Экспорт", "btn_ai": "ЖИ Көмекшісі",
+        "auth_btn": "Кіру",
+        "tooltip_lang": "Тілді өзгерту",
+        "tooltip_theme": "Тақырыпты өзгерту",
+        "tooltip_auth": "Кіру / Профиль",
+        "tooltip_donate": "Жобаға қолдау көрсету",
         "ai_modal_title": "ЖИ Жоспарлаушы", "ai_setup_help": "Жұмыс істеу үшін Gemini API кілті қажет",
         "btn_save": "Сақтау", "btn_generate": "Жоспар құру", "ai_loading_text": "Жүйе ойлануда...",
         "toast_saved": "Сақталды",
@@ -126,7 +144,15 @@ const translations = {
         "event_tag_label": "Тег", "event_tag_ph": "#маңызды #кездесу",
         "event_notes_label": "Жазбалар", "event_notes_ph": "Қосымша жазбалар...",
         "event_save_btn": "Сақтау", "event_delete_btn": "Жою", "event_add_btn": "Қосу",
-        "events_no_events": "Бұл күнге оқиға жоқ", "event_saved_toast": "Оқиға сақталды!", "event_deleted_toast": "Оқиға жойылды"
+        "events_no_events": "Бұл күнге оқиға жоқ", "event_saved_toast": "Оқиға сақталды!", "event_deleted_toast": "Оқиға жойылды",
+        "log_login": "Тіркелгіге кіру", "log_logout": "Тіркелгіден шығу", "log_register": "Тіркелу", "log_task_toggled": "Тапсырма белгіленді", "log_day_saved": "Күн сақталды", "log_goals_saved": "Мақсаттар жаңартылды", "log_goal_added": "Мақсат қосылды", "log_event_saved": "Оқиға сақталды", "log_event_deleted": "Оқиға жойылды", "log_note_created": "Стикер жасалды", "log_note_deleted": "Стикер жойылды", "log_drawing_saved": "Сурет сақталды", "log_drawing_stroke_saved": "Тақтадағы сызық", "log_drawing_cleared": "Сурет тазартылды", "log_backup_exported": "Резервтік көшірме жасалды", "log_backup_imported": "Деректер қалпына келтірілді",
+        "time_just_now": "жаңа ғана", "time_mins_ago": "мин бұрын", "time_hours_ago": "сағ бұрын", "time_today": "бүгін", "time_yesterday": "кеше",
+        "state_done": "орындалды", "state_undone": "алынды", "type_ahirat": "Ақырет", "type_dunya": "Дүние", "log_color_yellow": "🟡 сары", "log_color_green": "🟢 жасыл", "log_color_blue": "🔵 көк",
+        "log_syncing": "Синхрондау...", "log_no_access_title": "Қол жеткізу шектелген", "log_no_access_desc": "Әрекеттер тарихы сақталуы үшін тіркелгіге кіріңіз.", "log_empty_title": "Тарих әзірге бос", "log_empty_desc": "Күніңізді жоспарлауды бастаңыз, қадамдарыңыз осында пайда болады 🌱", "log_error_title": "Деректерді жүктеу қатесі", "log_error_desc": "Интернет қосылымын тексеріңіз",
+        "ai_key_saved": "API кілті сақталды!", "ai_plan_generated": "Жоспар құрылды! МашаАллах!", "ai_error_key": "API кілті немесе параметрлер қате.", "ai_error_server": "Сервер қатесі", "ai_error_format": "Gemini-ден күтпеген жауап форматы.", "ai_error": "ЖИ қатесі", "ai_error_format_retry": "ЖИ қате жауап форматын қайтарды. Қайта көріңіз.",
+        "ai_lang_name": "қазақ",
+        "backup_downloaded": "Резервтік көшірме жүктелді", "backup_restored": "Деректер қалпына келтірілді! Қайта жүктелуде...", "backup_error": "Деректерді импорттау қатесі!",
+        "lang_changed": "Тіл өзгертілді"
     },
     ar: {
         "seo_title": "Barakah Planner — يوميات إسلامية ومخطط الصلاة",
@@ -144,6 +170,11 @@ const translations = {
         "focus_label": "التركيز", "routine_label": "العادات", "add_task": "إضافة مهمة",
         "task1_ph": "المهمة الرئيسية اليوم...", "task5_ph": "الأعمال المنزلية...", "task7_ph": "العائلة، العشاء...", "task9_ph": "استراحة...", "task10_ph": "القراءة قبل النوم...",
         "btn_import": "استيراد", "btn_export": "تصدير", "btn_ai": "المساعد الذكي",
+        "auth_btn": "تسجيل الدخول",
+        "tooltip_lang": "تغيير اللغة",
+        "tooltip_theme": "تغيير المظهر",
+        "tooltip_auth": "تسجيل الدخول / الملف الشخصي",
+        "tooltip_donate": "دعم المشروع",
         "ai_modal_title": "المخطط الذكي", "ai_setup_help": "مطلوب مفتاح Gemini API",
         "btn_save": "حفظ", "btn_generate": "إنشاء الخطة", "ai_loading_text": "جاري التفكير...",
         "toast_saved": "تم الحفظ",
@@ -190,7 +221,15 @@ const translations = {
         "event_tag_label": "وسم", "event_tag_ph": "#مهم #اجتماع",
         "event_notes_label": "ملاحظات", "event_notes_ph": "ملاحظات إضافية...",
         "event_save_btn": "حفظ", "event_delete_btn": "حذف", "event_add_btn": "إضافة",
-        "events_no_events": "لا توجد أحداث في هذا اليوم", "event_saved_toast": "تم حفظ الحدث!", "event_deleted_toast": "تم حذف الحدث"
+        "events_no_events": "لا توجد أحداث في هذا اليوم", "event_saved_toast": "تم حفظ الحدث!", "event_deleted_toast": "تم حذف الحدث",
+        "log_login": "تسجيل الدخول", "log_logout": "تسجيل الخروج", "log_register": "التسجيل", "log_task_toggled": "تم تحديد المهمة", "log_day_saved": "تم حفظ اليوم", "log_goals_saved": "تم تحديث الأهداف", "log_goal_added": "تمت إضافة الهدف", "log_event_saved": "تم حفظ الحدث", "log_event_deleted": "تم حذف الحدث", "log_note_created": "تم إنشاء الملصق", "log_note_deleted": "تم حذف الملصق", "log_drawing_saved": "تم حفظ الرسم", "log_drawing_stroke_saved": "خط على اللوحة", "log_drawing_cleared": "تم مسح الرسم", "log_backup_exported": "تم التصدير للنسخ الاحتياطي", "log_backup_imported": "تمت استعادة البيانات",
+        "time_just_now": "الآن", "time_mins_ago": "دقائق مضت", "time_hours_ago": "ساعات مضت", "time_today": "اليوم", "time_yesterday": "أمس",
+        "state_done": "منجز", "state_undone": "غير منجز", "type_ahirat": "الآخرة", "type_dunya": "الدنيا", "log_color_yellow": "🟡 أصفر", "log_color_green": "🟢 أخضر", "log_color_blue": "🔵 أزرق",
+        "log_syncing": "مزامنة...", "log_no_access_title": "الوصول مقيد", "log_no_access_desc": "قم بتسجيل الدخول لحفظ سجل الأنشطة والوصول إليه عبر الأجهزة.", "log_empty_title": "السجل فارغ حاليا", "log_empty_desc": "ابدأ بتخطيط يومك، وستظهر خطواتك الأولى هنا 🌱", "log_error_title": "خطأ في تحميل البيانات", "log_error_desc": "تحقق من اتصالك بالإنترنت",
+        "ai_key_saved": "تم حفظ مفتاح API!", "ai_plan_generated": "تم إنشاء الخطة! ما شاء الله!", "ai_error_key": "مفتاح API غير صالح.", "ai_error_server": "خطأ خادم", "ai_error_format": "تنسيق استجابة غير متوقع من Gemini.", "ai_error": "خطأ ذكاء اصطناعي", "ai_error_format_retry": "أرجع الذكاء الاصطناعي تنسيق استجابة غير صالح. حاول مرة أخرى.",
+        "ai_lang_name": "العربية",
+        "backup_downloaded": "تم تنزيل النسخة الاحتياطية", "backup_restored": "تم استرداد البيانات! إعادة التشغيل...", "backup_error": "خطأ في استيراد البيانات!",
+        "lang_changed": "تم تغيير اللغة"
     },
     en: {
         "seo_title": "Barakah Planner — Islamic Daily Planner & Prayer Tracker",
@@ -208,6 +247,11 @@ const translations = {
         "focus_label": "Focus", "routine_label": "Routine", "add_task": "Add task",
         "task1_ph": "Main task of the day...", "task5_ph": "Household chores...", "task7_ph": "Family, dinner...", "task9_ph": "Rest, me time...", "task10_ph": "Reading before sleep...",
         "btn_import": "Import", "btn_export": "Export", "btn_ai": "AI Assistant",
+        "auth_btn": "Login",
+        "tooltip_lang": "Change language",
+        "tooltip_theme": "Change theme",
+        "tooltip_auth": "Login / Profile",
+        "tooltip_donate": "Support project",
         "ai_modal_title": "AI Planner", "ai_setup_help": "Gemini API key is required",
         "btn_save": "Save", "btn_generate": "Generate Plan", "ai_loading_text": "AI is thinking...",
         "toast_saved": "Saved",
@@ -254,7 +298,15 @@ const translations = {
         "event_tag_label": "Tag", "event_tag_ph": "#important #meeting",
         "event_notes_label": "Notes", "event_notes_ph": "Additional notes...",
         "event_save_btn": "Save", "event_delete_btn": "Delete", "event_add_btn": "Add",
-        "events_no_events": "No events for this day", "event_saved_toast": "Event saved!", "event_deleted_toast": "Event deleted"
+        "events_no_events": "No events for this day", "event_saved_toast": "Event saved!", "event_deleted_toast": "Event deleted",
+        "log_login": "Login", "log_logout": "Logout", "log_register": "Register", "log_task_toggled": "Task toggled", "log_day_saved": "Day saved", "log_goals_saved": "Goals updated", "log_goal_added": "Goal added", "log_event_saved": "Event saved", "log_event_deleted": "Event deleted", "log_note_created": "Note created", "log_note_deleted": "Note deleted", "log_drawing_saved": "Drawing saved", "log_drawing_stroke_saved": "Board stroke", "log_drawing_cleared": "Drawing cleared", "log_backup_exported": "Backup created", "log_backup_imported": "Data restored",
+        "time_just_now": "just now", "time_mins_ago": "min ago", "time_hours_ago": "h ago", "time_today": "today", "time_yesterday": "yesterday",
+        "state_done": "done", "state_undone": "undone", "type_ahirat": "Akhirah", "type_dunya": "Dunya", "log_color_yellow": "🟡 yellow", "log_color_green": "🟢 green", "log_color_blue": "🔵 blue",
+        "log_syncing": "Syncing...", "log_no_access_title": "Access restricted", "log_no_access_desc": "Log in to save your activity history and access it on all devices.", "log_empty_title": "History is empty", "log_empty_desc": "Start planning your day, and your first steps will appear here 🌱", "log_error_title": "Data loading error", "log_error_desc": "Check your internet connection",
+        "ai_key_saved": "API key saved!", "ai_plan_generated": "Plan generated! Mashallah!", "ai_error_key": "Invalid API key or parameters. Check settings.", "ai_error_server": "Server error", "ai_error_format": "Unexpected response format from Gemini.", "ai_error": "AI Error", "ai_error_format_retry": "AI returned invalid response format. Try again.",
+        "ai_lang_name": "English",
+        "backup_downloaded": "Backup downloaded", "backup_restored": "Data restored! Restarting...", "backup_error": "Data import error!",
+        "lang_changed": "Language changed"
     }
 };
 
@@ -375,10 +427,12 @@ function initI18n() {
             applyTranslations(currentLang);
             updateLangIcon(currentLang);
             document.dispatchEvent(new CustomEvent('langChanged', { detail: currentLang }));
-            showToast('Язык изменен / Тіл өзгертілді / تم تغيير اللغة');
+            if (window.showToast) window.showToast(window.t('lang_changed'));
         });
     }
 }
 
 window.initI18n = initI18n;
 window.translations = translations;
+window.getCurrentLang = () => currentLang;
+window.t = (key) => window.translations[currentLang]?.[key] || window.translations['ru']?.[key] || key;

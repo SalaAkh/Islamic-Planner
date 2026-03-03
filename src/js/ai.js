@@ -132,7 +132,7 @@ class AiAssistant {
             }
 
             this.setupArea.classList.add('hidden');
-            if (window.showToast) window.showToast('API ключ сохранен!');
+            if (window.showToast) window.showToast((window.t && window.t('ai_key_saved')) || 'API ключ сохранен!');
             this.promptInput.focus();
         }
     }
@@ -157,7 +157,7 @@ class AiAssistant {
                 },
                 body: JSON.stringify({
                     systemInstruction: {
-                        parts: [{ text: AI_SYSTEM_PROMPT }]
+                        parts: [{ text: AI_SYSTEM_PROMPT + `\n- Отвечай на ${window.t ? window.t('ai_lang_name') : 'русском'} языке.` }]
                     },
                     contents: [
                         { role: 'user', parts: [{ text: promptText }] }
@@ -171,14 +171,14 @@ class AiAssistant {
             });
 
             if (!response.ok) {
-                if (response.status === 400 || response.status === 403) throw new Error('Неверный API ключ или параметры. Проверьте настройки.');
-                throw new Error(`Ошибка сервера (${response.status})`);
+                if (response.status === 400 || response.status === 403) throw new Error((window.t && window.t('ai_error_key')) || 'Неверный API ключ или параметры. Проверьте настройки.');
+                throw new Error(`${(window.t && window.t('ai_error_server')) || 'Ошибка сервера'} (${response.status})`);
             }
 
             const data = await response.json();
 
             if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-                throw new Error('Непредвиденный формат ответа от Gemini.');
+                throw new Error((window.t && window.t('ai_error_format')) || 'Непредвиденный формат ответа от Gemini.');
             }
 
             const content = data.candidates[0].content.parts[0].text;
@@ -187,11 +187,11 @@ class AiAssistant {
 
             this.promptInput.value = '';
             this.closeModal();
-            if (window.showToast) window.showToast('План сгенерирован! МашаАллах!');
+            if (window.showToast) window.showToast((window.t && window.t('ai_plan_generated')) || 'План сгенерирован! МашаАллах!');
 
         } catch (error) {
             console.error('[AI] Fetch error:', error);
-            alert(`Ошибка ИИ: ${error.message}`);
+            alert(`${(window.t && window.t('ai_error')) || 'Ошибка ИИ'}: ${error.message}`);
         } finally {
             this.setLoading(false);
         }
@@ -241,7 +241,7 @@ class AiAssistant {
 
         } catch (e) {
             console.error('[AI] Parsing failed:', e, jsonStr);
-            alert('ИИ вернул неверный формат ответа. Попробуйте еще раз.');
+            alert((window.t && window.t('ai_error_format_retry')) || 'ИИ вернул неверный формат ответа. Попробуйте еще раз.');
         }
     }
 

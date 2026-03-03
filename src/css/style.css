@@ -648,6 +648,14 @@ body {
     z-index: 100;
 }
 
+.tooltip-left:hover::after {
+    left: auto;
+    right: 100%;
+    margin-right: 12px;
+    bottom: 50%;
+    transform: translateY(50%);
+}
+
 /* ============================================
    STICKY NOTES — IMPROVED WITH DRAG HANDLE
    ============================================ */
