@@ -103,7 +103,15 @@ for (const [lang, cfg] of Object.entries(LANGS)) {
     const initScript = `\n    <script>/* SSG language seed */localStorage.setItem('barakah_lang','${lang}');</script>`;
     html = html.replace(/(<script\s+type="module")/, `${initScript}\n    $1`);
 
-    // 8. Write output file into dist/<lang>/index.html
+    // 8. Fix relative paths → absolute so /en/sw.js doesn't 404
+    html = html.replace(/href="\.\/favicon\.ico"/g, 'href="/favicon.ico"');
+    html = html.replace(/href="\.\/manifest\.json"/g, 'href="/manifest.json"');
+    html = html.replace(/src="\.\/favicon\.ico"/g, 'src="/favicon.ico"');
+    // SW registration: './sw.js' → '/sw.js' (must be absolute for correct scope)
+    html = html.replace(/navigator\.serviceWorker\.register\(['"]\.\/sw\.js['"]\)/g,
+        `navigator.serviceWorker.register('/sw.js')`);
+
+    // 9. Write output file into dist/<lang>/index.html
     const outDir = path.join(__dirname, 'dist', lang);
     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
     const outPath = path.join(outDir, 'index.html');
