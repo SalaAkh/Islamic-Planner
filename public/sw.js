@@ -1,9 +1,9 @@
-const CACHE_NAME = 'barakah-planner-v8';
+const CACHE_NAME = 'barakah-planner-v9';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
-    './public/manifest.json',
-    './public/favicon.ico',
+    './manifest.json',
+    './favicon.ico',
     'https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
@@ -13,7 +13,7 @@ self.addEventListener('install', (event) => {
         caches.open(CACHE_NAME)
             .then((cache) => cache.addAll(ASSETS_TO_CACHE))
             .then(() => self.skipWaiting())
-            .catch(err => console.warn('[Barakah Planner] SW cache addAll failed on some assets, this is acceptable for singlefile builds:', err))
+            .catch(err => console.warn('[Barakah Planner] SW cache addAll failed:', err))
     );
 });
 
@@ -24,7 +24,7 @@ self.addEventListener('activate', (event) => {
                 cacheNames.filter((name) => name !== CACHE_NAME)
                     .map((name) => caches.delete(name))
             );
-        })
+        }).then(() => self.clients.claim())
     );
 });
 
