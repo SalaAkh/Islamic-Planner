@@ -296,13 +296,9 @@ function renderDailyPlanner() {
     document.querySelectorAll('.task-toggle').forEach(btn => {
         const targetInputId = btn.nextElementSibling.getAttribute('data-id');
         if (data.tasks && data.tasks[targetInputId]) {
-            btn.classList.add('task-done', 'text-green-700', 'border-green-700');
-            btn.classList.remove('text-transparent');
-            btn.innerHTML = '<i class="fas fa-check"></i>';
+            btn.classList.add('task-done');
         } else {
-            btn.classList.remove('task-done', 'text-green-700', 'border-green-700');
-            btn.classList.add('text-transparent');
-            btn.innerHTML = '';
+            btn.classList.remove('task-done');
         }
     });
 
@@ -364,15 +360,11 @@ function updateIbadahProgress() {
 function toggleTask(btn) {
     const input = btn.nextElementSibling;
     if (!btn.classList.contains('task-done')) {
-        btn.classList.add('task-done', 'text-green-700', 'border-green-700');
-        btn.classList.remove('text-transparent');
-        btn.innerHTML = '<i class="fas fa-check"></i>';
+        btn.classList.add('task-done');
         input.classList.add('line-through', 'text-gray-400', 'opacity-60');
         window.ActivityLog?.log('task_toggled', { state: 'done', task: input.value?.slice(0, 60) });
     } else {
-        btn.classList.remove('task-done', 'text-green-700', 'border-green-700');
-        btn.classList.add('text-transparent');
-        btn.innerHTML = '';
+        btn.classList.remove('task-done');
         input.classList.remove('line-through', 'text-gray-400', 'opacity-60');
         window.ActivityLog?.log('task_toggled', { state: 'undone', task: input.value?.slice(0, 60) });
     }

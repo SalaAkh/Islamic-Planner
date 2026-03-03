@@ -282,6 +282,50 @@ body {
     font-weight: bold;
 }
 
+/* Task toggle buttons — same visual style as paper-checkbox */
+.task-toggle {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border: 2px solid #94a3b8 !important;
+    border-radius: 4px !important;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    background: transparent !important;
+    padding: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent !important;
+}
+
+.task-toggle:hover {
+    border-color: var(--primary) !important;
+    background-color: var(--primary-light) !important;
+}
+
+.task-toggle.task-done {
+    border-color: var(--primary) !important;
+    transform: scale(1.15) rotate(5deg);
+    background-color: var(--primary-light) !important;
+}
+
+.task-toggle.task-done::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: sans-serif;
+    color: var(--primary);
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 1;
+}
+
 .section-title {
     position: relative;
     display: inline-block;
