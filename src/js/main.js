@@ -2,7 +2,7 @@
 let currentDate = new Date(); // День, который открыт в планировщике
 let calendarDate = new Date(); // Месяц, который открыт в календаре
 
-const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+// monthNames handled dynamically via Intl.DateTimeFormat in renderDailyPlanner and renderCalendar
 
 window.loadDay = () => typeof renderDailyPlanner === 'function' && renderDailyPlanner();
 window.loadGoals = () => typeof renderDynamicGoals === 'function' && renderDynamicGoals();
@@ -196,9 +196,12 @@ function initDailyPlanner() {
 
             const newRow = document.createElement('div');
             newRow.className = 'flex items-center';
+            const taskToggleLabel = (window.t && window.t('aria_mark_task')) || 'Отметить задачу';
+            const newTaskLabel = (window.t && window.t('aria_new_task')) || 'Новая задача';
+            const newTaskPh = (window.t && window.t('ph_new_task')) || 'Новая задача...';
             newRow.innerHTML = `
-                <button data-task-id="t_dyn_${blockIndex}_${newIndex}" aria-label="Отметить задачу" class="task-toggle shrink-0 mr-3"></button>
-                <textarea data-id="task_dyn_${blockIndex}_${newIndex}" id="task_dyn_${blockIndex}_${newIndex}" name="task_dyn_${blockIndex}_${newIndex}" rows="1" style="resize:none; overflow:hidden;" placeholder="Новая задача..." autocomplete="off" aria-label="Новая задача" class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500 w-full"></textarea>
+                <button data-task-id="t_dyn_${blockIndex}_${newIndex}" aria-label="${taskToggleLabel}" class="task-toggle shrink-0 mr-3"></button>
+                <textarea data-id="task_dyn_${blockIndex}_${newIndex}" id="task_dyn_${blockIndex}_${newIndex}" name="task_dyn_${blockIndex}_${newIndex}" rows="1" style="resize:none; overflow:hidden;" placeholder="${newTaskPh}" autocomplete="off" aria-label="${newTaskLabel}" class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500 w-full"></textarea>
             `;
 
             if (listContainer) {
@@ -525,12 +528,15 @@ function renderDynamicGoals() {
         const div = document.createElement('div');
         div.className = 'relative group';
 
+        const goalCustomTitle = (window.t && window.t('goal_custom_title')) || 'Своя цель';
+        const goalCustomPh = (window.t && window.t('goal_custom_ph')) || 'Напишите свою цель...';
+        const deleteTitle = (window.t && window.t('btn_delete_goal')) || 'Удалить';
         div.innerHTML = `
             <div class="flex items-center justify-between mb-2">
-                <input type="text" data-i18n="goal_custom_title" data-i18n-target="placeholder" class="dyn-goal-title bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide w-[85%] placeholder-slate-400" placeholder="Своя цель" value="${goal.title || ''}">
-                <button class="delete-dyn-goal text-red-300 hover:text-red-500 opacity-0 md:group-hover:opacity-100 transition-opacity p-1" title="Удалить"><i class="fas fa-trash"></i></button>
+                <input type="text" class="dyn-goal-title bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide w-[85%] placeholder-slate-400" placeholder="${goalCustomTitle}" value="${goal.title || ''}">
+                <button class="delete-dyn-goal text-red-300 hover:text-red-500 opacity-0 md:group-hover:opacity-100 transition-opacity p-1" title="${deleteTitle}"><i class="fas fa-trash"></i></button>
             </div>
-            <textarea data-i18n="goal_custom_ph" data-i18n-target="placeholder" class="dyn-goal-content ruled-textarea handwriting h-24 placeholder-slate-400 dark:placeholder-slate-500 w-full" placeholder="Напишите свою цель...">${goal.content || ''}</textarea>
+            <textarea class="dyn-goal-content ruled-textarea handwriting h-24 placeholder-slate-400 dark:placeholder-slate-500 w-full" placeholder="${goalCustomPh}">${goal.content || ''}</textarea>
         `;
 
         const titleInput = div.querySelector('.dyn-goal-title');

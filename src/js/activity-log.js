@@ -17,22 +17,22 @@ const MAX_LOG_ENTRIES = 200;
 
 // ─── Human-readable action labels & icon/color mapping ───────────────────────
 const ACTION_META = {
-    user_login: { label: 'Вход в аккаунт', icon: 'fa-sign-in-alt', color: 'emerald' },
-    user_logout: { label: 'Выход из аккаунта', icon: 'fa-sign-out-alt', color: 'gray' },
-    user_register: { label: 'Регистрация', icon: 'fa-user-plus', color: 'indigo' },
-    task_toggled: { label: 'Задача отмечена', icon: 'fa-check-square', color: 'green' },
-    day_saved: { label: 'День сохранён', icon: 'fa-calendar-day', color: 'blue' },
-    goals_saved: { label: 'Цели обновлены', icon: 'fa-bullseye', color: 'amber' },
-    goal_added: { label: 'Цель добавлена', icon: 'fa-plus-circle', color: 'amber' },
-    event_saved: { label: 'Событие сохранено', icon: 'fa-calendar-plus', color: 'violet' },
-    event_deleted: { label: 'Событие удалено', icon: 'fa-calendar-times', color: 'red' },
-    note_created: { label: 'Стикер создан', icon: 'fa-sticky-note', color: 'yellow' },
-    note_deleted: { label: 'Стикер удалён', icon: 'fa-trash-alt', color: 'red' },
-    drawing_saved: { label: 'Рисунок сохранён', icon: 'fa-paint-brush', color: 'pink' },
-    drawing_stroke_saved: { label: 'Штрих на доске', icon: 'fa-pen', color: 'pink' },
-    drawing_cleared: { label: 'Рисунок очищен', icon: 'fa-eraser', color: 'red' },
-    backup_exported: { label: 'Резервная копия создана', icon: 'fa-download', color: 'teal' },
-    backup_imported: { label: 'Данные восстановлены', icon: 'fa-upload', color: 'teal' },
+    user_login: { key: 'log_user_login', icon: 'fa-sign-in-alt', color: 'emerald' },
+    user_logout: { key: 'log_user_logout', icon: 'fa-sign-out-alt', color: 'gray' },
+    user_register: { key: 'log_user_register', icon: 'fa-user-plus', color: 'indigo' },
+    task_toggled: { key: 'log_task_toggled', icon: 'fa-check-square', color: 'green' },
+    day_saved: { key: 'log_day_saved', icon: 'fa-calendar-day', color: 'blue' },
+    goals_saved: { key: 'log_goals_saved', icon: 'fa-bullseye', color: 'amber' },
+    goal_added: { key: 'log_goal_added', icon: 'fa-plus-circle', color: 'amber' },
+    event_saved: { key: 'log_event_saved', icon: 'fa-calendar-plus', color: 'violet' },
+    event_deleted: { key: 'log_event_deleted', icon: 'fa-calendar-times', color: 'red' },
+    note_created: { key: 'log_note_created', icon: 'fa-sticky-note', color: 'yellow' },
+    note_deleted: { key: 'log_note_deleted', icon: 'fa-trash-alt', color: 'red' },
+    drawing_saved: { key: 'log_drawing_saved', icon: 'fa-paint-brush', color: 'pink' },
+    drawing_stroke_saved: { key: 'log_drawing_stroke_saved', icon: 'fa-pen', color: 'pink' },
+    drawing_cleared: { key: 'log_drawing_cleared', icon: 'fa-eraser', color: 'red' },
+    backup_exported: { key: 'log_backup_exported', icon: 'fa-download', color: 'teal' },
+    backup_imported: { key: 'log_backup_imported', icon: 'fa-upload', color: 'teal' },
 };
 
 const PREMIUM_COLORS = {
@@ -58,6 +58,7 @@ function formatTimestamp(ts) {
     const hours = Math.floor(diff / 3600000);
 
     const t = window.t || (k => k);
+    const lang = (window.getCurrentLang && window.getCurrentLang()) || localStorage.getItem('barakah_lang') || 'ru';
 
     if (mins < 1) return t('time_just_now') || 'только что';
     if (mins < 60) return `${mins} ${t('time_mins_ago') || 'мин назад'}`;
@@ -66,11 +67,11 @@ function formatTimestamp(ts) {
     const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
     const isToday = date.toDateString() === now.toDateString();
     const isYesterday = date.toDateString() === yesterday.toDateString();
-    const time = date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    const time = date.toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' });
 
     if (isToday) return `${t('time_today') || 'сегодня'} ${time}`;
     if (isYesterday) return `${t('time_yesterday') || 'вчера'} ${time}`;
-    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }) + ` ${time}`;
+    return date.toLocaleDateString(lang, { day: 'numeric', month: 'short' }) + ` ${time}`;
 }
 
 function buildMetaLabel(action, meta) {
@@ -90,9 +91,9 @@ function buildMetaLabel(action, meta) {
 
 function renderEntry(doc, index) {
     const data = doc.data();
-    const info = ACTION_META[data.action] || { label: data.action, icon: 'fa-box', color: 'gray' };
+    const info = ACTION_META[data.action] || { key: 'log_' + data.action, icon: 'fa-box', color: 'gray' };
     const styles = PREMIUM_COLORS[info.color] || PREMIUM_COLORS.gray;
-    const label = (window.t && window.t('log_' + data.action)) || info.label;
+    const label = (window.t && window.t(info.key || 'log_' + data.action)) || data.action;
     const metaStr = buildMetaLabel(data.action, data.meta);
 
     return `

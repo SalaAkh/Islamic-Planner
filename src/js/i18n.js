@@ -75,7 +75,10 @@ const translations = {
         "ai_key_saved": "API ключ сохранен!", "ai_plan_generated": "План сгенерирован! МашаАллах!", "ai_error_key": "Неверный API ключ или параметры. Проверьте настройки.", "ai_error_server": "Ошибка сервера", "ai_error_format": "Непредвиденный формат ответа от Gemini.", "ai_error": "Ошибка ИИ", "ai_error_format_retry": "ИИ вернул неверный формат ответа. Попробуйте еще раз.",
         "ai_lang_name": "русском",
         "backup_downloaded": "Резервная копия скачана", "backup_restored": "Данные восстановлены! Перезагрузка...", "backup_error": "Ошибка при импорте данных!",
-        "lang_changed": "Язык изменен"
+        "lang_changed": "Язык изменен",
+        "log_user_login": "Вход в аккаунт", "log_user_logout": "Выход из аккаунта", "log_user_register": "Регистрация",
+        "aria_mark_task": "Отметить задачу", "aria_new_task": "Новая задача", "ph_new_task": "Новая задача...",
+        "btn_delete_goal": "Удалить"
     },
     kk: {
         "seo_title": "Barakah Planner — Исламдық Күнделік және Намаз Жоспарлаушы",
@@ -152,7 +155,10 @@ const translations = {
         "ai_key_saved": "API кілті сақталды!", "ai_plan_generated": "Жоспар құрылды! МашаАллах!", "ai_error_key": "API кілті немесе параметрлер қате.", "ai_error_server": "Сервер қатесі", "ai_error_format": "Gemini-ден күтпеген жауап форматы.", "ai_error": "ЖИ қатесі", "ai_error_format_retry": "ЖИ қате жауап форматын қайтарды. Қайта көріңіз.",
         "ai_lang_name": "қазақ",
         "backup_downloaded": "Резервтік көшірме жүктелді", "backup_restored": "Деректер қалпына келтірілді! Қайта жүктелуде...", "backup_error": "Деректерді импорттау қатесі!",
-        "lang_changed": "Тіл өзгертілді"
+        "lang_changed": "Тіл өзгертілді",
+        "log_user_login": "Тіркелгіге кіру", "log_user_logout": "Тіркелгіден шығу", "log_user_register": "Тіркелу",
+        "aria_mark_task": "Тапсырманы белгілеу", "aria_new_task": "Жаңа тапсырма", "ph_new_task": "Жаңа тапсырма...",
+        "btn_delete_goal": "Жою"
     },
     ar: {
         "seo_title": "Barakah Planner — يوميات إسلامية ومخطط الصلاة",
@@ -229,7 +235,10 @@ const translations = {
         "ai_key_saved": "تم حفظ مفتاح API!", "ai_plan_generated": "تم إنشاء الخطة! ما شاء الله!", "ai_error_key": "مفتاح API غير صالح.", "ai_error_server": "خطأ خادم", "ai_error_format": "تنسيق استجابة غير متوقع من Gemini.", "ai_error": "خطأ ذكاء اصطناعي", "ai_error_format_retry": "أرجع الذكاء الاصطناعي تنسيق استجابة غير صالح. حاول مرة أخرى.",
         "ai_lang_name": "العربية",
         "backup_downloaded": "تم تنزيل النسخة الاحتياطية", "backup_restored": "تم استرداد البيانات! إعادة التشغيل...", "backup_error": "خطأ في استيراد البيانات!",
-        "lang_changed": "تم تغيير اللغة"
+        "lang_changed": "تم تغيير اللغة",
+        "log_user_login": "تسجيل الدخول", "log_user_logout": "تسجيل الخروج", "log_user_register": "التسجيل",
+        "aria_mark_task": "تحديد المهمة", "aria_new_task": "مهمة جديدة", "ph_new_task": "مهمة جديدة...",
+        "btn_delete_goal": "حذف"
     },
     en: {
         "seo_title": "Barakah Planner — Islamic Daily Planner & Prayer Tracker",
@@ -306,7 +315,10 @@ const translations = {
         "ai_key_saved": "API key saved!", "ai_plan_generated": "Plan generated! Mashallah!", "ai_error_key": "Invalid API key or parameters. Check settings.", "ai_error_server": "Server error", "ai_error_format": "Unexpected response format from Gemini.", "ai_error": "AI Error", "ai_error_format_retry": "AI returned invalid response format. Try again.",
         "ai_lang_name": "English",
         "backup_downloaded": "Backup downloaded", "backup_restored": "Data restored! Restarting...", "backup_error": "Data import error!",
-        "lang_changed": "Language changed"
+        "lang_changed": "Language changed",
+        "log_user_login": "Logged in", "log_user_logout": "Logged out", "log_user_register": "Registered",
+        "aria_mark_task": "Mark task", "aria_new_task": "New task", "ph_new_task": "New task...",
+        "btn_delete_goal": "Delete"
     }
 };
 
