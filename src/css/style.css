@@ -648,10 +648,21 @@ body {
     z-index: 100;
 }
 
-.tooltip-left:hover::after {
+.tooltip-left:hover::after,
+.ltr\:tooltip-left:hover::after {
     left: auto;
     right: 100%;
     margin-right: 12px;
+    bottom: 50%;
+    transform: translateY(50%);
+}
+
+html[dir="rtl"] .rtl\:tooltip-right:hover::after,
+[dir="rtl"] .rtl\:tooltip-right:hover::after {
+    right: auto;
+    left: 100%;
+    margin-left: 12px;
+    margin-right: 0; /* Reset */
     bottom: 50%;
     transform: translateY(50%);
 }
