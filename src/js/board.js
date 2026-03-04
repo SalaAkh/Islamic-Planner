@@ -487,41 +487,7 @@ window.initBoard = function (showToast) {
     // =====================
     function updateTransform() {
         infiniteCanvas.style.transform = `translate(${state.viewport.x}px, ${state.viewport.y}px) scale(${state.viewport.zoom})`;
-        // Redraw canvas with updated viewport transform so drawing tracks with pan/zoom
-        redrawCanvasWithTransform();
-    }
-
-    // Cached drawing image for redraw on pan/zoom
-    let _cachedDrawingImage = null;
-
-    function cacheDrawingImage() {
-        return new Promise(resolve => {
-            const temp = document.createElement('canvas');
-            temp.width = drawingCanvas.width;
-            temp.height = drawingCanvas.height;
-            const tempCtx = temp.getContext('2d');
-            // Reset any transform before reading pixels
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            tempCtx.drawImage(drawingCanvas, 0, 0);
-            temp.toBlob(blob => {
-                _cachedDrawingImage = new Image();
-                _cachedDrawingImage.onload = () => resolve();
-                _cachedDrawingImage.src = URL.createObjectURL(blob);
-            });
-        });
-    }
-
-    function redrawCanvasWithTransform() {
-        if (!_cachedDrawingImage) return;
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
-        ctx.setTransform(
-            state.viewport.zoom, 0,
-            0, state.viewport.zoom,
-            state.viewport.x, state.viewport.y
-        );
-        ctx.drawImage(_cachedDrawingImage, 0, 0);
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        renderStrokes(); // Redraw paths at new viewport
     }
 
     function saveBoardData() {
@@ -534,23 +500,13 @@ window.initBoard = function (showToast) {
     let _drawSaveTimer = null;
     function requestDrawingSave() {
         if (_drawSaveTimer) clearTimeout(_drawSaveTimer);
-        // Cache drawing image and then save
-        cacheDrawingImage().then(() => {
-            _drawSaveTimer = setTimeout(saveDrawingData, 2000);
-        });
+        _drawSaveTimer = setTimeout(saveDrawingData, 2000);
     }
 
     async function saveDrawingData() {
         try {
-            // Save the world-space drawing (reset transform before toDataURL)
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            const dataUrl = drawingCanvas.toDataURL();
-            ctx.setTransform(
-                state.viewport.zoom, 0,
-                0, state.viewport.zoom,
-                state.viewport.x, state.viewport.y
-            );
-            await Store.saveDrawing(dataUrl);
+            // Serialize strokes array as JSON — no canvas pixel manipulation needed
+            await Store.saveDrawing(JSON.stringify(state.strokes));
             window.ActivityLog?.log('drawing_stroke_saved');
         } catch (e) {
             console.error('[Board] Failed to save drawing:', e);
@@ -572,20 +528,28 @@ window.initBoard = function (showToast) {
             notesContainer.innerHTML = '';
             state.notes.forEach(note => createNoteElement(note));
         }
-        // Restore drawing from IndexedDB (async, no size limit)
+        // Restore drawing strokes from IndexedDB
         try {
             const drawingData = await Store.getDrawing();
             if (drawingData) {
-                const img = new Image();
-                img.onload = () => {
-                    // Drawing is stored in world-space (identity transform)
-                    ctx.setTransform(1, 0, 0, 1, 0, 0);
-                    ctx.drawImage(img, 0, 0);
-                    _cachedDrawingImage = img;
-                    // Now redraw with current viewport
-                    redrawCanvasWithTransform();
-                };
-                img.src = drawingData;
+                // New format: JSON strokes array
+                if (drawingData.trimStart().startsWith('[')) {
+                    state.strokes = JSON.parse(drawingData);
+                } else {
+                    // Legacy: old dataURL format — load as background image once, discard
+                    const img = new Image();
+                    img.onload = () => {
+                        // Convert legacy pixel image to a single stroke-less "background" entry
+                        // We can't recover exact paths, so we render it as-is then clear on next save
+                        ctx.save();
+                        ctx.translate(state.viewport.x, state.viewport.y);
+                        ctx.scale(state.viewport.zoom, state.viewport.zoom);
+                        ctx.drawImage(img, 0, 0);
+                        ctx.restore();
+                    };
+                    img.src = drawingData;
+                }
+                renderStrokes();
             }
         } catch (e) {
             console.warn('[Board] Could not restore drawing:', e);
@@ -596,3 +560,4 @@ window.initBoard = function (showToast) {
         if (typeof showToast === 'function') showToast(msg);
     }
 }
+
