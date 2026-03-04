@@ -3840,7 +3840,7 @@ body {
     border-radius: 0 12px 12px 0;
     padding: 20px 15px;
     font-weight: 600;
-    transition: transform .2s, right .2s, background-color .2s;
+    transition: transform .2s, background-color .2s;
     position: relative;
     right: 0;
     box-shadow: 6px 4px 12px #00000026
@@ -4773,6 +4773,12 @@ body {
     .tab-btn:hover,
     .tab-btn:active {
         transform: none !important
+    }
+
+    .tab-btn.active {
+        right: auto !important;
+        padding-left: 0 !important;
+        box-shadow: none !important
     }
 
     .tab-btn.active.tab-daily {
