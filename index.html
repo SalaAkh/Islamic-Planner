@@ -864,29 +864,29 @@
     </div>
 
     <!-- Right Action Buttons (AI, Theme, Lang) -->
-    <div class="fixed bottom-6 right-6 flex flex-col items-end rtl:items-start gap-3 z-50">
+    <div class="fixed bottom-6 end-6 flex flex-col items-end gap-3 z-50">
         <!-- Lang Toggle -->
         <button id="lang-toggle"
-            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-gray-600 dark:text-gray-300 hover:scale-110 transition-transform border border-gray-100 dark:border-slate-700 tooltip tooltip-left"
+            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-gray-600 dark:text-gray-300 hover:scale-110 transition-transform border border-gray-100 dark:border-slate-700 tooltip ltr:tooltip-left rtl:tooltip-right"
             aria-label="Смена языка" data-i18n="tooltip_lang" data-i18n-target="aria-label">
             <span id="lang-icon" class="text-xs font-bold font-sans">RU</span>
         </button>
         <!-- Theme Toggle -->
         <button id="theme-toggle"
-            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-gray-600 dark:text-gray-300 hover:scale-110 transition-transform border border-gray-100 dark:border-slate-700 tooltip tooltip-left"
+            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-gray-600 dark:text-gray-300 hover:scale-110 transition-transform border border-gray-100 dark:border-slate-700 tooltip ltr:tooltip-left rtl:tooltip-right"
             aria-label="Смена темы" data-i18n="tooltip_theme" data-i18n-target="aria-label">
             <i class="fas fa-moon"></i>
         </button>
         <!-- Auth Button -->
         <button id="auth-btn" dir="auto"
-            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-indigo-500 hover:scale-110 transition-transform border border-indigo-100 dark:border-slate-700 tooltip tooltip-left"
+            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-indigo-500 hover:scale-110 transition-transform border border-indigo-100 dark:border-slate-700 tooltip ltr:tooltip-left rtl:tooltip-right"
             aria-label="Войти / Профиль" data-i18n="tooltip_auth" data-i18n-target="aria-label">
             <i id="auth-icon" class="fas fa-user"></i>
         </button>
         <!-- Donate Button -->
         <button id="donate-btn" dir="auto"
             onclick="document.getElementById('donate-modal').classList.remove('hidden'); document.getElementById('donate-modal').classList.add('flex')"
-            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-rose-500 hover:scale-110 transition-transform border border-rose-100 dark:border-slate-700 tooltip tooltip-left"
+            class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-rose-500 hover:scale-110 transition-transform border border-rose-100 dark:border-slate-700 tooltip ltr:tooltip-left rtl:tooltip-right"
             aria-label="Поддержать проект" data-i18n="tooltip_donate" data-i18n-target="aria-label">
             <i class="fas fa-heart"></i>
         </button>
