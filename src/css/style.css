@@ -662,7 +662,8 @@ html[dir="rtl"] .rtl\:tooltip-right:hover::after,
     right: auto;
     left: 100%;
     margin-left: 12px;
-    margin-right: 0; /* Reset */
+    margin-right: 0;
+    /* Reset */
     bottom: 50%;
     transform: translateY(50%);
 }
@@ -1239,7 +1240,17 @@ body {
     }
 
     .tab-btn:hover {
-        transform: none;
+        transform: none !important;
+    }
+
+    .tab-btn.active {
+        padding: 0.5rem 0 !important;
+        /* Force reset from desktop padding-left: 20px */
+        right: auto !important;
+        transform: none !important;
+        box-shadow: none !important;
+        flex: 1 !important;
+        /* Ensure it stays flex: 1 and doesn't expand */
     }
 
     /* Active states for mobile bottom nav */
