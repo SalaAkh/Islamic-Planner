@@ -843,12 +843,12 @@
                     </div>
                     <div class="toolbar-divider"></div>
                     <div class="toolbar-group items-center">
-                        <label class="tool-label-sm" data-i18n="tool_color_label">Цвет</label>
+                        <label for="draw-color" class="tool-label-sm" data-i18n="tool_color_label">Цвет</label>
                         <input type="color" id="draw-color" name="draw-color" value="#1e293b" class="color-picker-btn"
                             title="Цвет кисти" aria-label="Цвет кисти">
                     </div>
                     <div class="toolbar-group items-center">
-                        <label class="tool-label-sm" data-i18n="tool_size_label">Размер</label>
+                        <label for="brush-size" class="tool-label-sm" data-i18n="tool_size_label">Размер</label>
                         <input type="range" id="brush-size" name="brush-size" min="1" max="20" value="3"
                             class="brush-slider" aria-label="Размер кисти">
                     </div>
@@ -1008,7 +1008,8 @@
                 </div>
 
                 <div class="mb-4">
-                    <label class="block text-xs text-gray-500 mb-1" data-i18n="auth_name_label">Имя пользователя</label>
+                    <label for="auth-name-input" class="block text-xs text-gray-500 mb-1"
+                        data-i18n="auth_name_label">Имя пользователя</label>
                     <div class="flex gap-2">
                         <input type="text" id="auth-name-input" name="display-name" placeholder="Ваше имя"
                             autocomplete="name"
@@ -1281,7 +1282,7 @@
 
                 <!-- Prompt Area -->
                 <div id="ai-chat-area">
-                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"
+                    <label for="ai-prompt" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"
                         data-i18n="ai_prompt_label">Как
                         распланировать день?</label>
                     <div class="relative">

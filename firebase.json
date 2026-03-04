@@ -107,30 +107,6 @@
         ],
         "rewrites": [
             {
-                "source": "/sitemap.xml",
-                "destination": "/sitemap.xml"
-            },
-            {
-                "source": "/robots.txt",
-                "destination": "/robots.txt"
-            },
-            {
-                "source": "/sw.js",
-                "destination": "/sw.js"
-            },
-            {
-                "source": "/manifest.json",
-                "destination": "/manifest.json"
-            },
-            {
-                "source": "/favicon.ico",
-                "destination": "/favicon.ico"
-            },
-            {
-                "source": "/google4a672bfea76db3c6.html",
-                "destination": "/google4a672bfea76db3c6.html"
-            },
-            {
                 "source": "**",
                 "destination": "/index.html"
             }

@@ -361,6 +361,9 @@ window.initBoard = function (showToast) {
 
         const textarea = document.createElement('textarea');
         textarea.className = 'sticky-content handwriting';
+        textarea.id = `note-${noteData.id}-text`;
+        textarea.name = `note-${noteData.id}-text`;
+        textarea.setAttribute('aria-label', (window.t && window.t('note_placeholder')) || 'Бисмиллях...');
         textarea.placeholder = (window.t && window.t('note_placeholder')) || 'Бисмиллях...';
         textarea.value = noteData.text || '';
 

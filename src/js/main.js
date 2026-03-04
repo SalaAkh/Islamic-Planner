@@ -548,10 +548,10 @@ function renderDynamicGoals() {
         const deleteTitle = (window.t && window.t('btn_delete_goal')) || 'Удалить';
         div.innerHTML = `
             <div class="flex items-center justify-between mb-2">
-                <input type="text" class="dyn-goal-title bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide w-[85%] placeholder-slate-400" placeholder="${goalCustomTitle}" value="${goal.title || ''}">
+                <input type="text" id="dyn-goal-title-${goal.id}" name="dyn-goal-title-${goal.id}" aria-label="${goalCustomTitle}" class="dyn-goal-title bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide w-[85%] placeholder-slate-400" placeholder="${goalCustomTitle}" value="${goal.title || ''}">
                 <button type="button" class="delete-dyn-goal text-red-500 opacity-30 hover:opacity-100 transition-all p-2 shrink-0 cursor-pointer relative z-50" title="${deleteTitle}"><i class="fas fa-trash pointer-events-none"></i></button>
             </div>
-            <textarea class="dyn-goal-content ruled-textarea handwriting h-24 placeholder-slate-400 dark:placeholder-slate-500 w-full" placeholder="${goalCustomPh}">${goal.content || ''}</textarea>
+            <textarea id="dyn-goal-content-${goal.id}" name="dyn-goal-content-${goal.id}" aria-label="${goalCustomPh}" class="dyn-goal-content ruled-textarea handwriting h-24 placeholder-slate-400 dark:placeholder-slate-500 w-full" placeholder="${goalCustomPh}">${goal.content || ''}</textarea>
         `;
 
         const titleInput = div.querySelector('.dyn-goal-title');
