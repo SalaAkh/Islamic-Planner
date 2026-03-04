@@ -115,7 +115,9 @@
     <link rel="stylesheet" href="./src/css/tailwind.css?v=4">
 
     <!-- PWA & Favicon -->
+    <link rel="manifest" href="./public/manifest.json">
     <link rel="icon" type="image/x-icon" href="./public/favicon.ico">
+    <link rel="shortcut icon" href="./public/favicon.ico">
     <meta name="theme-color" content="#059669">
 
     <!-- Подключаем скрипты -->
@@ -862,7 +864,7 @@
     </div>
 
     <!-- Right Action Buttons (AI, Theme, Lang) -->
-    <div class="fixed bottom-6 end-6 flex flex-col items-end gap-3 z-50">
+    <div class="fixed bottom-6 right-6 flex flex-col items-end rtl:items-start gap-3 z-50">
         <!-- Lang Toggle -->
         <button id="lang-toggle"
             class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-gray-600 dark:text-gray-300 hover:scale-110 transition-transform border border-gray-100 dark:border-slate-700 tooltip tooltip-left"
