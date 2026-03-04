@@ -26,7 +26,11 @@ window.Auth = {
                 if (authIcon) {
                     authIcon.classList.remove('fa-user');
                     authIcon.classList.add('fa-user-check');
-                    authBtn.setAttribute('aria-label', user.email);
+                    // Removed dynamic email override to keep tooltip localized -> we rely on HTML data-i18n
+                    authBtn.removeAttribute('aria-label');
+                    if (window.t) {
+                        authBtn.setAttribute('aria-label', window.t('tooltip_auth') || 'Войти / Профиль');
+                    }
                 }
                 console.log("[Auth] Logged in as:", user.email);
 
@@ -37,7 +41,7 @@ window.Auth = {
                 if (userEmailEl) userEmailEl.textContent = user.email;
 
                 const userNameEl = document.getElementById('auth-user-name');
-                if (userNameEl) userNameEl.textContent = user.displayName || 'Без имени';
+                if (userNameEl) userNameEl.textContent = user.displayName || (window.t ? window.t('auth_no_name') : 'Без имени');
 
                 const nameInput = document.getElementById('auth-name-input');
                 if (nameInput) nameInput.value = user.displayName || '';
@@ -64,7 +68,13 @@ window.Auth = {
                 if (authIcon) {
                     authIcon.classList.remove('fa-user-check');
                     authIcon.classList.add('fa-user');
-                    authBtn.setAttribute('aria-label', 'Войти / Профиль');
+                    // Reset to standard tooltip (localized via data-i18n in HTML)
+                    authBtn.removeAttribute('aria-label');
+                    if (window.t) {
+                        authBtn.setAttribute('aria-label', window.t('tooltip_auth') || 'Войти / Профиль');
+                    } else {
+                        authBtn.setAttribute('aria-label', 'Войти / Профиль');
+                    }
                 }
                 console.log("[Auth] Logged out.");
 
@@ -234,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const btnText = document.getElementById('auth-submit-text');
 
             errorEl.textContent = '';
-            btnText.textContent = isRegister ? 'Регистрация...' : 'Вход...';
+            btnText.textContent = isRegister ? (window.t ? window.t('auth_registering') : 'Регистрация...') : (window.t ? window.t('auth_logging_in') : 'Вход...');
             if (submitBtn) submitBtn.disabled = true;
             submitBtn.classList.add('opacity-70');
 
@@ -244,10 +254,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.error) {
                 // Translate common errors
-                if (result.error.includes("auth/invalid-credential")) errorEl.textContent = "Неверный логин или пароль";
-                else if (result.error.includes("auth/email-already-in-use")) errorEl.textContent = "Email уже зарегистрирован";
-                else if (result.error.includes("auth/weak-password")) errorEl.textContent = "Пароль слишком простой (минимум 6 символов)";
-                else if (result.error.includes("auth/operation-not-allowed")) errorEl.textContent = "Глобальная регистрация по Email отключена (Firebase)";
+                if (result.error.includes("auth/invalid-credential")) errorEl.textContent = (window.t ? window.t('auth_err_invalid') : "Неверный логин или пароль");
+                else if (result.error.includes("auth/email-already-in-use")) errorEl.textContent = (window.t ? window.t('auth_err_in_use') : "Email уже зарегистрирован");
+                else if (result.error.includes("auth/weak-password")) errorEl.textContent = (window.t ? window.t('auth_err_weak') : "Пароль слишком простой (минимум 6 символов)");
+                else if (result.error.includes("auth/operation-not-allowed")) errorEl.textContent = (window.t ? window.t('auth_err_not_allowed') : "Глобальная регистрация по Email отключена (Firebase)");
                 else errorEl.textContent = result.error;
             } else {
                 // Success - close modal
@@ -256,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loginForm.reset();
             }
 
-            btnText.textContent = isRegister ? 'Зарегистрироваться' : 'Войти';
+            btnText.textContent = isRegister ? (window.t ? window.t('auth_register_btn') : 'Зарегистрироваться') : (window.t ? window.t('auth_login_btn') : 'Войти');
             if (submitBtn) submitBtn.disabled = false;
             submitBtn.classList.remove('opacity-70');
         });
@@ -266,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnGoogle) {
         btnGoogle.addEventListener('click', async () => {
             const prevHtml = btnGoogle.innerHTML;
-            btnGoogle.innerHTML = '<i class="fas fa-circle-notch fa-spin text-gray-500"></i> Загрузка...';
+            btnGoogle.innerHTML = `<i class="fas fa-circle-notch fa-spin text-gray-500"></i> ${window.t ? window.t('auth_loading') : 'Загрузка...'}`;
             btnGoogle.disabled = true;
 
             const result = await Auth.signInWithGoogle();
@@ -276,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('auth-modal').classList.remove('flex');
             } else {
                 const errorEl = document.getElementById('auth-error');
-                if (errorEl) errorEl.textContent = "Ошибка входа через Google. Попробуйте снова.";
+                if (errorEl) errorEl.textContent = (window.t ? window.t('auth_err_google') : "Ошибка входа через Google. Попробуйте снова.");
             }
 
             btnGoogle.innerHTML = prevHtml;
@@ -307,18 +317,18 @@ document.addEventListener('DOMContentLoaded', () => {
         btnUpdateProfile.addEventListener('click', async () => {
             const newName = document.getElementById('auth-name-input').value.trim();
             const msgEl = document.getElementById('auth-profile-msg');
-            msgEl.textContent = 'Сохранение...';
+            msgEl.textContent = window.t ? window.t('auth_saving') : 'Сохранение...';
             msgEl.className = 'text-xs text-center mt-1 h-4 font-medium transition-colors text-indigo-500';
 
             const result = await Auth.updateUsername(newName);
             if (result.success) {
-                msgEl.textContent = 'Имя обновлено!';
+                msgEl.textContent = (window.t ? window.t('auth_name_updated') : 'Имя обновлено!');
                 msgEl.className = 'text-xs text-center mt-1 h-4 font-medium transition-colors text-green-500';
                 const userNameEl = document.getElementById('auth-user-name');
-                if (userNameEl) userNameEl.textContent = newName || 'Без имени';
+                if (userNameEl) userNameEl.textContent = newName || (window.t ? window.t('auth_no_name') : 'Без имени');
                 setTimeout(() => { msgEl.textContent = ''; }, 3000);
             } else {
-                msgEl.textContent = 'Ошибка сохранения';
+                msgEl.textContent = window.t ? window.t('auth_save_err') : 'Ошибка сохранения';
                 msgEl.className = 'text-xs text-center mt-1 h-4 font-medium transition-colors text-red-500';
             }
         });
@@ -330,9 +340,9 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleRegCheckbox.addEventListener('change', (e) => {
             const btnSubmit = document.getElementById('auth-submit-text');
             if (e.target.checked) {
-                btnSubmit.textContent = "Зарегистрироваться";
+                btnSubmit.textContent = window.t ? window.t('auth_register_btn') : "Зарегистрироваться";
             } else {
-                btnSubmit.textContent = "Войти";
+                btnSubmit.textContent = window.t ? window.t('auth_login_btn') : "Войти";
             }
         });
     }

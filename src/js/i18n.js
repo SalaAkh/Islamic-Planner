@@ -94,7 +94,14 @@ const translations = {
         "drawing_cleared_toast": "Рисунок очищен",
         "note_deleted_toast": "Стикер удален",
         "note_created_toast": "МашаАллах, стикер добавлен 🌱",
-        "shortcut_draw": "рисунок", "shortcut_eraser": "ластик", "shortcut_hand": "рука", "shortcut_pan": "пан"
+        "shortcut_draw": "рисунок", "shortcut_eraser": "ластик", "shortcut_hand": "рука", "shortcut_pan": "пан",
+        "tooltip_auth": "Войти / Профиль", "tooltip_donate": "Поддержать проект", "auth_no_name": "Без имени",
+        "auth_saving": "Сохранение...", "auth_name_updated": "Имя обновлено!", "auth_save_err": "Ошибка сохранения",
+        "auth_registering": "Регистрация...", "auth_logging_in": "Вход...", "auth_err_invalid": "Неверный логин или пароль",
+        "auth_err_in_use": "Email уже зарегистрирован", "auth_err_weak": "Пароль слишком простой (минимум 6 символов)",
+        "auth_err_not_allowed": "Глобальная регистрация по Email отключена (Firebase)", "auth_register_btn": "Зарегистрироваться",
+        "auth_login_btn": "Войти", "auth_loading": "Загрузка...", "auth_err_google": "Ошибка входа через Google. Попробуйте снова.",
+        "sync_loading": "Синхронизация...", "auth_logout": "Выйти"
     },
     kk: {
         "seo_title": "Barakah Planner — Исламдық Күнделік және Намаз Жоспарлаушы",
@@ -190,7 +197,14 @@ const translations = {
         "drawing_cleared_toast": "Сурет тазартылды",
         "note_deleted_toast": "Стикер жойылды",
         "note_created_toast": "МашаАллах, стикер қосылды 🌱",
-        "shortcut_draw": "сурет", "shortcut_eraser": "өшіргіш", "shortcut_hand": "қол", "shortcut_pan": "жылжыту"
+        "shortcut_draw": "сурет", "shortcut_eraser": "өшіргіш", "shortcut_hand": "қол", "shortcut_pan": "жылжыту",
+        "tooltip_auth": "Кіру / Профиль", "tooltip_donate": "Жобаны қолдау", "auth_no_name": "Атаусыз",
+        "auth_saving": "Сақталуда...", "auth_name_updated": "Аты жаңартылды!", "auth_save_err": "Сақтау қатесі",
+        "auth_registering": "Тіркелу...", "auth_logging_in": "Кіру...", "auth_err_invalid": "Логин немесе құпия сөз қате",
+        "auth_err_in_use": "Email тіркелген", "auth_err_weak": "Құпия сөз тым оңай (кемінде 6 таңба)",
+        "auth_err_not_allowed": "Email арқылы тіркелу өшірілген (Firebase)", "auth_register_btn": "Тіркелу",
+        "auth_login_btn": "Кіру", "auth_loading": "Жүктелуде...", "auth_err_google": "Google арқылы кіру қатесі. Қайта көріңіз.",
+        "sync_loading": "Синхрондау...", "auth_logout": "Шығу"
     },
     ar: {
         "seo_title": "Barakah Planner — يوميات إسلامية ومخطط الصلاة",
@@ -286,7 +300,14 @@ const translations = {
         "drawing_cleared_toast": "تم مسح الرسم",
         "note_deleted_toast": "تم حذف الملصق",
         "note_created_toast": "ما شاء الله، تم إضافة ملصق 🌱",
-        "shortcut_draw": "رسم", "shortcut_eraser": "ممحاة", "shortcut_hand": "يد", "shortcut_pan": "تحريк"
+        "shortcut_draw": "رسم", "shortcut_eraser": "ممحاة", "shortcut_hand": "يد", "shortcut_pan": "تحريк",
+        "tooltip_auth": "تسجيل الدخول / الملف الشخصي", "tooltip_donate": "دعم المشروع", "auth_no_name": "بلا اسم",
+        "auth_saving": "جارٍ الحفظ...", "auth_name_updated": "تم تحديث الاسم!", "auth_save_err": "خطأ في الحفظ",
+        "auth_registering": "جاري التسجيل...", "auth_logging_in": "جاري الدخول...", "auth_err_invalid": "خطأ في البريد الإلكتروني أو كلمة المرور",
+        "auth_err_in_use": "البريد الإلكتروني مسجل بالفعل", "auth_err_weak": "كلمة المرور ضعيفة جدًا (6 أحرف على الأقل)",
+        "auth_err_not_allowed": "تم إيقاف التسجيل بالبريد الإلكتروني (Firebase)", "auth_register_btn": "تسجيل",
+        "auth_login_btn": "دخول", "auth_loading": "جاري التحميل...", "auth_err_google": "حدث خطأ أثناء تسجيل الدخول عبر Google. حاول مرة أخرى.",
+        "sync_loading": "المزامنة...", "auth_logout": "تسجيل خروج"
     },
     en: {
         "seo_title": "Barakah Planner — Islamic Daily Planner & Prayer Tracker",
@@ -382,7 +403,14 @@ const translations = {
         "drawing_cleared_toast": "Drawing cleared",
         "note_deleted_toast": "Sticker removed",
         "note_created_toast": "Mashallah, sticker added 🌱",
-        "shortcut_draw": "draw", "shortcut_eraser": "eraser", "shortcut_hand": "hand", "shortcut_pan": "pan"
+        "shortcut_draw": "draw", "shortcut_eraser": "eraser", "shortcut_hand": "hand", "shortcut_pan": "pan",
+        "tooltip_auth": "Login / Profile", "tooltip_donate": "Support the Project", "auth_no_name": "No name",
+        "auth_saving": "Saving...", "auth_name_updated": "Name updated!", "auth_save_err": "Save error",
+        "auth_registering": "Registering...", "auth_logging_in": "Logging in...", "auth_err_invalid": "Invalid email or password",
+        "auth_err_in_use": "Email is already registered", "auth_err_weak": "Password is too weak (min 6 chars)",
+        "auth_err_not_allowed": "Email registration is disabled globally (Firebase)", "auth_register_btn": "Register",
+        "auth_login_btn": "Login", "auth_loading": "Loading...", "auth_err_google": "Google Sign-In failed. Try again.",
+        "sync_loading": "Syncing...", "auth_logout": "Logout"
     }
 };
 
