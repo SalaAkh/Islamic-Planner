@@ -100,3 +100,69 @@ if (fs.existsSync(PUBLIC_DIR)) {
 // 7. Write final monolith
 fs.writeFileSync(path.join(DIST_DIR, 'index.html'), html);
 console.log('✅ Build complete! Monolithic file generated at dist/index.html');
+
+// 8. Generate language-specific static HTML pages for Telegram/social previews
+const BASE_URL = 'https://islamic-planer.web.app';
+const LANG_META = {
+    kk: {
+        lang: 'kk',
+        dir: 'ltr',
+        title: 'Barakah Planner — Исламдық Күнделік және Намаз Жоспарлаушы',
+        desc: 'Күніңізді Ислам бойынша жоспарлаңыз: намаз трекері, Ақырет пен Дүние мақсаттары, Tafakkur идеялар тақтасы. Тегін.',
+        image: `${BASE_URL}/banner-kk.png`,
+        url: `${BASE_URL}/?lang=kk`,
+    },
+    en: {
+        lang: 'en',
+        dir: 'ltr',
+        title: 'Barakah Planner — Islamic Daily Planner & Prayer Tracker',
+        desc: 'Plan your day according to Islam: prayer tracker, Akhirah & Dunya goals, Tafakkur idea board. Free.',
+        image: `${BASE_URL}/banner-en.png`,
+        url: `${BASE_URL}/?lang=en`,
+    },
+    ar: {
+        lang: 'ar',
+        dir: 'rtl',
+        title: 'Barakah Planner — يوميات إسلامية ومخطط الصلاة',
+        desc: 'خطط ليومك وفقًا للإسلام: متتبع الصلاة، أهداف الآخرة والدنيا، لوحة أفكار تفكر. مجاني.',
+        image: `${BASE_URL}/banner-ar.png`,
+        url: `${BASE_URL}/?lang=ar`,
+    },
+};
+
+Object.entries(LANG_META).forEach(([langCode, meta]) => {
+    // Create subfolder
+    const langDir = path.join(DIST_DIR, langCode);
+    if (!fs.existsSync(langDir)) fs.mkdirSync(langDir, { recursive: true });
+
+    // Build a minimal HTML file that instantly redirects but has proper static og meta
+    const langHtml = `<!DOCTYPE html>
+<html lang="${meta.lang}" dir="${meta.dir}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${meta.title}</title>
+<meta name="description" content="${meta.desc}">
+<link rel="canonical" href="${meta.url}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="${meta.url}">
+<meta property="og:site_name" content="Barakah Planner">
+<meta property="og:title" content="${meta.title}">
+<meta property="og:description" content="${meta.desc}">
+<meta property="og:image" content="${meta.image}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${meta.title}">
+<meta name="twitter:description" content="${meta.desc}">
+<meta name="twitter:image" content="${meta.image}">
+<meta http-equiv="refresh" content="0; url=${meta.url}">
+<script>window.location.replace('${meta.url}');</script>
+</head>
+<body></body>
+</html>`;
+
+    fs.writeFileSync(path.join(langDir, 'index.html'), langHtml);
+    console.log(`✅ Language page generated: dist/${langCode}/index.html`);
+});
+

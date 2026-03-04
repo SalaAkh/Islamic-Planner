@@ -88,24 +88,31 @@
                 ]
             }
         ],
-        "redirects": [
-            {
-                "source": "/kk{,/**}",
-                "destination": "/?lang=kk",
-                "type": 301
-            },
-            {
-                "source": "/en{,/**}",
-                "destination": "/?lang=en",
-                "type": 301
-            },
-            {
-                "source": "/ar{,/**}",
-                "destination": "/?lang=ar",
-                "type": 301
-            }
-        ],
         "rewrites": [
+            {
+                "source": "/kk",
+                "destination": "/kk/index.html"
+            },
+            {
+                "source": "/kk/**",
+                "destination": "/kk/index.html"
+            },
+            {
+                "source": "/en",
+                "destination": "/en/index.html"
+            },
+            {
+                "source": "/en/**",
+                "destination": "/en/index.html"
+            },
+            {
+                "source": "/ar",
+                "destination": "/ar/index.html"
+            },
+            {
+                "source": "/ar/**",
+                "destination": "/ar/index.html"
+            },
             {
                 "source": "**",
                 "destination": "/index.html"
