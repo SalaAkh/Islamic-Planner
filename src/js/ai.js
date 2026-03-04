@@ -281,7 +281,7 @@ class AiAssistant {
             newRow.innerHTML = `
                 <button data-task-id="t_dyn_${newIndex}" class="task-toggle shrink-0 mr-3"></button>
                 <input data-id="task_dyn_${newIndex}" id="task_dyn_${newIndex}" name="task_dyn_${newIndex}" type="text" class="ruled-input handwriting day-input w-full" value="${tasks[taskIndex]}" autocomplete="off">
-                <button class="delete-dyn-task text-red-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 shrink-0 ml-2" title="${deleteTitle}"><i class="fas fa-trash text-sm"></i></button>
+                <button class="delete-dyn-task text-red-500 opacity-30 hover:opacity-100 transition-opacity p-2 shrink-0 ml-2" title="${deleteTitle}"><i class="fas fa-trash text-sm"></i></button>
             `;
             listContainer.appendChild(newRow);
             taskIndex++;
