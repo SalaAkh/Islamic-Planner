@@ -460,6 +460,14 @@ function applyTranslations(lang) {
         if (twImage) twImage.content = dict['seo_image'];
     }
 
+    // Update og:url and canonical to language-specific URL for proper sharing
+    const BASE_URL = 'https://islamic-planer.web.app';
+    const langUrl = BASE_URL + '/?lang=' + lang;
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.content = langUrl;
+    const canonicalTag = document.getElementById('seo-canonical');
+    if (canonicalTag) canonicalTag.href = langUrl;
+
     // Перевод текстовых элементов
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');

@@ -112,11 +112,15 @@ window.initBoard = function (showToast) {
     window.addEventListener('resize', resizeDrawingCanvas);
 
     // screen px → world coordinates
+    // NOTE: .infinite-canvas has CSS top:50% left:50%, so world-space origin (0,0)
+    // is at the CENTER of the board container — we must subtract that offset here.
     function screenToWorld(clientX, clientY) {
-        const rect = container.getBoundingClientRect();
+        const rect = drawingCanvas.getBoundingClientRect();
+        const cx = drawingCanvas.width / 2;
+        const cy = drawingCanvas.height / 2;
         return {
-            x: (clientX - rect.left - state.viewport.x) / state.viewport.zoom,
-            y: (clientY - rect.top - state.viewport.y) / state.viewport.zoom,
+            x: (clientX - rect.left - cx - state.viewport.x) / state.viewport.zoom,
+            y: (clientY - rect.top - cy - state.viewport.y) / state.viewport.zoom,
         };
     }
 
@@ -124,8 +128,11 @@ window.initBoard = function (showToast) {
     function renderStrokes() {
         ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
         ctx.save();
-        // Transform: world → screen  (ctx.translate then scale = same as CSS transform)
-        ctx.translate(state.viewport.x, state.viewport.y);
+        // Transform mirrors CSS: origin at canvas center (matches .infinite-canvas top:50% left:50%)
+        // then apply viewport pan + zoom
+        const cx = drawingCanvas.width / 2;
+        const cy = drawingCanvas.height / 2;
+        ctx.translate(cx + state.viewport.x, cy + state.viewport.y);
         ctx.scale(state.viewport.zoom, state.viewport.zoom);
 
         const all = state.currentStroke
