@@ -190,7 +190,7 @@ function initDailyPlanner() {
         // Handle delete dynamic task button
         const delBtn = e.target.closest('.delete-dyn-task');
         if (delBtn) {
-            const row = delBtn.closest('.flex.items-center');
+            const row = delBtn.parentElement;
             if (row) {
                 row.remove();
                 saveDailyData();
@@ -214,7 +214,7 @@ function initDailyPlanner() {
             newRow.innerHTML = `
                 <button data-task-id="t_dyn_${blockIndex}_${newIndex}" aria-label="${taskToggleLabel}" class="task-toggle shrink-0 mr-3"></button>
                 <textarea data-id="task_dyn_${blockIndex}_${newIndex}" id="task_dyn_${blockIndex}_${newIndex}" name="task_dyn_${blockIndex}_${newIndex}" rows="1" style="resize:none; overflow:hidden;" placeholder="${newTaskPh}" autocomplete="off" aria-label="${newTaskLabel}" class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500 w-full"></textarea>
-                <button class="delete-dyn-task text-red-500 opacity-30 hover:opacity-100 transition-opacity p-2 shrink-0 ml-2" title="${deleteTitle}"><i class="fas fa-trash text-sm"></i></button>
+                <button type="button" class="delete-dyn-task text-red-500 opacity-30 hover:opacity-100 transition-all p-2 shrink-0 ml-2 cursor-pointer relative z-50" title="${deleteTitle}"><i class="fas fa-trash text-sm pointer-events-none"></i></button>
             `;
 
             if (listContainer) {
@@ -280,7 +280,7 @@ function renderDailyPlanner() {
                     newRow.innerHTML = `
                         <button data-task-id="t_dyn_${dynId}" aria-label="Отметить задачу" class="task-toggle shrink-0 mr-3"></button>
                         <textarea data-id="${key}" id="${key}" name="${key}" rows="1" style="resize:none; overflow:hidden;" autocomplete="off" aria-label="Задача" class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500 w-full"></textarea>
-                        <button class="delete-dyn-task text-red-500 opacity-30 hover:opacity-100 transition-opacity p-2 shrink-0 ml-2" title="${deleteTitle}"><i class="fas fa-trash text-sm"></i></button>
+                        <button type="button" class="delete-dyn-task text-red-500 opacity-30 hover:opacity-100 transition-all p-2 shrink-0 ml-2 cursor-pointer relative z-50" title="${deleteTitle}"><i class="fas fa-trash text-sm pointer-events-none"></i></button>
                     `;
                     container.appendChild(newRow);
                 }
@@ -549,7 +549,7 @@ function renderDynamicGoals() {
         div.innerHTML = `
             <div class="flex items-center justify-between mb-2">
                 <input type="text" class="dyn-goal-title bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide w-[85%] placeholder-slate-400" placeholder="${goalCustomTitle}" value="${goal.title || ''}">
-                <button class="delete-dyn-goal text-red-500 opacity-30 hover:opacity-100 transition-opacity p-2" title="${deleteTitle}"><i class="fas fa-trash"></i></button>
+                <button type="button" class="delete-dyn-goal text-red-500 opacity-30 hover:opacity-100 transition-all p-2 shrink-0 cursor-pointer relative z-50" title="${deleteTitle}"><i class="fas fa-trash pointer-events-none"></i></button>
             </div>
             <textarea class="dyn-goal-content ruled-textarea handwriting h-24 placeholder-slate-400 dark:placeholder-slate-500 w-full" placeholder="${goalCustomPh}">${goal.content || ''}</textarea>
         `;
