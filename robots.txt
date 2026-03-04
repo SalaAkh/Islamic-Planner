@@ -1,3 +1,9 @@
+# ═══════════════════════════════════════════════════════
+# Barakah Planner — robots.txt
+# Primary:  islamic-planer.web.app
+# Alias:    islamic-planer.firebaseapp.com
+# ═══════════════════════════════════════════════════════
+
 User-agent: *
 Allow: /
 Disallow: /node_modules/
@@ -9,5 +15,11 @@ Disallow: /.firebase/
 Disallow: /google-services.json
 Disallow: /github/
 Disallow: /guides/
+Disallow: /src/
 
+# Sitemaps for both hosting domains
 Sitemap: https://islamic-planer.web.app/sitemap.xml
+Sitemap: https://islamic-planer.firebaseapp.com/sitemap.xml
+
+# Crawl-delay (courtesy, not mandatory)
+# Crawl-delay: 1

@@ -45,7 +45,16 @@
                 "headers": [
                     {
                         "key": "Content-Type",
-                        "value": "application/xml"
+                        "value": "application/xml; charset=utf-8"
+                    }
+                ]
+            },
+            {
+                "source": "/robots.txt",
+                "headers": [
+                    {
+                        "key": "Content-Type",
+                        "value": "text/plain; charset=utf-8"
                     }
                 ]
             },
@@ -116,6 +125,10 @@
             {
                 "source": "/favicon.ico",
                 "destination": "/favicon.ico"
+            },
+            {
+                "source": "/google4a672bfea76db3c6.html",
+                "destination": "/google4a672bfea76db3c6.html"
             },
             {
                 "source": "**",

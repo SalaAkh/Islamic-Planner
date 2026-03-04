@@ -91,7 +91,7 @@ if (fs.existsSync(PUBLIC_DIR)) {
 }
 
 // 6. Copy sitemap and robots
-['sitemap.xml', 'robots.txt'].forEach(f => {
+['sitemap.xml', 'robots.txt', 'google4a672bfea76db3c6.html'].forEach(f => {
     if (fs.existsSync(`./${f}`)) {
         fs.copyFileSync(`./${f}`, path.join(DIST_DIR, f));
     }
