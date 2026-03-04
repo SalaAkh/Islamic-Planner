@@ -120,12 +120,24 @@ window.initBoard = function (showToast) {
 
     window.addEventListener('resize', resizeDrawingCanvas);
 
+    // Convert screen coords → world coords (same space as sticky notes)
     function getDrawingPos(clientX, clientY) {
         const rect = container.getBoundingClientRect();
+        const sx = clientX - rect.left;
+        const sy = clientY - rect.top;
         return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
+            x: (sx - state.viewport.x) / state.viewport.zoom,
+            y: (sy - state.viewport.y) / state.viewport.zoom
         };
+    }
+
+    // Apply viewport transform to ctx so all drawing is in world space
+    function applyViewportTransform() {
+        ctx.setTransform(
+            state.viewport.zoom, 0,
+            0, state.viewport.zoom,
+            state.viewport.x, state.viewport.y
+        );
     }
 
     // =====================
@@ -151,16 +163,17 @@ window.initBoard = function (showToast) {
     drawingCanvas.addEventListener('mousedown', (e) => {
         if (state.activeTool === 'pencil' || state.activeTool === 'eraser') {
             state.isDrawing = true;
+            applyViewportTransform();
             const pos = getDrawingPos(e.clientX, e.clientY);
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
             if (state.activeTool === 'eraser') {
                 ctx.globalCompositeOperation = 'destination-out';
-                ctx.lineWidth = state.drawSize * 5;
+                ctx.lineWidth = state.drawSize * 5 / state.viewport.zoom;
             } else {
                 ctx.globalCompositeOperation = 'source-over';
                 ctx.strokeStyle = state.drawColor;
-                ctx.lineWidth = state.drawSize;
+                ctx.lineWidth = state.drawSize / state.viewport.zoom;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
             }
@@ -203,6 +216,7 @@ window.initBoard = function (showToast) {
             state.isDrawing = false;
             ctx.closePath();
             ctx.globalCompositeOperation = 'source-over';
+            ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset before save
             requestDrawingSave();  // Debounced save
         }
     });
@@ -263,16 +277,17 @@ window.initBoard = function (showToast) {
             state.lastTouchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
         } else if (e.touches.length === 1 && (state.activeTool === 'pencil' || state.activeTool === 'eraser')) {
             state.isDrawing = true;
+            applyViewportTransform();
             const pos = getDrawingPos(e.touches[0].clientX, e.touches[0].clientY);
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
             if (state.activeTool === 'eraser') {
                 ctx.globalCompositeOperation = 'destination-out';
-                ctx.lineWidth = state.drawSize * 5;
+                ctx.lineWidth = state.drawSize * 5 / state.viewport.zoom;
             } else {
                 ctx.globalCompositeOperation = 'source-over';
                 ctx.strokeStyle = state.drawColor;
-                ctx.lineWidth = state.drawSize;
+                ctx.lineWidth = state.drawSize / state.viewport.zoom;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
             }
@@ -325,6 +340,7 @@ window.initBoard = function (showToast) {
             state.isDrawing = false;
             ctx.closePath();
             ctx.globalCompositeOperation = 'source-over';
+            ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset before save
             requestDrawingSave();  // Debounced save
         }
         saveBoardData();
@@ -467,6 +483,41 @@ window.initBoard = function (showToast) {
     // =====================
     function updateTransform() {
         infiniteCanvas.style.transform = `translate(${state.viewport.x}px, ${state.viewport.y}px) scale(${state.viewport.zoom})`;
+        // Redraw canvas with updated viewport transform so drawing tracks with pan/zoom
+        redrawCanvasWithTransform();
+    }
+
+    // Cached drawing image for redraw on pan/zoom
+    let _cachedDrawingImage = null;
+
+    function cacheDrawingImage() {
+        return new Promise(resolve => {
+            const temp = document.createElement('canvas');
+            temp.width = drawingCanvas.width;
+            temp.height = drawingCanvas.height;
+            const tempCtx = temp.getContext('2d');
+            // Reset any transform before reading pixels
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            tempCtx.drawImage(drawingCanvas, 0, 0);
+            temp.toBlob(blob => {
+                _cachedDrawingImage = new Image();
+                _cachedDrawingImage.onload = () => resolve();
+                _cachedDrawingImage.src = URL.createObjectURL(blob);
+            });
+        });
+    }
+
+    function redrawCanvasWithTransform() {
+        if (!_cachedDrawingImage) return;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        ctx.setTransform(
+            state.viewport.zoom, 0,
+            0, state.viewport.zoom,
+            state.viewport.x, state.viewport.y
+        );
+        ctx.drawImage(_cachedDrawingImage, 0, 0);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
 
     function saveBoardData() {
@@ -479,12 +530,22 @@ window.initBoard = function (showToast) {
     let _drawSaveTimer = null;
     function requestDrawingSave() {
         if (_drawSaveTimer) clearTimeout(_drawSaveTimer);
-        _drawSaveTimer = setTimeout(saveDrawingData, 2000);
+        // Cache drawing image and then save
+        cacheDrawingImage().then(() => {
+            _drawSaveTimer = setTimeout(saveDrawingData, 2000);
+        });
     }
 
     async function saveDrawingData() {
         try {
+            // Save the world-space drawing (reset transform before toDataURL)
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             const dataUrl = drawingCanvas.toDataURL();
+            ctx.setTransform(
+                state.viewport.zoom, 0,
+                0, state.viewport.zoom,
+                state.viewport.x, state.viewport.y
+            );
             await Store.saveDrawing(dataUrl);
             window.ActivityLog?.log('drawing_stroke_saved');
         } catch (e) {
@@ -512,7 +573,14 @@ window.initBoard = function (showToast) {
             const drawingData = await Store.getDrawing();
             if (drawingData) {
                 const img = new Image();
-                img.onload = () => ctx.drawImage(img, 0, 0);
+                img.onload = () => {
+                    // Drawing is stored in world-space (identity transform)
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.drawImage(img, 0, 0);
+                    _cachedDrawingImage = img;
+                    // Now redraw with current viewport
+                    redrawCanvasWithTransform();
+                };
                 img.src = drawingData;
             }
         } catch (e) {

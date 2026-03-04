@@ -4550,8 +4550,10 @@ body {
     box-shadow: 0 25px 60px #00000026, 0 5px 20px #00000014, -5px 0 20px #0000000d
 }
 
-.tab-btn:hover {
-    transform: translate(6px) !important
+@media (min-width:769px) {
+    .tab-btn:hover {
+        transform: translate(6px)
+    }
 }
 
 @media (max-width:768px) {
@@ -4768,8 +4770,9 @@ body {
         transform: none !important
     }
 
-    .tab-btn:hover {
-        transform: none
+    .tab-btn:hover,
+    .tab-btn:active {
+        transform: none !important
     }
 
     .tab-btn.active.tab-daily {
