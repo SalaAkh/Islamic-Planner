@@ -187,6 +187,14 @@ function initDailyPlanner() {
             return;
         }
 
+        // Handle delete dynamic task button
+        const delBtn = e.target.closest('.delete-dyn-task');
+        if (delBtn) {
+            delBtn.closest('.flex.items-center.group').remove();
+            saveDailyData();
+            return;
+        }
+
         // Handle Add Task button
         const addBtn = e.target.closest('.add-task-btn');
         if (addBtn) {
@@ -195,13 +203,15 @@ function initDailyPlanner() {
             const newIndex = Date.now(); // Unique ID
 
             const newRow = document.createElement('div');
-            newRow.className = 'flex items-center';
+            newRow.className = 'flex items-center group';
             const taskToggleLabel = (window.t && window.t('aria_mark_task')) || 'Отметить задачу';
             const newTaskLabel = (window.t && window.t('aria_new_task')) || 'Новая задача';
             const newTaskPh = (window.t && window.t('ph_new_task')) || 'Новая задача...';
+            const deleteTitle = (window.t && window.t('btn_delete_goal')) || 'Удалить';
             newRow.innerHTML = `
                 <button data-task-id="t_dyn_${blockIndex}_${newIndex}" aria-label="${taskToggleLabel}" class="task-toggle shrink-0 mr-3"></button>
                 <textarea data-id="task_dyn_${blockIndex}_${newIndex}" id="task_dyn_${blockIndex}_${newIndex}" name="task_dyn_${blockIndex}_${newIndex}" rows="1" style="resize:none; overflow:hidden;" placeholder="${newTaskPh}" autocomplete="off" aria-label="${newTaskLabel}" class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500 w-full"></textarea>
+                <button class="delete-dyn-task text-red-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 shrink-0 ml-2" title="${deleteTitle}"><i class="fas fa-trash text-sm"></i></button>
             `;
 
             if (listContainer) {
@@ -262,10 +272,12 @@ function renderDailyPlanner() {
 
                 if (container) {
                     const newRow = document.createElement('div');
-                    newRow.className = 'flex items-center';
+                    newRow.className = 'flex items-center group';
+                    const deleteTitle = (window.t && window.t('btn_delete_goal')) || 'Удалить';
                     newRow.innerHTML = `
                         <button data-task-id="t_dyn_${dynId}" aria-label="Отметить задачу" class="task-toggle shrink-0 mr-3"></button>
                         <textarea data-id="${key}" id="${key}" name="${key}" rows="1" style="resize:none; overflow:hidden;" autocomplete="off" aria-label="Задача" class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500 w-full"></textarea>
+                        <button class="delete-dyn-task text-red-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 shrink-0 ml-2" title="${deleteTitle}"><i class="fas fa-trash text-sm"></i></button>
                     `;
                     container.appendChild(newRow);
                 }
