@@ -147,6 +147,7 @@ window.initBoard = function (showToast) {
     function resizeDrawingCanvas() {
         const rect = container.getBoundingClientRect();
         if (rect.width === 0 || rect.height === 0) return; // Tab is hidden
+        const newWidth = Math.round(rect.width);
         const newHeight = Math.round(rect.height);
 
         if (drawingCanvas.width !== newWidth || drawingCanvas.height !== newHeight) {
