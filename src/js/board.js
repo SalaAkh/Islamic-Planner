@@ -91,11 +91,29 @@ window.initBoard = function (showToast) {
     }
     if (btnClearDrawing) {
         btnClearDrawing.addEventListener('click', () => {
-            state.strokes = [];
-            state.currentStroke = null;
-            renderStrokes();
-            Store.clearDrawing();
-            showToastSafe((window.t && window.t('drawing_cleared_toast')) || 'Рисунок очищен');
+            const lang = document.documentElement.lang || 'ru';
+            const messages = {
+                'ru': 'Вы уверены, что хотите удалить весь рисунок и все стикеры?',
+                'en': 'Are you sure you want to clear the entire drawing and all stickers?',
+                'kk': 'Барлық сызбаларды және стикерлерді өшіргіңіз келе ме?',
+                'ar': 'هل أنت متأكد أنك تريد مسح الرسم بأكمله وجميع الملصقات؟'
+            };
+            const msg = messages[lang] || messages['ru'];
+
+            if (confirm(msg)) {
+                // Clear drawings
+                state.strokes = [];
+                state.currentStroke = null;
+                renderStrokes();
+                Store.clearDrawing();
+
+                // Clear stickers
+                state.notes = [];
+                if (notesContainer) notesContainer.innerHTML = '';
+                saveBoardData();
+
+                showToastSafe((window.t && window.t('drawing_cleared_toast')) || 'Доска очищена');
+            }
         });
     }
 
@@ -104,12 +122,20 @@ window.initBoard = function (showToast) {
     // =====================
     function resizeDrawingCanvas() {
         const rect = container.getBoundingClientRect();
-        drawingCanvas.width = rect.width || window.innerWidth;
-        drawingCanvas.height = rect.height || window.innerHeight;
-        renderStrokes(); // Redraw paths after resize
+        if (rect.width === 0 || rect.height === 0) return; // Tab is hidden
+
+        const newWidth = Math.round(rect.width);
+        const newHeight = Math.round(rect.height);
+
+        if (drawingCanvas.width !== newWidth || drawingCanvas.height !== newHeight) {
+            drawingCanvas.width = newWidth;
+            drawingCanvas.height = newHeight;
+            renderStrokes(); // Redraw paths after resize
+        }
     }
 
-    window.addEventListener('resize', resizeDrawingCanvas);
+    const resizeObserver = new ResizeObserver(() => resizeDrawingCanvas());
+    resizeObserver.observe(container);
 
     // screen px → world coordinates
     // NOTE: .infinite-canvas has CSS top:50% left:50%, so world-space origin (0,0)
