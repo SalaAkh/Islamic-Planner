@@ -38,10 +38,14 @@ self.addEventListener('fetch', (event) => {
                 if (cachedResponse) return cachedResponse;
 
                 return fetch(event.request).then((networkResponse) => {
-                    const responseToCache = networkResponse.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseToCache);
-                    });
+                    if (networkResponse && networkResponse.status === 200) {
+                        const responseToCache = networkResponse.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(event.request, responseToCache).catch(err => {
+                                console.warn('[Barakah Planner] SW cache put error:', err);
+                            });
+                        });
+                    }
                     return networkResponse;
                 }).catch(() => {
                     // Offline fallback (already handled by cache for HTML)
