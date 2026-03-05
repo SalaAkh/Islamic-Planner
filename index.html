@@ -1616,9 +1616,11 @@
         // Service Workers and Manifests don't work on file:// protocol due to browser security
         if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./public/sw.js')
+                navigator.serviceWorker.register('./public/sw.js?v=' + Date.now())
                     .then(registration => {
                         console.log('[Barakah Planner] ServiceWorker registered with scope:', registration.scope);
+                        // Force update check
+                        registration.update();
                     })
                     .catch(err => {
                         console.debug('[Barakah Planner] ServiceWorker registration skipped (expected on local file run).');
