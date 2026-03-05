@@ -25,6 +25,60 @@ window.DbSync = {
         }, 1500);
     },
 
+    async syncReminderToCloud(event, dateString) {
+        if (!window.firebaseDb || !window.Auth || !window.Auth.user || !window.Auth.user.email) return;
+
+        // Only set reminders if there is a specific time
+        if (event.allDay || !event.time) {
+            await this.deleteReminderFromCloud(event.id);
+            return;
+        }
+
+        try {
+            const uid = window.Auth.user.uid;
+            // Structure: users/UID/reminders/EVENT_ID
+            const reminderRef = doc(window.firebaseDb, `users/${uid}/reminders`, event.id);
+
+            // Calculate exact trigger time from date and time
+            const dateTimeStr = `${dateString}T${event.time}:00`;
+            const triggerDate = new Date(dateTimeStr);
+
+            // Если событие в прошлом, не ставим напоминание
+            if (triggerDate < new Date()) {
+                await this.deleteReminderFromCloud(event.id);
+                return;
+            }
+
+            const reminderData = {
+                title: event.title,
+                eventTime: event.time,
+                eventDate: dateString,
+                triggerTime: triggerDate.toISOString(),
+                userEmail: window.Auth.user.email,
+                notified: false
+            };
+
+            await setDoc(reminderRef, reminderData);
+            console.log(`[Sync] Reminder set for ${event.id}`);
+        } catch (e) {
+            console.error('[Sync] Error syncing reminder:', e);
+        }
+    },
+
+    async deleteReminderFromCloud(eventId) {
+        if (!window.firebaseDb || !window.Auth || !window.Auth.user) return;
+
+        try {
+            const uid = window.Auth.user.uid;
+            const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js");
+            const reminderRef = doc(window.firebaseDb, `users/${uid}/reminders`, eventId);
+            await deleteDoc(reminderRef);
+            console.log(`[Sync] Reminder deleted for ${eventId}`);
+        } catch (e) {
+            console.error('[Sync] Error deleting reminder:', e);
+        }
+    },
+
     async syncFromCloud() {
         if (!window.firebaseDb || !window.Auth || !window.Auth.user) return;
 

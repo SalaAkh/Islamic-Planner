@@ -188,7 +188,12 @@ window.Store = {
         }
         try {
             localStorage.setItem('barakah_events', JSON.stringify(all));
-            if (window.DbSync) window.DbSync.syncToCloud('events', all);
+            if (window.DbSync) {
+                window.DbSync.syncToCloud('events', all);
+                if (typeof window.DbSync.syncReminderToCloud === 'function') {
+                    window.DbSync.syncReminderToCloud(event, dateString);
+                }
+            }
             window.ActivityLog?.log('event_saved', { date: dateString, eventId: event.id, title: event.title });
         } catch (e) {
             console.error('[Store] Failed to save event:', e);
@@ -202,7 +207,12 @@ window.Store = {
         if (all[dateString].length === 0) delete all[dateString];
         try {
             localStorage.setItem('barakah_events', JSON.stringify(all));
-            if (window.DbSync) window.DbSync.syncToCloud('events', all);
+            if (window.DbSync) {
+                window.DbSync.syncToCloud('events', all);
+                if (typeof window.DbSync.deleteReminderFromCloud === 'function') {
+                    window.DbSync.deleteReminderFromCloud(eventId);
+                }
+            }
             window.ActivityLog?.log('event_deleted', { date: dateString, eventId });
         } catch (e) {
             console.error('[Store] Failed to delete event:', e);
