@@ -1470,7 +1470,7 @@
                         class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider"
                         data-i18n="event_alert_label">Уведомление</label>
                     <select id="event-alert" name="event-alert"
-                        class="w-full bg-gray-50 dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-white transition-all appearance-none cursor-pointer">
+                        class="w-full bg-gray-50 dark:bg-slate-800 border-2 border-emerald-200 dark:border-emerald-800/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-white transition-all appearance-none cursor-pointer mb-2">
                         <option value="none" data-i18n="alert_none">Без уведомления</option>
                         <option value="5min" data-i18n="alert_5min">За 5 минут</option>
                         <option value="15min" data-i18n="alert_15min">За 15 минут</option>
@@ -1478,6 +1478,16 @@
                         <option value="1hour" data-i18n="alert_1hour">За 1 час</option>
                         <option value="1day" data-i18n="alert_1day">За 1 день</option>
                     </select>
+
+                    <div id="event-email-notify-wrapper" class="flex items-center gap-2 px-1 hidden mt-2">
+                        <input type="checkbox" id="event-email-notify" name="event-email-notify"
+                            class="w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer">
+                        <label for="event-email-notify"
+                            class="text-sm font-semibold text-gray-700 dark:text-gray-300 cursor-pointer"
+                            data-i18n="event_email_notify_label">
+                            Также отправить на Email
+                        </label>
+                    </div>
                 </div>
 
                 <!-- Tag -->

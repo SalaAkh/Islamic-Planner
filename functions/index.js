@@ -40,23 +40,70 @@ exports.checkAndSendReminders = functions.pubsub.schedule('every 5 minutes').onR
         snapshot.forEach((doc) => {
             const data = doc.data();
             console.log(`Processing reminder for ${data.userEmail}: ${data.title}`);
+            const uid = doc.ref.parent.parent.id; // get uid from users/{uid}/reminders/{remId}
 
-            const mailOptions = {
-                from: `"Barakah Planner" <${process.env.SMTP_USER || 'noreply@barakah.app'}>`,
-                to: data.userEmail,
-                subject: `Напоминание: ${data.title}`,
-                text: `Ассаляму алейкум!\n\nНапоминаем о событии: ${data.title}\nВремя: ${data.eventTime}\n\nДа благословит вас Всевышний!\n\nКоманда Barakah Planner`,
-            };
+            const p = (async () => {
+                // 1. Отправляем email если разрешено
+                if (data.sendEmail) {
+                    const mailOptions = {
+                        from: `"Barakah Planner" <${process.env.SMTP_USER || 'noreply@barakah.app'}>`,
+                        to: data.userEmail,
+                        subject: `Напоминание: ${data.title}`,
+                        text: `Ассаляму алейкум!\n\nНапоминаем о событии: ${data.title}\nВремя: ${data.eventTime}\n\nДа благословит вас Всевышний!\n\nКоманда Barakah Planner`,
+                    };
+                    try {
+                        await mailTransport.sendMail(mailOptions);
+                        console.log(`Email sent to ${data.userEmail}`);
+                    } catch (error) {
+                        console.error('Error sending email:', error);
+                    }
+                }
 
-            // Отправляем письмо и, если успешно, помечаем `notified: true`
-            const p = mailTransport.sendMail(mailOptions)
-                .then(() => {
-                    console.log(`Email sent to ${data.userEmail}`);
-                    return doc.ref.update({ notified: true });
-                })
-                .catch((error) => {
-                    console.error('There was an error while sending the email:', error);
-                });
+                // 2. Отправляем Push-уведомления
+                try {
+                    const tokensSnapshot = await db.collection(`users/${uid}/fcmTokens`).get();
+                    if (!tokensSnapshot.empty) {
+                        const tokens = [];
+                        tokensSnapshot.forEach(tDoc => tokens.push(tDoc.id));
+
+                        const message = {
+                            notification: {
+                                title: "Напоминание: " + data.title,
+                                body: `Событие в ${data.eventTime}`
+                            },
+                            tokens: tokens
+                        };
+
+                        const response = await admin.messaging().sendEachForMulticast(message);
+                        console.log(`Push sent to ${response.successCount} devices for ${uid}`);
+
+                        // Очистка невалидных токенов
+                        if (response.failureCount > 0) {
+                            const failedTokens = [];
+                            response.responses.forEach((resp, idx) => {
+                                if (!resp.success) {
+                                    if (resp.error.code === 'messaging/invalid-registration-token' ||
+                                        resp.error.code === 'messaging/registration-token-not-registered') {
+                                        failedTokens.push(tokens[idx]);
+                                    }
+                                }
+                            });
+                            if (failedTokens.length > 0) {
+                                const cleanupPromises = failedTokens.map(t =>
+                                    db.collection(`users/${uid}/fcmTokens`).doc(t).delete()
+                                );
+                                await Promise.all(cleanupPromises);
+                                console.log(`Cleaned up ${failedTokens.length} expired tokens`);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error sending push:', error);
+                }
+
+                // Помечаем как отправленное
+                await doc.ref.update({ notified: true });
+            })();
 
             promises.push(p);
         });

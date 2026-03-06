@@ -41,7 +41,14 @@ window.DbSync = {
 
             // Calculate exact trigger time from date and time
             const dateTimeStr = `${dateString}T${event.time}:00`;
-            const triggerDate = new Date(dateTimeStr);
+            const eventDateObj = new Date(dateTimeStr);
+            let triggerDate = new Date(eventDateObj.getTime());
+
+            if (event.alert === '5min') triggerDate.setMinutes(triggerDate.getMinutes() - 5);
+            else if (event.alert === '15min') triggerDate.setMinutes(triggerDate.getMinutes() - 15);
+            else if (event.alert === '30min') triggerDate.setMinutes(triggerDate.getMinutes() - 30);
+            else if (event.alert === '1hour') triggerDate.setHours(triggerDate.getHours() - 1);
+            else if (event.alert === '1day') triggerDate.setDate(triggerDate.getDate() - 1);
 
             // Если событие в прошлом, не ставим напоминание
             if (triggerDate < new Date()) {
@@ -55,6 +62,7 @@ window.DbSync = {
                 eventDate: dateString,
                 triggerTime: triggerDate.toISOString(),
                 userEmail: window.Auth.user.email,
+                sendEmail: !!event.sendEmail,
                 notified: false
             };
 

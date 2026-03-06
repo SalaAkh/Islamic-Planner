@@ -777,6 +777,8 @@ function initEvents() {
     const alldayChk = document.getElementById('event-allday');
     const repeatSettings = document.getElementById('event-repeat-settings');
     const timeWrapper = document.getElementById('event-time-wrapper');
+    const alertSelect = document.getElementById('event-alert');
+    const emailWrapper = document.getElementById('event-email-notify-wrapper');
 
     // Tab switching
     document.querySelectorAll('.event-type-tab').forEach(tab => {
@@ -820,6 +822,16 @@ function initEvents() {
         }
     });
 
+    // Alert toggle — show email option if alert is not none
+    alertSelect.addEventListener('change', () => {
+        if (alertSelect.value === 'none') {
+            emailWrapper.classList.add('hidden');
+            document.getElementById('event-email-notify').checked = false;
+        } else {
+            emailWrapper.classList.remove('hidden');
+        }
+    });
+
     // Close modal
     closeBtn.addEventListener('click', closeEventModal);
     modal.addEventListener('click', (e) => {
@@ -852,9 +864,15 @@ function initEvents() {
             repeatEnd: document.getElementById('event-repeat-end').value,
             allDay: alldayChk.checked,
             alert: document.getElementById('event-alert').value,
+            sendEmail: document.getElementById('event-email-notify').checked,
             tag: document.getElementById('event-tag').value,
             notes: document.getElementById('event-notes').value
         };
+
+        // Request notification permission if alert is enabled
+        if (event.alert !== 'none' && typeof window.requestNotificationPermission === 'function') {
+            window.requestNotificationPermission();
+        }
 
         // If we were editing and the date changed, delete from old date first
         if (_eventEditingId && _eventEditingDate && _eventEditingDate !== dateStr) {
@@ -917,6 +935,8 @@ function openEventModal(dateStr, existingEvent = null) {
     document.getElementById('event-repeat-type').value = 'daily';
     document.getElementById('event-repeat-end').value = '';
     document.getElementById('event-alert').value = 'none';
+    document.getElementById('event-email-notify').checked = false;
+    document.getElementById('event-email-notify-wrapper').classList.add('hidden');
     document.getElementById('event-tag').value = '';
     document.getElementById('event-notes').value = '';
     document.getElementById('event-repeat-settings').classList.add('hidden');
@@ -950,6 +970,14 @@ function openEventModal(dateStr, existingEvent = null) {
         document.getElementById('event-repeat-type').value = existingEvent.repeatType || 'daily';
         document.getElementById('event-repeat-end').value = existingEvent.repeatEnd || '';
         document.getElementById('event-alert').value = existingEvent.alert || 'none';
+
+        document.getElementById('event-email-notify').checked = !!existingEvent.sendEmail;
+        if (existingEvent.alert && existingEvent.alert !== 'none') {
+            document.getElementById('event-email-notify-wrapper').classList.remove('hidden');
+        } else {
+            document.getElementById('event-email-notify-wrapper').classList.add('hidden');
+        }
+
         document.getElementById('event-tag').value = existingEvent.tag || '';
         document.getElementById('event-notes').value = existingEvent.notes || '';
         document.getElementById('event-delete-btn').classList.remove('hidden');

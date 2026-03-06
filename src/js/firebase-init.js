@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getMessaging, getToken, onMessage, isSupported } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging.js";
 
 // User's actual Firebase Config
 const firebaseConfig = {
@@ -24,6 +25,40 @@ try {
     window.firebaseAuth = auth;
     window.firebaseDb = db;
     window.googleProvider = googleProvider;
+
+    isSupported().then((supported) => {
+        if (supported) {
+            const messaging = getMessaging(app);
+            window.firebaseMessaging = messaging;
+
+            window.requestNotificationPermission = async () => {
+                if (!window.Auth || !window.Auth.user) return;
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        const token = await getToken(messaging);
+                        if (token) {
+                            const uid = window.Auth.user.uid;
+                            await setDoc(doc(db, `users/${uid}/fcmTokens`, token), {
+                                token: token,
+                                updatedAt: new Date().toISOString()
+                            }, { merge: true });
+                            console.log('[FCM] Token saved to Firestore');
+                        }
+                    }
+                } catch (error) {
+                    console.warn('[FCM] Error requesting permission', error);
+                }
+            };
+
+            onMessage(messaging, (payload) => {
+                console.log('[FCM] Message received in foreground: ', payload);
+                if (typeof window.showToast === 'function' && payload.notification) {
+                    window.showToast(`🔔 ${payload.notification.title}: ${payload.notification.body}`);
+                }
+            });
+        }
+    });
 
     console.log("[Firebase] Initialized successfully. (SurviveKit Ready)");
 } catch (error) {
