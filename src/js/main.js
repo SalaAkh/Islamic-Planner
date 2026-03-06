@@ -910,12 +910,23 @@ function initEvents() {
         if (event.alert !== 'none') {
             if (Notification.permission === 'denied') {
                 const lang = localStorage.getItem('barakah_lang') || 'ru';
-                const msg = lang === 'ru' ? '⚠️ Уведомления заблокированы в настройках браузера. Разрешите их вручную.' : '⚠️ Notifications are blocked in browser settings. Enable them manually.';
+                const msg = lang === 'ru' ? '⚠️ Уведомления заблокированы браузером. Разрешите их в настройках (иконка замочка).' : '⚠️ Notifications are blocked in browser settings. Enable them manually.';
                 if (typeof window.showToast === 'function') window.showToast(msg);
-            } else if (typeof window.requestNotificationPermission === 'function') {
-                window.requestNotificationPermission();
-            } else if (Notification.permission === 'default') {
-                Notification.requestPermission();
+            } else if (Notification.permission !== 'granted') {
+                // Call requestPermission directly inside the click handler to maintain user gesture trust
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        if (typeof window.recordFCMToken === 'function') window.recordFCMToken();
+                    } else if (permission === 'denied') {
+                        // User just clicked block
+                        const lang = localStorage.getItem('barakah_lang') || 'ru';
+                        const msg = lang === 'ru' ? 'Вы запретили уведомления. Вы всегда можете включить их в настройках браузера.' : 'Notifications disabled.';
+                        if (typeof window.showToast === 'function') window.showToast(msg);
+                    }
+                });
+            } else if (Notification.permission === 'granted' && typeof window.recordFCMToken === 'function') {
+                // Already granted, just ensure FCM token is saved if it wasn't
+                window.recordFCMToken();
             }
         }
 
