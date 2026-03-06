@@ -1122,3 +1122,64 @@ function closeEventsPopup() {
 }
 
 window.openEventModal = openEventModal;
+
+// --- LOCAL BROWSER NOTIFICATIONS (FALLBACK/IN-APP) ---
+function initLocalNotifications() {
+    // Track fired notifications so we don't spam the user
+    window._localNotifsFired = new Set();
+
+    setInterval(() => {
+        if (Notification.permission !== 'granted') return;
+
+        const events = Store.getEvents();
+        const now = new Date();
+        const todayStr = formatDate(now);
+
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = formatDate(tomorrow);
+
+        const upcomingEvents = [...(events[todayStr] || []), ...(events[tomorrowStr] || [])];
+
+        upcomingEvents.forEach(ev => {
+            if (!ev.time || ev.alert === 'none') return;
+
+            // Calculate exactly when it should trigger
+            const dateTimeStr = `${ev.date}T${ev.time}:00`;
+            const eventDateObj = new Date(dateTimeStr);
+            let triggerDate = new Date(eventDateObj.getTime());
+
+            if (ev.alert === '5min') triggerDate.setMinutes(triggerDate.getMinutes() - 5);
+            else if (ev.alert === '15min') triggerDate.setMinutes(triggerDate.getMinutes() - 15);
+            else if (ev.alert === '30min') triggerDate.setMinutes(triggerDate.getMinutes() - 30);
+            else if (ev.alert === '1hour') triggerDate.setHours(triggerDate.getHours() - 1);
+            else if (ev.alert === '1day') triggerDate.setDate(triggerDate.getDate() - 1);
+
+            // Time difference in milliseconds
+            const timeDiff = now.getTime() - triggerDate.getTime();
+
+            // If the trigger time has passed recently (within 1 minute) and hasn't fired yet
+            if (timeDiff >= 0 && timeDiff < 60000 && !window._localNotifsFired.has(ev.id)) {
+                window._localNotifsFired.add(ev.id);
+
+                const title = `Напоминание: ${ev.title}`;
+                const body = `Запланировано на ${ev.time}${ev.location ? ' в ' + ev.location : ''}`;
+
+                // Show native browser notification
+                new Notification(title, {
+                    body: body,
+                    icon: '/public/favicon.ico',
+                    tag: ev.id // prevents duplicate notifications in OS tray
+                });
+
+                // Show in-app toast
+                if (typeof window.showToast === 'function') {
+                    window.showToast(`🔔 ${title}`);
+                }
+            }
+        });
+    }, 30000); // Check every 30 seconds
+}
+
+// Start the local notification checker
+initLocalNotifications();
