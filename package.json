@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "npx @tailwindcss/cli -i ./src/css/style.css -o ./src/css/tailwind.css --watch",
-    "build": "npx @tailwindcss/cli -i ./src/css/style.css -o ./src/css/tailwind.css --minify && node build-monolith.js",
-    "deploy": "npm run build && firebase deploy --only hosting,firestore"
+    "build": "npx @tailwindcss/cli -i ./src/css/style.css -o ./src/css/tailwind.css --minify && node build-monolith.js"
   },
   "repository": {
     "type": "git",

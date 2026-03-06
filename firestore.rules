@@ -22,5 +22,15 @@ service cloud.firestore {
     match /users/{userId}/activity_log/{logId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+
+    // Reminders — each user can manage their own reminders
+    match /users/{userId}/reminders/{reminderId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // FCM Tokens for Push Notifications
+    match /users/{userId}/fcmTokens/{tokenId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
   }
 }

@@ -141,6 +141,35 @@ body {
     transform: translateX(8px);
 }
 
+/* ── NAV LOGO ── */
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--text);
+    text-decoration: none;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.nav-logo:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+.nav-logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--green, #34d399), #10b981);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: white;
+}
+
 .tab-btn.active {
     right: 5px;
     /* Активная вкладка чуть задвигается внутрь */
