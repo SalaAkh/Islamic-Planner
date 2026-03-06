@@ -97,22 +97,51 @@ function initDonationToast() {
 // --- TABS LOGIC ---
 function initTabs() {
     const tabs = document.querySelectorAll('.planner-tabs button');
+
+    // Оборачиваем все страницы в контейнер для 3D трансформаций
+    const pagesContainer = document.querySelector('.page-view').parentElement;
+    if (pagesContainer && !pagesContainer.classList.contains('page-flip-container')) {
+        pagesContainer.classList.add('page-flip-container');
+    }
+
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            // Hide all pages
-            document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-
-            // Show target
+            const currentActivePage = document.querySelector('.page-view.active');
             const viewName = tab.getAttribute('data-tab');
-            document.getElementById('view-' + viewName).classList.add('active');
+            const targetPage = document.getElementById('view-' + viewName);
+
+            // Если кликаем на ту же активную вкладку - ничего не делаем
+            if (currentActivePage === targetPage) return;
+
+            // Обновляем состояние вкладок
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             tab.classList.add('active');
 
+            if (currentActivePage) {
+                // Запускаем анимацию ухода
+                currentActivePage.classList.remove('active', 'page-flip-in');
+                currentActivePage.classList.add('page-flip-out');
+
+                // Ждем окончания анимации (0.55s), затем скрываем полностью
+                setTimeout(() => {
+                    currentActivePage.classList.remove('page-flip-out');
+                }, 550);
+            }
+
+            // Показываем новую страницу с анимацией появления
+            document.querySelectorAll('.page-view').forEach(el => {
+                if (el !== targetPage && el !== currentActivePage) {
+                    el.classList.remove('active', 'page-flip-in', 'page-flip-out');
+                }
+            });
+
+            targetPage.classList.add('active', 'page-flip-in');
+
+            // Загружаем данные если нужно
             if (viewName === 'calendar' && document.getElementById('calendar-body').innerHTML.trim() === '') {
                 renderCalendar();
             }
 
-            // Initialize board if first time — pass showToast so board doesn't need global
             if (viewName === 'board' && !window._boardInitialized) {
                 initBoard(showToast);
                 window._boardInitialized = true;

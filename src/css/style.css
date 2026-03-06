@@ -200,24 +200,76 @@ body {
 
 .page-view {
     display: none;
-    animation: fadeIn 0.4s ease;
+    /* Убираем стандартные transition/animation здесь, 
+       чтобы JS мог повесить свои классы */
 }
 
 .page-view.active {
     display: block;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
+/* --- АНИМАЦИЯ ПЕРЕВОРОТА СТРАНИЦЫ (PAGE FLIP) --- */
+.page-flip-container {
+    perspective: 2000px;
+    position: relative;
+    width: 100%;
+}
+
+/* Старая страница уходит (переворачивается влево) */
+.page-flip-out {
+    animation: flipOutLeft 0.55s ease-in forwards;
+    transform-origin: left center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 20;
+    backface-visibility: hidden;
+    background-color: var(--paper);
+    /* Прячем сквозной фон */
+}
+
+/* Новая страница приходит */
+.page-flip-in {
+    display: block !important;
+    animation: flipInRight 0.55s ease-out forwards;
+    transform-origin: left center;
+    position: relative;
+    /* Или absolute, зависит от флоу, но JS ее делает block */
+    z-index: 10;
+    backface-visibility: hidden;
+}
+
+@keyframes flipOutLeft {
+    0% {
+        transform: rotateY(0deg);
+        opacity: 1;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    50% {
+        box-shadow: -20px 0 40px rgba(0, 0, 0, 0.2);
+    }
+
+    100% {
+        transform: rotateY(-90deg);
+        opacity: 0;
+        box-shadow: none;
     }
 }
+
+@keyframes flipInRight {
+    0% {
+        transform: rotateY(90deg);
+        opacity: 0;
+    }
+
+    100% {
+        transform: rotateY(0deg);
+        opacity: 1;
+    }
+}
+
 
 @keyframes shake {
 
