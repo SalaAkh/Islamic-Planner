@@ -28,18 +28,8 @@
 
     <!-- Smart Redirect: if user already has app data, send them straight to app.html -->
     <script>
-        (function () {
-            try {
-                var keys = Object.keys(localStorage);
-                var hasData = keys.some(function (k) {
-                    return k.startsWith('barakah_') && k !== 'barakah_lang';
-                });
-                if (hasData) {
-                    var lang = localStorage.getItem('barakah_lang') || 'ru';
-                    window.location.replace('./app.html?lang=' + lang);
-                }
-            } catch (e) { }
-        })();
+        // No auto-redirect — landing page always shows.
+        // Users click "Open App" to go to the planner.
     </script>
 
     <style>
@@ -544,7 +534,11 @@
             }
 
             .lang-switcher {
-                display: none;
+                display: flex;
+                /* Force display instead of 'none' */
+                transform: scale(0.85);
+                /* Make it slightly smaller to fit better */
+                transform-origin: right center;
             }
 
             .nav-logo span {
@@ -941,7 +935,8 @@
                 فِيكُمْ</span>
         </div>
         <p>© 2025 <strong>Barakah Planner</strong> · <span class="t" data-key="footer_free">Бесплатно для Уммы</span> ·
-            <a href="./app.html" class="t" data-key="open_app">Открыть</a></p>
+            <a href="./app.html" class="t" data-key="open_app">Открыть</a>
+        </p>
     </footer>
 
     <script>

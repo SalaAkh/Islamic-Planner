@@ -26,6 +26,7 @@
     --tab-calendar: #10b981;
     --tab-goals: #f59e0b;
     --tab-board: #6366f1;
+    --tab-home: #94a3b8;
 }
 
 .dark {
@@ -40,6 +41,7 @@
     --tab-calendar: #059669;
     --tab-goals: #d97706;
     --tab-board: #4f46e5;
+    --tab-home: #334155;
 }
 
 body {
@@ -162,6 +164,10 @@ body {
 
 .tab-board {
     background-color: var(--tab-board);
+}
+
+.tab-home {
+    background-color: var(--tab-home);
 }
 
 .page-view {
