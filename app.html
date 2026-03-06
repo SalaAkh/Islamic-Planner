@@ -230,9 +230,7 @@
 
 <body>
     <div class="notebook-wrapper animate-pulse pointer-events-none" id="app-wrapper">
-        <!-- Вкладки навигации -->
         <div class="planner-tabs">
-
             <button data-tab="daily" id="tab-daily" class="tab-btn tab-daily active">
                 <i class="fas fa-sun md:hidden text-[22px] mb-1"></i>
                 <span data-i18n="tab_daily">День</span>
@@ -276,52 +274,54 @@
             <!-- СТРАНИЦА 1: ДНЕВНОЙ ПЛАНЕР -->
             <div id="view-daily" class="page-view pb-28 active">
                 <header
-                    class="mb-10 border-b-2 border-slate-200 pb-4 flex flex-col md:flex-row justify-between items-end">
+                    class="mb-6 border-b-2 border-slate-200 dark:border-slate-700 pb-4 flex flex-col md:flex-row justify-between items-end">
                     <div>
-                        <div class="flex flex-col gap-2">
-                            <a href="/" class="nav-logo inline-flex mb-4">
-                                <div class="nav-logo-icon">☪</div>
-                                <span>Barakah Planner</span>
-                            </a>
-                            <h1 class="text-3xl font-bold text-green-900 dark:text-green-300 tracking-tight"
-                                data-i18n="title_daily">План на день</h1>
-                            <p class="arabic text-xl text-green-700 dark:text-green-400 italic mt-1">بِسْمِ اللَّهِ
-                                الرَّحْمَٰنِ الرَّحِيمِ</p>
-                        </div>
-                        <div
-                            class="w-full md:w-7/12 lg:w-6/12 mt-6 md:mt-0 bg-white/40 dark:bg-slate-800/40 p-5 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/50 backdrop-blur-md">
-                            <div class="flex items-center justify-between mb-4">
-                                <i id="prev-day"
-                                    class="fas fa-chevron-left nav-btn text-xl p-2 pl-0 text-slate-500 hover:text-emerald-500 transition-all cursor-pointer transform hover:-translate-x-1"
-                                    title="Предыдущий день" data-i18n="nav_prev_day" data-i18n-target="title"></i>
-                                <div class="flex-grow flex flex-col items-center px-2 relative">
-                                    <div class="flex items-center w-full justify-center">
-                                        <span
-                                            class="text-xs font-bold text-slate-400 dark:text-slate-500 mr-2 uppercase tracking-wider"
-                                            data-i18n="date_today">Дата:</span>
-                                        <input id="date-display" name="date-display" type="text" readonly
-                                            autocomplete="off"
-                                            class="handwriting w-full text-center text-xl text-slate-800 dark:text-white cursor-default bg-transparent border-none outline-none focus:ring-0"
-                                            value="Сегодня">
-                                    </div>
-                                    <span id="hijri-date-display"
-                                        class="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5 font-bold tracking-widest uppercase"></span>
+                        <!-- Basmallah above logo -->
+                        <p class="arabic text-base text-green-600 dark:text-green-400 italic mb-2 tracking-wide">بِسْمِ
+                            اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+
+                        <!-- Logo / back link -->
+                        <a href="/" class="nav-logo mb-3 inline-flex">
+                            <div class="nav-logo-icon"
+                                style="background: linear-gradient(135deg,#059669,#10b981); font-size: 18px;">🕌</div>
+                            <span>Islamic Planner</span>
+                        </a>
+
+                        <h1 class="text-3xl font-bold text-green-900 dark:text-green-300 tracking-tight"
+                            data-i18n="title_daily">План на день</h1>
+                    </div>
+                    <div
+                        class="w-full md:w-7/12 lg:w-6/12 mt-6 md:mt-0 bg-white/40 dark:bg-slate-800/40 p-5 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/50 backdrop-blur-md">
+                        <div class="flex items-center justify-between mb-4">
+                            <i id="prev-day"
+                                class="fas fa-chevron-left nav-btn text-xl p-2 pl-0 text-slate-500 hover:text-emerald-500 transition-all cursor-pointer transform hover:-translate-x-1"
+                                title="Предыдущий день" data-i18n="nav_prev_day" data-i18n-target="title"></i>
+                            <div class="flex-grow flex flex-col items-center px-2 relative">
+                                <div class="flex items-center w-full justify-center">
+                                    <span
+                                        class="text-xs font-bold text-slate-400 dark:text-slate-500 mr-2 uppercase tracking-wider"
+                                        data-i18n="date_today">Дата:</span>
+                                    <input id="date-display" name="date-display" type="text" readonly autocomplete="off"
+                                        class="handwriting w-full text-center text-xl text-slate-800 dark:text-white cursor-default bg-transparent border-none outline-none focus:ring-0"
+                                        value="Сегодня">
                                 </div>
-                                <i id="next-day"
-                                    class="fas fa-chevron-right nav-btn text-xl p-2 pr-0 text-slate-500 hover:text-emerald-500 transition-all cursor-pointer transform hover:translate-x-1"
-                                    title="Следующий день" data-i18n="nav_next_day" data-i18n-target="title"></i>
+                                <span id="hijri-date-display"
+                                    class="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5 font-bold tracking-widest uppercase"></span>
                             </div>
-                            <div
-                                class="flex items-center border-t border-slate-200/60 dark:border-slate-700/50 pt-3 mt-1">
-                                <label for="niyyah"
-                                    class="text-xs font-bold text-slate-400 dark:text-slate-500 mr-3 uppercase tracking-wider"
-                                    data-i18n="niyyah_label">Ният:</label>
-                                <textarea data-id="niyyah" id="niyyah" name="niyyah" rows="1"
-                                    style="resize:none; overflow:hidden;" placeholder="Ради довольства Аллаха..."
-                                    autocomplete="off" data-i18n="niyyah_ph" data-i18n-target="placeholder"
-                                    class="ruled-input handwriting w-full text-emerald-800 dark:text-emerald-300 day-input text-lg"></textarea>
-                            </div>
+                            <i id="next-day"
+                                class="fas fa-chevron-right nav-btn text-xl p-2 pr-0 text-slate-500 hover:text-emerald-500 transition-all cursor-pointer transform hover:translate-x-1"
+                                title="Следующий день" data-i18n="nav_next_day" data-i18n-target="title"></i>
                         </div>
+                        <div class="flex items-center border-t border-slate-200/60 dark:border-slate-700/50 pt-3 mt-1">
+                            <label for="niyyah"
+                                class="text-xs font-bold text-slate-400 dark:text-slate-500 mr-3 uppercase tracking-wider"
+                                data-i18n="niyyah_label">Ният:</label>
+                            <textarea data-id="niyyah" id="niyyah" name="niyyah" rows="1"
+                                style="resize:none; overflow:hidden;" placeholder="Ради довольства Аллаха..."
+                                autocomplete="off" data-i18n="niyyah_ph" data-i18n-target="placeholder"
+                                class="ruled-input handwriting w-full text-emerald-800 dark:text-emerald-300 day-input text-lg"></textarea>
+                        </div>
+                    </div>
                 </header>
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10">
                     <!-- Левая колонка (Трекеры) -->

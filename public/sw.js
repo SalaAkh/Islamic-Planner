@@ -28,9 +28,22 @@ self.addEventListener('activate', (event) => {
     );
 });
 
+// URLs that should never be cached
+const SKIP_CACHE_PATTERNS = [
+    /firebaseapp\.com/,
+    /googleapis\.com\/identitytoolkit/,
+    /securetoken\.google\.com/,
+    /accounts\.google\.com/,
+    /firebase\.googleapis\.com/,
+    /__\/auth\//,
+];
+
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
     if (!event.request.url.startsWith('http')) return;
+
+    // Skip Firebase Auth and other non-cacheable URLs
+    if (SKIP_CACHE_PATTERNS.some(pattern => pattern.test(event.request.url))) return;
 
     event.respondWith(
         caches.match(event.request)
@@ -38,7 +51,12 @@ self.addEventListener('fetch', (event) => {
                 if (cachedResponse) return cachedResponse;
 
                 return fetch(event.request).then((networkResponse) => {
-                    if (networkResponse && networkResponse.status === 200) {
+                    // Only cache valid, non-opaque responses (opaque = status 0, no CORS)
+                    if (
+                        networkResponse &&
+                        networkResponse.status === 200 &&
+                        networkResponse.type !== 'opaque'
+                    ) {
                         const responseToCache = networkResponse.clone();
                         caches.open(CACHE_NAME).then((cache) => {
                             cache.put(event.request, responseToCache).catch(err => {
