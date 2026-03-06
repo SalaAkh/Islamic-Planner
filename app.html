@@ -101,6 +101,25 @@
     <meta name="twitter:description"
         content="Исламский Ежедневник: трекер намазов, цели Ахирата и Дуньи, доска Tafakkur. Бесплатно и без рекламы.">
     <meta name="twitter:image" content="https://islamic-planer.web.app/public/banner-ru.png">
+    <meta name="twitter:image:alt" content="Barakah Planner — Исламский Ежедневник">
+    <meta name="twitter:site" content="@BarakahPlanner">
+    <meta name="twitter:creator" content="@BarakahPlanner">
+    <meta name="twitter:domain" content="islamic-planer.web.app">
+    <meta name="twitter:app:name:iphone" content="Barakah Planner">
+    <meta name="twitter:app:name:ipad" content="Barakah Planner">
+    <meta name="twitter:app:name:googleplay" content="Barakah Planner">
+    <meta name="twitter:app:url:iphone" content="https://islamic-planer.web.app">
+    <meta name="twitter:app:url:ipad" content="https://islamic-planer.web.app">
+    <meta name="twitter:app:url:googleplay" content="https://islamic-planer.web.app">
+    <meta name="twitter:app:id:iphone" content="com.barakahplanner">
+    <meta name="twitter:app:id:ipad" content="com.barakahplanner">
+    <meta name="twitter:app:id:googleplay" content="com.barakahplanner">
+    <meta name="twitter:app:url:googleplay" content="https://play.google.com/store/apps/details?id=com.barakahplanner">
+    <meta name="twitter:app:url:googleplay" content="https://play.google.com/store/apps/details?id=com.barakahplanner">
+    <meta name="twitter:app:version:googleplay" content="1.0">
+    <meta name="twitter:app:version:googleplay" content="1.0">
+    <meta name="twitter:app:version:googleplay" content="1.0">
+    <meta name="twitter:app:version:googleplay" content="1.0">
 
     <!-- ═══════════════════════════════════════════════════════════════ -->
     <!-- JSON-LD STRUCTURED DATA (RICH SNIPPET)                         -->
@@ -231,6 +250,10 @@
 <body>
     <div class="notebook-wrapper animate-pulse pointer-events-none" id="app-wrapper">
         <div class="planner-tabs">
+            <a href="/" id="tab-home" class="tab-btn tab-home" style="text-decoration: none;">
+                <i class="fas fa-home md:hidden text-[22px] mb-1"></i>
+                <span data-i18n="tab_home">Главная</span>
+            </a>
             <button data-tab="daily" id="tab-daily" class="tab-btn tab-daily active">
                 <i class="fas fa-sun md:hidden text-[22px] mb-1"></i>
                 <span data-i18n="tab_daily">День</span>
@@ -275,19 +298,13 @@
             <div id="view-daily" class="page-view pb-28 active">
                 <header
                     class="mb-6 border-b-2 border-slate-200 dark:border-slate-700 pb-4 flex flex-col md:flex-row justify-between items-end">
-                    <div>
+                    <div class="pt-2">
                         <!-- Basmallah above logo -->
-                        <p class="arabic text-base text-green-600 dark:text-green-400 italic mb-2 tracking-wide">بِسْمِ
-                            اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+                        <p class="arabic text-[2rem] text-emerald-500 dark:text-emerald-400 mb-4 tracking-wide leading-relaxed font-bold"
+                            style="text-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);">بِسْمِ اللَّهِ الرَّحْمَٰنِ
+                            الرَّحِيمِ</p>
 
-                        <!-- Logo / back link -->
-                        <a href="/" class="nav-logo mb-3 inline-flex">
-                            <div class="nav-logo-icon"
-                                style="background: linear-gradient(135deg,#059669,#10b981); font-size: 18px;">🕌</div>
-                            <span>Islamic Planner</span>
-                        </a>
-
-                        <h1 class="text-3xl font-bold text-green-900 dark:text-green-300 tracking-tight"
+                        <h1 class="text-4xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight"
                             data-i18n="title_daily">План на день</h1>
                     </div>
                     <div
