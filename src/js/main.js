@@ -148,15 +148,52 @@ function formatDate(date) {
     return [year, month, day].join('-');
 }
 
+function animateDateChange(direction, updateCallback) {
+    const container = document.querySelector('#date-display').closest('.flex-grow');
+    if (!container) {
+        updateCallback();
+        return;
+    }
+
+    container.style.transition = 'opacity 0.15s ease-out, transform 0.15s ease-out';
+    container.style.opacity = '0';
+    container.style.transform = direction === 'next' ? 'translateX(-15px)' : 'translateX(15px)';
+
+    setTimeout(() => {
+        updateCallback();
+
+        container.style.transition = 'none';
+        container.style.transform = direction === 'next' ? 'translateX(15px)' : 'translateX(-15px)';
+
+        // Force reflow
+        void container.offsetWidth;
+
+        container.style.transition = 'opacity 0.15s ease-in, transform 0.15s ease-in';
+        container.style.opacity = '1';
+        container.style.transform = 'translateX(0)';
+
+        // Clean up transition styles after animation
+        setTimeout(() => {
+            container.style.transition = '';
+            container.style.transform = '';
+            container.style.opacity = '';
+        }, 150);
+    }, 150);
+}
+
 function initDailyPlanner() {
     document.getElementById('prev-day').addEventListener('click', () => {
-        currentDate.setDate(currentDate.getDate() - 1);
-        renderDailyPlanner();
+        animateDateChange('prev', () => {
+            currentDate.setDate(currentDate.getDate() - 1);
+            renderDailyPlanner();
+        });
     });
 
     document.getElementById('next-day').addEventListener('click', () => {
-        currentDate.setDate(currentDate.getDate() + 1);
-        renderDailyPlanner();
+        animateDateChange('next', () => {
+            currentDate.setDate(currentDate.getDate() + 1);
+            renderDailyPlanner();
+        });
     });
 
     // Event Delegation for dynamic elements
