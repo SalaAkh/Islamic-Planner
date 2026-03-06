@@ -2,7 +2,7 @@
     "name": "Barakah Planner",
     "short_name": "Barakah",
     "description": "Экосистема для мусульман: Дин и Дунья",
-    "start_url": "/",
+    "start_url": "/app.html",
     "display": "standalone",
     "background_color": "#0f172a",
     "theme_color": "#059669",

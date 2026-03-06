@@ -10,132 +10,128 @@ if (!fs.existsSync(DIST_DIR)) {
     fs.mkdirSync(DIST_DIR);
 }
 
-// 1. Read source index.html
-let html = fs.readFileSync('./index.html', 'utf8');
-
-// 2. Inline CSS
-console.log('Inlining tailwind.css...');
-if (fs.existsSync('./src/css/tailwind.css')) {
-    const css = fs.readFileSync('./src/css/tailwind.css', 'utf8');
-    html = html.replace(
-        /<link\s+rel="stylesheet"\s+href="\.\/src\/css\/tailwind\.css\?v=\d+">/g,
-        `<style>\n${css}\n</style>`
-    );
-} else {
-    console.warn('⚠️ tailwind.css not found! Build before running this script.');
+// ─── Helper: inline CSS into any HTML ───
+function inlineCSS(html) {
+    if (fs.existsSync('./src/css/tailwind.css')) {
+        const css = fs.readFileSync('./src/css/tailwind.css', 'utf8');
+        return html.replace(
+            /<link\s+rel="stylesheet"\s+href="\.\/src\/css\/tailwind\.css\?v=\d+">/g,
+            `<style>\n${css}\n</style>`
+        );
+    }
+    console.warn('⚠️ tailwind.css not found!');
+    return html;
 }
 
-// 3. Inline ALL JS scripts — preserve type="module" and defer
+// ─── Helper: inline JS scripts into any HTML ───
 const scriptsToInline = [
-    'crypto-storage.js',
-    'i18n.js',
-    'store.js',
-    'ai.js',
-    'board.js',
-    'main.js',
-    'activity-log.js',
-    'auth.js',
-    'db.js',
-    'firebase-init.js'
+    'crypto-storage.js', 'i18n.js', 'store.js', 'ai.js',
+    'board.js', 'main.js', 'activity-log.js', 'auth.js',
+    'db.js', 'firebase-init.js'
 ];
 
-scriptsToInline.forEach(script => {
-    console.log(`Inlining ${script}...`);
-    if (fs.existsSync(`./src/js/${script}`)) {
-        const js = fs.readFileSync(`./src/js/${script}`, 'utf8');
-        const escapedName = script.replace('.', '\\.');
-        const regex = new RegExp(`<script([^>]*)src="\\.\\/src\\/js\\/${escapedName}(?:\\?[^"]*)?"([^>]*)><\\/script>`, 'g');
+function inlineScripts(html) {
+    scriptsToInline.forEach(script => {
+        console.log(`Inlining ${script}...`);
+        if (fs.existsSync(`./src/js/${script}`)) {
+            const js = fs.readFileSync(`./src/js/${script}`, 'utf8');
+            const escapedName = script.replace('.', '\\.');
+            const regex = new RegExp(`<script([^>]*)src="\\.\\/src\\/js\\/${escapedName}(?:\\?[^"]*)?\"([^>]*)><\\/script>`, 'g');
 
-        let matchFound = false;
-        html = html.replace(regex, (match, before, after) => {
-            matchFound = true;
-            const attrs = (before + ' ' + after).trim();
-            const isModule = /type=["']module["']/.test(attrs);
-            const isDefer = /\bdefer\b/.test(attrs);
+            html = html.replace(regex, (match, before, after) => {
+                const attrs = (before + ' ' + after).trim();
+                const isModule = /type=["']module["']/.test(attrs);
+                const isDefer = /\bdefer\b/.test(attrs);
 
-            let finalJs = js;
-            if (script === 'firebase-init.js') {
-                const apiKey = process.env.FIREBASE_API_KEY || '';
-                finalJs = finalJs.replace('__FIREBASE_API_KEY__', apiKey);
-                if (!apiKey) {
-                    console.warn("⚠️ WARNING: FIREBASE_API_KEY is not set.");
+                let finalJs = js;
+                if (script === 'firebase-init.js') {
+                    const apiKey = process.env.FIREBASE_API_KEY || '';
+                    finalJs = finalJs.replace('__FIREBASE_API_KEY__', apiKey);
+                    if (!apiKey) console.warn('⚠️ WARNING: FIREBASE_API_KEY is not set.');
                 }
-            }
 
-            const typeAttr = isModule ? ' type="module"' : '';
-            const deferAttr = isDefer ? ' defer' : '';
-            return `<script${typeAttr}${deferAttr}>\n${finalJs}\n</script>`;
-        });
-
-        if (!matchFound) {
-            console.warn(`⚠️ Could not find script tag for ${script} in index.html`);
+                const typeAttr = isModule ? ' type="module"' : '';
+                const deferAttr = isDefer ? ' defer' : '';
+                return `<script${typeAttr}${deferAttr}>\n${finalJs}\n</script>`;
+            });
+        } else {
+            console.warn(`⚠️ Script ${script} not found!`);
         }
-    } else {
-        console.warn(`⚠️ Script ${script} not found!`);
-    }
-});
+    });
+    return html;
+}
 
-// 4. Fix paths that pointed to ./public/ — in dist they're in the root
-html = html.replace(/\.\/public\/favicon\.ico/g, './favicon.ico');
-html = html.replace(/\.\/public\/sw\.js/g, './sw.js');
-html = html.replace(/\.\/public\/manifest\.json/g, './manifest.json');
+// ─── 1. Build app.html (main PWA) ───
+console.log('\n[1/2] Building app.html (main PWA)...');
+let appHtml = fs.readFileSync('./app.html', 'utf8');
+appHtml = inlineCSS(appHtml);
+appHtml = inlineScripts(appHtml);
 
-// 5. Copy assets from public/ to dist/ root (sw.js, manifest.json, favicon, banners, og-images)
+// Fix paths: ./public/ → ./
+appHtml = appHtml.replace(/\.\/public\/favicon\.ico/g, './favicon.ico');
+appHtml = appHtml.replace(/\.\/public\/sw\.js/g, './sw.js');
+appHtml = appHtml.replace(/\.\/public\/manifest\.json/g, './manifest.json');
+
+fs.writeFileSync(path.join(DIST_DIR, 'app.html'), appHtml);
+console.log('✅ app.html built!');
+
+// ─── 2. Build index.html (Landing Page) ───
+console.log('\n[2/2] Building index.html (Landing Page)...');
+let landingHtml = fs.readFileSync('./index.html', 'utf8');
+// Fix public paths in landing too
+landingHtml = landingHtml.replace(/\.\/public\/favicon\.ico/g, './favicon.ico');
+landingHtml = landingHtml.replace(/\.\/public\/manifest\.json/g, './manifest.json');
+
+fs.writeFileSync(path.join(DIST_DIR, 'index.html'), landingHtml);
+console.log('✅ index.html (landing) built!');
+
+// ─── 3. Copy assets from public/ to dist/ root ───
 const PUBLIC_DIR = './public';
 if (fs.existsSync(PUBLIC_DIR)) {
-    console.log('Copying public assets to dist root...');
+    console.log('\nCopying public assets to dist root...');
     const files = fs.readdirSync(PUBLIC_DIR);
     files.forEach(file => {
         fs.copyFileSync(path.join(PUBLIC_DIR, file), path.join(DIST_DIR, file));
     });
 }
 
-// 6. Copy sitemap and robots
+// ─── 4. Copy sitemap, robots, google verification ───
 ['sitemap.xml', 'robots.txt', 'google4a672bfea76db3c6.html'].forEach(f => {
     if (fs.existsSync(`./${f}`)) {
         fs.copyFileSync(`./${f}`, path.join(DIST_DIR, f));
     }
 });
 
-// 7. Write final monolith
-fs.writeFileSync(path.join(DIST_DIR, 'index.html'), html);
-console.log('✅ Build complete! Monolithic file generated at dist/index.html');
-
-// 8. Generate language-specific static HTML pages for Telegram/social previews
+// ─── 5. Generate language-specific social preview pages ───
 const BASE_URL = 'https://islamic-planer.web.app';
 const LANG_META = {
     kk: {
-        lang: 'kk',
-        dir: 'ltr',
+        lang: 'kk', dir: 'ltr',
         title: 'Barakah Planner — Исламдық Күнделік және Намаз Жоспарлаушы',
-        desc: 'Күніңізді Ислам бойынша жоспарлаңыз: намаз трекері, Ақырет пен Дүние мақсаттары, Tafakkur идеялар тақтасы. Тегін.',
+        desc: 'Күніңізді Ислам бойынша жоспарлаңыз: намаз трекері, Ақырет пен Дүние мақсаттары, Tafakkur тақтасы. Тегін.',
         image: `${BASE_URL}/banner-kk.png`,
         url: `${BASE_URL}/?lang=kk`,
     },
     en: {
-        lang: 'en',
-        dir: 'ltr',
+        lang: 'en', dir: 'ltr',
         title: 'Barakah Planner — Islamic Daily Planner & Prayer Tracker',
         desc: 'Plan your day according to Islam: prayer tracker, Akhirah & Dunya goals, Tafakkur idea board. Free.',
         image: `${BASE_URL}/banner-en.png`,
         url: `${BASE_URL}/?lang=en`,
     },
     ar: {
-        lang: 'ar',
-        dir: 'rtl',
+        lang: 'ar', dir: 'rtl',
         title: 'Barakah Planner — يوميات إسلامية ومخطط الصلاة',
-        desc: 'خطط ليومك وفقًا للإسلام: متتبع الصلاة، أهداف الآخرة والدنيا، لوحة أفكار تفكر. مجاني.',
+        desc: 'خطط ليومك وفقًا للإسلام: متتبع الصلاة، أهداف الآخرة والدنيا، لوحة تفكر. مجاني.',
         image: `${BASE_URL}/banner-ar.png`,
         url: `${BASE_URL}/?lang=ar`,
     },
 };
 
 Object.entries(LANG_META).forEach(([langCode, meta]) => {
-    // Create subfolder
     const langDir = path.join(DIST_DIR, langCode);
     if (!fs.existsSync(langDir)) fs.mkdirSync(langDir, { recursive: true });
 
-    // Build a minimal HTML file that instantly redirects but has proper static og meta
     const langHtml = `<!DOCTYPE html>
 <html lang="${meta.lang}" dir="${meta.dir}">
 <head>
@@ -163,6 +159,7 @@ Object.entries(LANG_META).forEach(([langCode, meta]) => {
 </html>`;
 
     fs.writeFileSync(path.join(langDir, 'index.html'), langHtml);
-    console.log(`✅ Language page generated: dist/${langCode}/index.html`);
+    console.log(`✅ Language page: dist/${langCode}/index.html`);
 });
 
+console.log('\n🚀 Build complete! Files: dist/index.html (landing) + dist/app.html (PWA)');

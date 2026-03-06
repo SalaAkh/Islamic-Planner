@@ -114,6 +114,10 @@
                 "destination": "/ar/index.html"
             },
             {
+                "source": "/app",
+                "destination": "/app.html"
+            },
+            {
                 "source": "**",
                 "destination": "/index.html"
             }
