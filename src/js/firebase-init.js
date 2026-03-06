@@ -32,10 +32,10 @@ try {
             window.firebaseMessaging = messaging;
 
             window.requestNotificationPermission = async () => {
-                if (!window.Auth || !window.Auth.user) return;
                 try {
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
+                        if (!window.Auth || !window.Auth.user) return; // Only save token if logged in
                         const token = await getToken(messaging);
                         if (token) {
                             const uid = window.Auth.user.uid;
@@ -47,7 +47,7 @@ try {
                         }
                     }
                 } catch (error) {
-                    console.warn('[FCM] Error requesting permission', error);
+                    console.warn('[Notification] Error requesting permission', error);
                 }
             };
 

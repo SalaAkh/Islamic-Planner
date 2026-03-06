@@ -907,16 +907,34 @@ function initEvents() {
         };
 
         // Request notification permission if alert is enabled
-        if (event.alert !== 'none' && typeof window.requestNotificationPermission === 'function') {
-            window.requestNotificationPermission();
+        if (event.alert !== 'none') {
+            if (Notification.permission === 'denied') {
+                const lang = localStorage.getItem('barakah_lang') || 'ru';
+                const msg = lang === 'ru' ? '⚠️ Уведомления заблокированы в настройках браузера. Разрешите их вручную.' : '⚠️ Notifications are blocked in browser settings. Enable them manually.';
+                if (typeof window.showToast === 'function') window.showToast(msg);
+            } else if (typeof window.requestNotificationPermission === 'function') {
+                window.requestNotificationPermission();
+            } else if (Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
         }
 
-        // If we were editing and the date changed, delete from old date first
-        if (_eventEditingId && _eventEditingDate && _eventEditingDate !== dateStr) {
-            Store.deleteEvent(_eventEditingDate, _eventEditingId);
+        // Cancel old offline notification if editing
+        if (_eventEditingId) {
+            if (typeof window.cancelOfflineNotification === 'function') {
+                window.cancelOfflineNotification(_eventEditingId);
+            }
+            if (_eventEditingDate && _eventEditingDate !== dateStr) {
+                Store.deleteEvent(_eventEditingDate, _eventEditingId);
+            }
         }
 
         Store.saveEvent(dateStr, event);
+
+        // Schedule new offline notification
+        if (typeof window.scheduleOfflineNotification === 'function') {
+            window.scheduleOfflineNotification(event);
+        }
 
         const lang = localStorage.getItem('barakah_lang') || 'ru';
         const msg = (window.translations && window.translations[lang] && window.translations[lang]['event_saved_toast']) || 'Event saved!';
@@ -929,6 +947,9 @@ function initEvents() {
     // Delete
     deleteBtn.addEventListener('click', () => {
         if (_eventEditingId && _eventEditingDate) {
+            if (typeof window.cancelOfflineNotification === 'function') {
+                window.cancelOfflineNotification(_eventEditingId);
+            }
             Store.deleteEvent(_eventEditingDate, _eventEditingId);
 
             const lang = localStorage.getItem('barakah_lang') || 'ru';
@@ -1122,6 +1143,57 @@ function closeEventsPopup() {
 }
 
 window.openEventModal = openEventModal;
+
+// --- OFFLINE PUSH NOTIFICATIONS (Notification Triggers API) ---
+window.scheduleOfflineNotification = async function (event) {
+    if (!('serviceWorker' in navigator)) return;
+    if (event.alert === 'none') return;
+
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        if (!('showTrigger' in Notification.prototype)) {
+            return; // Fallback to initLocalNotifications
+        }
+
+        // Calculate triggerTime
+        const dateTimeStr = `${event.date}T${event.time}:00`;
+        const eventDateObj = new Date(dateTimeStr);
+        let triggerDate = new Date(eventDateObj.getTime());
+
+        if (event.alert === '5min') triggerDate.setMinutes(triggerDate.getMinutes() - 5);
+        else if (event.alert === '15min') triggerDate.setMinutes(triggerDate.getMinutes() - 15);
+        else if (event.alert === '30min') triggerDate.setMinutes(triggerDate.getMinutes() - 30);
+        else if (event.alert === '1hour') triggerDate.setHours(triggerDate.getHours() - 1);
+        else if (event.alert === '1day') triggerDate.setDate(triggerDate.getDate() - 1);
+
+        if (triggerDate.getTime() < Date.now()) return; // Already passed
+
+        // Ensure permission
+        if (Notification.permission !== 'granted') return;
+
+        await registration.showNotification(`Напоминание: ${event.title}`, {
+            body: `Запланировано на ${event.time}${event.location ? ' в ' + event.location : ''}`,
+            icon: '/public/favicon.ico',
+            tag: event.id,
+            showTrigger: new window.TimestampTrigger(triggerDate.getTime())
+        });
+        console.log(`[Offline Push] Scheduled for ${triggerDate.toISOString()} locally!`);
+    } catch (e) {
+        console.error('Failed to schedule offline notification', e);
+    }
+}
+
+window.cancelOfflineNotification = async function (eventId) {
+    if (!('serviceWorker' in navigator)) return;
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        const notifications = await registration.getNotifications({ tag: eventId, includeTriggered: true });
+        notifications.forEach(notification => notification.close());
+        console.log(`[Offline Push] Cancelled locally: ${eventId}`);
+    } catch (e) {
+        console.error('Failed to cancel offline notification', e);
+    }
+}
 
 // --- LOCAL BROWSER NOTIFICATIONS (FALLBACK/IN-APP) ---
 function initLocalNotifications() {
