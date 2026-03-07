@@ -166,10 +166,12 @@ function updateHeaderCityName(name) {
     if (el) el.textContent = name;
 }
 
-async function loadScheduleForYear(year, forceFetch = false) {
-    if (!currentCityPref) return;
+async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null) {
+    if (!currentCityPref && !fallbackCity) return;
 
-    const storeKey = `${NAMAZ_STORAGE_KEY_PREFIX}${currentCityPref.id}_${year}`;
+    const targetCity = fallbackCity || currentCityPref;
+    const storeKey = `${NAMAZ_STORAGE_KEY_PREFIX}${targetCity.id}_${year}`;
+
     if (!forceFetch) {
         const cached = localStorage.getItem(storeKey);
         if (cached) {
@@ -184,7 +186,7 @@ async function loadScheduleForYear(year, forceFetch = false) {
     }
 
     try {
-        const { lat, lng } = currentCityPref;
+        const { lat, lng } = targetCity;
         const res = await fetch(`https://api.muftyat.kz/prayer-times/${year}/${lat}/${lng}`);
         if (!res.ok) throw new Error("API status " + res.status);
         const data = await res.json();
@@ -195,17 +197,67 @@ async function loadScheduleForYear(year, forceFetch = false) {
                 scheduleMap[day.Date] = day;
             });
             currentSchedule = scheduleMap;
-            localStorage.setItem(storeKey, JSON.stringify(scheduleMap));
+            // Always save under the original user preference ID so they don't know it fell back
+            const prefStoreKey = `${NAMAZ_STORAGE_KEY_PREFIX}${currentCityPref.id}_${year}`;
+            localStorage.setItem(prefStoreKey, JSON.stringify(scheduleMap));
             updateNamazUI();
         }
     } catch (e) {
-        console.error("Failed to fetch schedule", e);
+        console.error("Failed to fetch schedule for " + targetCity.title, e);
+
+        // If it's a server error and we haven't fallen back too deeply
+        if (!fallbackCity && window.MUFTYAT_CITIES) {
+            console.log("Attempting to find nearest working city as fallback...");
+            const nearest = getNearestCity(targetCity.lat, targetCity.lng);
+            if (nearest) {
+                console.log(`Fallback city found: ${nearest.t}`);
+                const fallbackObj = { id: nearest.i, title: nearest.t, lat: nearest.la, lng: nearest.lo };
+                await loadScheduleForYear(year, true, fallbackObj);
+                return;
+            }
+        }
+
         if (!currentSchedule) {
             document.getElementById('namaz-current-time').textContent = "Ошибка";
             const subtitle = document.querySelector('#namaz-countdown span');
-            if (subtitle) subtitle.textContent = "Нет интернета";
+            if (subtitle) subtitle.textContent = "Сервер недоступен";
         }
     }
+}
+
+// Haversine distance
+function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of the earth in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+}
+
+function getNearestCity(latStr, lngStr) {
+    if (!window.MUFTYAT_CITIES) return null;
+    const originLat = parseFloat(latStr);
+    const originLng = parseFloat(lngStr);
+
+    let closest = null;
+    let minDistance = Infinity;
+
+    for (const city of window.MUFTYAT_CITIES) {
+        // Skip exact same city strings to avoid infinite loop
+        if (city.la === latStr && city.lo === lngStr) continue;
+
+        const d = getDistance(originLat, originLng, parseFloat(city.la), parseFloat(city.lo));
+        // Find nearest city (hopefully valid in api)
+        if (d < minDistance) {
+            minDistance = d;
+            closest = city;
+        }
+    }
+    return closest;
 }
 
 function parseTimeStr(timeStr, dateObj) {

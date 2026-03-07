@@ -15,7 +15,6 @@
             "build-monolith.js",
             "style.css",
             "dummy.css",
-            "src/**",
             "README.md",
             "SECURITY.md",
             "*.log",

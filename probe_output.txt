@@ -1,0 +1,7 @@
+FAIL https://api.muftyat.kz/prayer-times/2026/3: 404
+FAIL https://api.muftyat.kz/prayer-times/2026/?city=3: 404
+FAIL https://api.muftyat.kz/prayer-times/2026/?city_id=3: 404
+FAIL https://api.muftyat.kz/prayer-times/2026/?id=3: 404
+FAIL https://api.muftyat.kz/v1/prayer-times/2026/3: 404
+SUCCESS https://api.muftyat.kz/prayer-times/2026/49.806406/73.085485: 200
+Data summary: 365

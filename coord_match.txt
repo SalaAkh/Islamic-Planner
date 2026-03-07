@@ -1,0 +1,6 @@
+FAIL https://api.muftyat.kz/prayer-times/2026/49.631899/72.859245: 500
+FAIL https://api.muftyat.kz/prayer-times/2026/49.63189/72.85924: 404
+FAIL https://api.muftyat.kz/prayer-times/2026/49.6319/72.8592: 404
+FAIL https://api.muftyat.kz/prayer-times/2026/49.632/72.859: 404
+FAIL https://api.muftyat.kz/prayer-times/2026/49.63/72.86: 404
+FAIL https://api.muftyat.kz/prayer-times/2026/49.6/72.9: 404
