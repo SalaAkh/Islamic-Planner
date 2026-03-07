@@ -178,36 +178,24 @@ function formatDate(date) {
 }
 
 function animateDateChange(direction, updateCallback) {
-    const container = document.querySelector('#date-display').closest('.flex-grow');
+    const container = document.querySelector('#view-daily > div.grid');
     if (!container) {
         updateCallback();
         return;
     }
 
-    container.style.transition = 'opacity 0.15s ease-out, transform 0.15s ease-out';
-    container.style.opacity = '0';
-    container.style.transform = direction === 'next' ? 'translateX(-15px)' : 'translateX(15px)';
+    container.classList.add('date-flip-container', 'date-flip-out');
 
     setTimeout(() => {
         updateCallback();
 
-        container.style.transition = 'none';
-        container.style.transform = direction === 'next' ? 'translateX(15px)' : 'translateX(-15px)';
+        container.classList.remove('date-flip-out');
+        container.classList.add('date-flip-in');
 
-        // Force reflow
-        void container.offsetWidth;
-
-        container.style.transition = 'opacity 0.15s ease-in, transform 0.15s ease-in';
-        container.style.opacity = '1';
-        container.style.transform = 'translateX(0)';
-
-        // Clean up transition styles after animation
         setTimeout(() => {
-            container.style.transition = '';
-            container.style.transform = '';
-            container.style.opacity = '';
-        }, 150);
-    }, 150);
+            container.classList.remove('date-flip-container', 'date-flip-in');
+        }, 400);
+    }, 400);
 }
 
 function initDailyPlanner() {
