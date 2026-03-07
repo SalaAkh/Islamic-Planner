@@ -26,7 +26,7 @@ function inlineCSS(html) {
 // ─── Helper: inline JS scripts into any HTML ───
 const scriptsToInline = [
     'crypto-storage.js', 'i18n.js', 'store.js', 'ai.js',
-    'board.js', 'main.js', 'activity-log.js', 'auth.js',
+    'board.js', 'namaz-tracker.js', 'main.js', 'activity-log.js', 'auth.js',
     'db.js', 'firebase-init.js'
 ];
 
@@ -93,6 +93,13 @@ if (fs.existsSync(PUBLIC_DIR)) {
     files.forEach(file => {
         fs.copyFileSync(path.join(PUBLIC_DIR, file), path.join(DIST_DIR, file));
     });
+}
+
+const JS_DIST = path.join(DIST_DIR, 'src', 'js');
+if (!fs.existsSync(JS_DIST)) fs.mkdirSync(JS_DIST, { recursive: true });
+if (fs.existsSync('./src/js/muftyat-cities.js')) {
+    fs.copyFileSync('./src/js/muftyat-cities.js', path.join(JS_DIST, 'muftyat-cities.js'));
+    console.log('✅ Copied muftyat-cities.js to dist/src/js/');
 }
 
 // ─── 4. Copy sitemap, robots, google verification ───
