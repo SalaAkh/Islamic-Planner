@@ -18,7 +18,14 @@ async function fetchAllCities() {
         });
 
         if (data && data.results) {
-            allCities = allCities.concat(data.results);
+            const mapped = data.results.map(c => ({
+                i: c.id,
+                t: c.title,
+                la: c.lat,
+                lo: c.lng,
+                r: c.region || ''
+            }));
+            allCities = allCities.concat(mapped);
             nextUrl = data.next;
             // muftyat api uses http in next sometimes, so ensure https
             if (nextUrl && nextUrl.startsWith('http://')) {

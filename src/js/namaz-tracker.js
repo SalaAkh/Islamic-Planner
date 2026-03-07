@@ -150,11 +150,16 @@ function renderCityResults(cities, isLoading = false) {
 
     let html = '';
     cities.forEach(c => {
+        const title = c.t || '';
+        const region = c.r || '';
+        const lat = c.la || '';
+        const lng = c.lo || '';
+
         html += `
-            <div onclick="selectNamazCity('${c.i}', '${c.t.replace(/'/g, "\\'")}', '${c.la}', '${c.lo}')" 
+            <div onclick="selectNamazCity('${c.i}', '${title.replace(/'/g, "\\'")}', '${lat}', '${lng}')" 
                 class="p-3 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 rounded-xl hover:bg-emerald-50 dark:hover:bg-slate-700 cursor-pointer transition-colors flex flex-col mb-2">
-                <span class="font-bold text-slate-800 dark:text-slate-200">${c.t}</span>
-                <span class="text-xs text-slate-500 mt-1"><i class="fas fa-map mr-1"></i>${c.r || ''}</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200">${title}</span>
+                <span class="text-xs text-slate-500 mt-1"><i class="fas fa-map mr-1"></i>${region}</span>
             </div>
         `;
     });
