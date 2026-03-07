@@ -213,61 +213,57 @@ body {
     animation: fadeIn 0.3s ease;
 }
 
-/* --- АНИМАЦИЯ ПЕРЕВОРОТА СТРАНИЦЫ (PAGE FLIP) ДЛЯ ТАБОВ --- */
+/* --- ПРЕМИАЛЬНАЯ ПЛАВНАЯ АНИМАЦИЯ СТРАНИЦ ДЛЯ ТАБОВ --- */
 .page-flip-container {
     perspective: 2500px;
+    position: relative;
+    overflow-x: hidden;
 }
 
 .page-flip-out {
-    animation: flipOutLeft 0.55s ease-in forwards !important;
-    transform-origin: left center;
+    animation: pageSlideDownOut 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 20;
-    backface-visibility: hidden;
     background-color: var(--paper);
     /* Прячем нижний слой */
     display: block !important;
 }
 
 .page-flip-in {
-    animation: flipInRight 0.55s ease-out forwards !important;
-    transform-origin: left center;
+    animation: pageSlideUpIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
     position: relative;
     z-index: 10;
-    backface-visibility: hidden;
     display: block !important;
 }
 
-@keyframes flipOutLeft {
+@keyframes pageSlideDownOut {
     0% {
-        transform: rotateY(0deg);
+        transform: translateY(0) scale(1);
         opacity: 1;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    }
-
-    50% {
-        box-shadow: -20px 0 40px rgba(0, 0, 0, 0.2);
+        filter: blur(0px);
     }
 
     100% {
-        transform: rotateY(-90deg);
+        transform: translateY(20px) scale(0.98);
         opacity: 0;
-        box-shadow: none;
+        filter: blur(2px);
     }
 }
 
-@keyframes flipInRight {
+@keyframes pageSlideUpIn {
     0% {
-        transform: rotateY(90deg);
+        transform: translateY(-20px) scale(0.98);
         opacity: 0;
+        filter: blur(2px);
     }
 
     100% {
-        transform: rotateY(0deg);
+        transform: translateY(0) scale(1);
         opacity: 1;
+        filter: blur(0px);
     }
 }
 
@@ -283,42 +279,80 @@ body {
     }
 }
 
-/* --- АНИМАЦИЯ ПЕРЕВОРОТА ДАТЫ (PAGE FLIP) --- */
-.date-flip-container {
-    perspective: 1000px;
+/* --- ПРЕМИАЛЬНАЯ АНИМАЦИЯ ПЕРЕКЛЮЧЕНИЯ ДАТЫ (DATE SLIDE) --- */
+.date-anim-container {
+    position: relative;
 }
 
-.date-flip-out {
-    animation: flipOutTop 0.4s ease-in forwards;
-    transform-origin: bottom center;
+.date-slide-out-next {
+    animation: slideOutLeft 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.date-flip-in {
-    animation: flipInBottom 0.4s ease-out forwards;
-    transform-origin: top center;
+.date-slide-in-next {
+    animation: slideInRight 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-@keyframes flipOutTop {
+.date-slide-out-prev {
+    animation: slideOutRight 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.date-slide-in-prev {
+    animation: slideInLeft 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideOutLeft {
     0% {
-        transform: rotateX(0deg);
         opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0px);
     }
 
     100% {
-        transform: rotateX(90deg);
         opacity: 0;
+        transform: translateX(-30px) scale(0.98);
+        filter: blur(1px);
     }
 }
 
-@keyframes flipInBottom {
+@keyframes slideInRight {
     0% {
-        transform: rotateX(-90deg);
         opacity: 0;
+        transform: translateX(30px) scale(0.98);
+        filter: blur(1px);
     }
 
     100% {
-        transform: rotateX(0deg);
         opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0px);
+    }
+}
+
+@keyframes slideOutRight {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(30px) scale(0.98);
+        filter: blur(1px);
+    }
+}
+
+@keyframes slideInLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-30px) scale(0.98);
+        filter: blur(1px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0px);
     }
 }
 

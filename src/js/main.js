@@ -186,23 +186,26 @@ function animateDateChange(direction, updateCallback) {
         return;
     }
 
-    gridContainer.classList.add('date-flip-container', 'date-flip-out');
-    headerPanel.classList.add('date-flip-container', 'date-flip-out');
+    const outClass = direction === 'next' ? 'date-slide-out-next' : 'date-slide-out-prev';
+    const inClass = direction === 'next' ? 'date-slide-in-next' : 'date-slide-in-prev';
+
+    gridContainer.classList.add('date-anim-container', outClass);
+    headerPanel.classList.add('date-anim-container', outClass);
 
     setTimeout(() => {
         updateCallback();
 
-        gridContainer.classList.remove('date-flip-out');
-        gridContainer.classList.add('date-flip-in');
+        gridContainer.classList.remove(outClass);
+        gridContainer.classList.add(inClass);
 
-        headerPanel.classList.remove('date-flip-out');
-        headerPanel.classList.add('date-flip-in');
+        headerPanel.classList.remove(outClass);
+        headerPanel.classList.add(inClass);
 
         setTimeout(() => {
-            gridContainer.classList.remove('date-flip-container', 'date-flip-in');
-            headerPanel.classList.remove('date-flip-container', 'date-flip-in');
-        }, 400);
-    }, 400);
+            gridContainer.classList.remove('date-anim-container', inClass);
+            headerPanel.classList.remove('date-anim-container', inClass);
+        }, 350);
+    }, 350);
 }
 
 function initDailyPlanner() {
