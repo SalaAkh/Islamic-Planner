@@ -206,14 +206,34 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
         console.error("Failed to fetch schedule for " + targetCity.title, e);
 
         // If it's a server error and we haven't fallen back too deeply
-        if (!fallbackCity && window.MUFTYAT_CITIES) {
+        if (!fallbackCity) {
             console.log("Attempting to find nearest working city as fallback...");
-            const nearest = getNearestCity(targetCity.lat, targetCity.lng);
-            if (nearest) {
-                console.log(`Fallback city found: ${nearest.t}`);
-                const fallbackObj = { id: nearest.i, title: nearest.t, lat: nearest.la, lng: nearest.lo };
-                await loadScheduleForYear(year, true, fallbackObj);
-                return;
+
+            // Wait up to 2 seconds for MUFTYAT_CITIES to load if it's external
+            if (!window.MUFTYAT_CITIES) {
+                console.log("Waiting for cities JS to load...");
+                await new Promise(resolve => {
+                    let checks = 0;
+                    const interval = setInterval(() => {
+                        if (window.MUFTYAT_CITIES || checks > 20) {
+                            clearInterval(interval);
+                            resolve();
+                        }
+                        checks++;
+                    }, 100);
+                });
+            }
+
+            if (window.MUFTYAT_CITIES) {
+                const nearest = getNearestCity(targetCity.lat, targetCity.lng);
+                if (nearest) {
+                    console.log(`Fallback city found: ${nearest.t}`);
+                    const fallbackObj = { id: nearest.i, title: nearest.t, lat: nearest.la, lng: nearest.lo };
+                    await loadScheduleForYear(year, true, fallbackObj);
+                    return;
+                }
+            } else {
+                console.warn("MUFTYAT_CITIES still undefined after waiting.");
             }
         }
 

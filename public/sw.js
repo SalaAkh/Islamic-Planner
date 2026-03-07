@@ -1,11 +1,11 @@
-const CACHE_NAME = 'barakah-planner-v20';
+const CACHE_NAME = 'barakah-planner-v21';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './manifest.json',
     './favicon.ico',
     'https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
 ];
 
 self.addEventListener('install', (event) => {
@@ -66,7 +66,12 @@ self.addEventListener('fetch', (event) => {
                     }
                     return networkResponse;
                 }).catch(() => {
-                    // Offline fallback (already handled by cache for HTML)
+                    // Return a valid offline Response instead of undefined to avoid TypeErrors
+                    return new Response('Content not available offline', {
+                        status: 503,
+                        statusText: 'Service Unavailable',
+                        headers: new Headers({ 'Content-Type': 'text/plain' })
+                    });
                 });
             })
     );
