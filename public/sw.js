@@ -1,4 +1,4 @@
-const CACHE_NAME = 'barakah-planner-v21';
+const CACHE_NAME = 'barakah-planner-v22';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
