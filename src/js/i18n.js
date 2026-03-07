@@ -9,7 +9,7 @@ const translations = {
         "title_daily": "План на день", "niyyah_label": "Ният:", "niyyah_ph": "Ради довольства Аллаха...",
         "ibadah_title": "Ибадат Трекер", "quran_title": "Чтение Корана", "quran_ph": "Сура / Аяты",
         "sadaka_title": "Садака / Благое дело", "sadaka_ph": "Кому помочь сегодня?",
-        "fajr": "Фаджр", "morning_azkar": "Уттренние азкары", "zuhr": "Зухр", "asr": "Аср",
+        "fajr": "Фаджр", "morning_azkar": "Утренние азкары", "zuhr": "Зухр", "asr": "Аср",
         "evening_azkar": "Вечерние азкары", "maghrib": "Магриб", "isha": "Иша", "witr": "Витр",
         "fajr_zuhr": "Фаджр — Зухр", "zuhr_asr": "Зухр — Аср", "asr_maghrib": "Аср — Магриб",
         "maghrib_isha": "Магриб — Иша", "isha_sleep": "Иша — Сон", "nav_prev_day": "Предыдущий день", "nav_next_day": "Следующий день",
