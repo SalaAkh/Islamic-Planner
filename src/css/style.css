@@ -1,6 +1,32 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+@layer base {
+
+    /* Хакаем Tailwind, чтобы он не объединял эти свойства в один блок, иначе IDE ругается */
+    img,
+    svg,
+    video,
+    canvas,
+    audio,
+    iframe,
+    embed,
+    object {
+        vertical-align: middle;
+    }
+
+    :root img,
+    :root svg,
+    :root video,
+    :root canvas,
+    :root audio,
+    :root iframe,
+    :root embed,
+    :root object {
+        display: block;
+    }
+}
+
 /* Screen-reader only (accessible label, visually hidden) */
 .sr-only {
     position: absolute;
