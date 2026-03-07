@@ -98,7 +98,7 @@ function setupModalEvents() {
             }
 
             if (window.MUFTYAT_CITIES && window.MUFTYAT_CITIES.length > 0) {
-                const results = window.MUFTYAT_CITIES.filter(c => c.t.toLowerCase().includes(q)).slice(0, 50);
+                const results = window.MUFTYAT_CITIES.filter(c => (c.t || '').toLowerCase().includes(q)).slice(0, 50);
                 renderCityResults(results);
             } else {
                 renderCityResults([], true);
@@ -171,11 +171,14 @@ function updateHeaderCityName(name) {
     if (el) el.textContent = name;
 }
 
-async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null) {
+async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null, ignoreSet = new Set()) {
     if (!currentCityPref && !fallbackCity) return;
 
     const targetCity = fallbackCity || currentCityPref;
     const storeKey = `${NAMAZ_STORAGE_KEY_PREFIX}${targetCity.id}_${year}`;
+
+    // Add current target to ignore set so we don't pick it as fallback
+    ignoreSet.add(targetCity.id);
 
     if (!forceFetch) {
         const cached = localStorage.getItem(storeKey);
@@ -210,8 +213,8 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
     } catch (e) {
         console.error("Failed to fetch schedule for " + targetCity.title, e);
 
-        // If it's a server error and we haven't fallen back too deeply
-        if (!fallbackCity) {
+        // Limit fallback depth by checking ignoreSet size (max 5 fallbacks)
+        if (ignoreSet.size < 5) {
             console.log("Attempting to find nearest working city as fallback...");
 
             // Wait up to 2 seconds for MUFTYAT_CITIES to load if it's external
@@ -230,11 +233,11 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
             }
 
             if (window.MUFTYAT_CITIES) {
-                const nearest = getNearestCity(targetCity.lat, targetCity.lng);
+                const nearest = getNearestCity(targetCity.lat, targetCity.lng, ignoreSet);
                 if (nearest) {
                     console.log(`Fallback city found: ${nearest.t}`);
                     const fallbackObj = { id: nearest.i, title: nearest.t, lat: nearest.la, lng: nearest.lo };
-                    await loadScheduleForYear(year, true, fallbackObj);
+                    await loadScheduleForYear(year, true, fallbackObj, ignoreSet);
                     return;
                 }
             } else {
@@ -263,7 +266,7 @@ function getDistance(lat1, lon1, lat2, lon2) {
     return R * c; // Distance in km
 }
 
-function getNearestCity(latStr, lngStr) {
+function getNearestCity(latStr, lngStr, ignoreSet = new Set()) {
     if (!window.MUFTYAT_CITIES) return null;
     const originLat = parseFloat(latStr);
     const originLng = parseFloat(lngStr);
@@ -274,6 +277,9 @@ function getNearestCity(latStr, lngStr) {
     for (const city of window.MUFTYAT_CITIES) {
         // Skip exact same city strings to avoid infinite loop
         if (city.la === latStr && city.lo === lngStr) continue;
+
+        // Skip cities we've already tried
+        if (ignoreSet.has(city.i)) continue;
 
         const d = getDistance(originLat, originLng, parseFloat(city.la), parseFloat(city.lo));
         // Find nearest city (hopefully valid in api)
