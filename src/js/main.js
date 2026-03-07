@@ -178,22 +178,29 @@ function formatDate(date) {
 }
 
 function animateDateChange(direction, updateCallback) {
-    const container = document.querySelector('#view-daily > div.grid');
-    if (!container) {
+    const gridContainer = document.querySelector('#view-daily > div.grid');
+    const headerPanel = document.querySelector('#date-display').closest('.rounded-2xl');
+
+    if (!gridContainer || !headerPanel) {
         updateCallback();
         return;
     }
 
-    container.classList.add('date-flip-container', 'date-flip-out');
+    gridContainer.classList.add('date-flip-container', 'date-flip-out');
+    headerPanel.classList.add('date-flip-container', 'date-flip-out');
 
     setTimeout(() => {
         updateCallback();
 
-        container.classList.remove('date-flip-out');
-        container.classList.add('date-flip-in');
+        gridContainer.classList.remove('date-flip-out');
+        gridContainer.classList.add('date-flip-in');
+
+        headerPanel.classList.remove('date-flip-out');
+        headerPanel.classList.add('date-flip-in');
 
         setTimeout(() => {
-            container.classList.remove('date-flip-container', 'date-flip-in');
+            gridContainer.classList.remove('date-flip-container', 'date-flip-in');
+            headerPanel.classList.remove('date-flip-container', 'date-flip-in');
         }, 400);
     }, 400);
 }
