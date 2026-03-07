@@ -22,6 +22,8 @@
 - `src/js/board.js` — Движок бесконечного холста (Zoom, Pan, Sticky Notes 4-х цветов, рисование).
 - `src/js/activity-log.js` — История действий юзера (Audit Trail) с поддержкой Firestore.
 - `src/js/auth.js`, `db.js`, `firebase-init.js` — Авторизация и синхронизация профиля в Google Firebase.
+- `src/js/namaz-tracker.js` — Виджет расписания намазов (таймер, интеграция с Муфтиятом, graceful fallback).
+- `src/js/muftyat-cities.js` — Огромная база координат 6000+ городов для вычисления ближайшего города без API.
 - `src/js/main.js` — Главный контроллер DOM и роутер вкладок.
 - `build-monolith.js` — Наш собственный Node.js-сборщик.
 
