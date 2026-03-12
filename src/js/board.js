@@ -594,10 +594,12 @@ window.initBoard = function (showToast) {
     let _drawSaveTimer = null;
     let _drawSaveInFlight = null;
     let _drawSaveNeedsResave = false;
+    let _drawSaveToastPending = false;
     let _lastSavedDrawingPayload = null;
 
     function requestDrawingSave() {
-        return saveDrawingData(true);
+        _drawSaveToastPending = true;
+        return saveDrawingData();
     }
 
     function flushDrawingSave() {
@@ -605,10 +607,10 @@ window.initBoard = function (showToast) {
             clearTimeout(_drawSaveTimer);
             _drawSaveTimer = null;
         }
-        return saveDrawingData(false);
+        return saveDrawingData();
     }
 
-    async function saveDrawingData(showToastOnSuccess = true) {
+    async function saveDrawingData() {
         const currentPayload = JSON.stringify(state.strokes);
         if (!_drawSaveInFlight && currentPayload === _lastSavedDrawingPayload) return;
 
@@ -622,18 +624,20 @@ window.initBoard = function (showToast) {
                 _drawSaveNeedsResave = false;
                 _drawSaveTimer = null;
                 const payload = JSON.stringify(state.strokes);
-                await Store.saveDrawing(payload);
+                const writePromise = Store.saveDrawing(payload);
                 _lastSavedDrawingPayload = payload;
                 window.ActivityLog?.log('drawing_stroke_saved');
+                if (_drawSaveToastPending) {
+                    const msg = (window.t && window.t('toast_saved')) || 'Saved';
+                    showToastSafe(msg);
+                    _drawSaveToastPending = false;
+                }
+                await writePromise;
             } while (_drawSaveNeedsResave);
         })();
 
         try {
             await _drawSaveInFlight;
-            if (showToastOnSuccess) {
-                const msg = (window.t && window.t('toast_saved')) || 'Saved';
-                showToastSafe(msg);
-            }
         } catch (e) {
             console.error('[Board] Failed to save drawing:', e);
         } finally {
@@ -685,7 +689,13 @@ window.initBoard = function (showToast) {
     }
 
     function showToastSafe(msg) {
-        if (typeof showToast === 'function') showToast(msg);
+        if (typeof window.showToast === 'function') {
+            window.showToast(msg);
+            return;
+        }
+        if (typeof showToast === 'function') {
+            showToast(msg);
+        }
     }
 }
 

@@ -70,38 +70,32 @@ async function idbGet(key) {
 }
 
 async function idbSet(key, value) {
+    fallbackSet(key, value);
     try {
         const db = await openDb();
         return new Promise((resolve, reject) => {
             const tx = db.transaction(STORE_NAME, 'readwrite');
             const req = tx.objectStore(STORE_NAME).put(value, key);
-            req.onsuccess = () => {
-                fallbackSet(key, value);
-                resolve();
-            };
+            req.onsuccess = () => resolve();
             req.onerror = () => reject(req.error);
         });
     } catch (e) {
         console.warn('[Store] IndexedDB write failed:', e);
-        fallbackSet(key, value);
     }
 }
 
 async function idbDelete(key) {
+    fallbackDelete(key);
     try {
         const db = await openDb();
         return new Promise((resolve, reject) => {
             const tx = db.transaction(STORE_NAME, 'readwrite');
             const req = tx.objectStore(STORE_NAME).delete(key);
-            req.onsuccess = () => {
-                fallbackDelete(key);
-                resolve();
-            };
+            req.onsuccess = () => resolve();
             req.onerror = () => reject(req.error);
         });
     } catch (e) {
         console.warn('[Store] IndexedDB delete failed:', e);
-        fallbackDelete(key);
     }
 }
 

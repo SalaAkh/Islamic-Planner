@@ -143,7 +143,7 @@ function initTabs() {
             }
 
             if (viewName === 'board' && !window._boardInitialized) {
-                initBoard(showToast);
+                initBoard(window.showToast);
                 window._boardInitialized = true;
             }
 
