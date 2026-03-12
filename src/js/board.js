@@ -17,6 +17,8 @@ window.initBoard = function (showToast) {
     const colorPicker = document.getElementById('draw-color');
     const brushSize = document.getElementById('brush-size');
     const btnClearDrawing = document.getElementById('clear-drawing');
+    const btnUndo = document.getElementById('tool-undo');
+    const btnRedo = document.getElementById('tool-redo');
 
     // =====================
     // STATE
@@ -37,6 +39,7 @@ window.initBoard = function (showToast) {
         drawColor: '#1e293b',
         drawSize: 3,
         strokes: [],        // completed strokes: { tool, color, size, points:[{x,y}] }
+        undoneStrokes: [],  // undone strokes for redo
         currentStroke: null,// stroke being drawn right now
         // Touch
         lastTouchDist: null,
@@ -91,6 +94,7 @@ window.initBoard = function (showToast) {
     }
     function doClearBoard() {
         state.strokes = [];
+        state.undoneStrokes = [];
         state.currentStroke = null;
         renderStrokes();
         Store.clearDrawing();
@@ -230,10 +234,30 @@ window.initBoard = function (showToast) {
         if (!state.currentStroke) return;
         if (state.currentStroke.points.length > 1) {
             state.strokes.push(state.currentStroke);
+            state.undoneStrokes = []; // Clear redo history on new action
         }
         state.currentStroke = null;
         requestDrawingSave();
     }
+
+    function undoStroke() {
+        if (state.strokes.length > 0) {
+            state.undoneStrokes.push(state.strokes.pop());
+            renderStrokes();
+            requestDrawingSave();
+        }
+    }
+
+    function redoStroke() {
+        if (state.undoneStrokes.length > 0) {
+            state.strokes.push(state.undoneStrokes.pop());
+            renderStrokes();
+            requestDrawingSave();
+        }
+    }
+
+    if (btnUndo) btnUndo.addEventListener('click', undoStroke);
+    if (btnRedo) btnRedo.addEventListener('click', redoStroke);
 
     // =====================
     // MOUSE EVENTS
@@ -307,10 +331,18 @@ window.initBoard = function (showToast) {
             state.prevTool = state.activeTool;
             setActiveTool('pan');
         }
-        // Shortcuts: P = pencil, E = eraser, V = pan
-        if (e.code === 'KeyP' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') setActiveTool('pencil');
-        if (e.code === 'KeyE' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') setActiveTool('eraser');
-        if (e.code === 'KeyV' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') setActiveTool('pan');
+        // Shortcuts: P = pencil, E = eraser, V = pan, Ctrl+Z = undo, Ctrl+Y = redo
+        if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') {
+            e.preventDefault();
+            undoStroke();
+        } else if ((e.ctrlKey || e.metaKey) && e.code === 'KeyY') {
+            e.preventDefault();
+            redoStroke();
+        } else {
+            if (e.code === 'KeyP' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') setActiveTool('pencil');
+            if (e.code === 'KeyE' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') setActiveTool('eraser');
+            if (e.code === 'KeyV' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') setActiveTool('pan');
+        }
     });
     document.addEventListener('keyup', (e) => {
         if (e.code === 'Space') {
