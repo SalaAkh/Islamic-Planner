@@ -25,7 +25,7 @@ function inlineCSS(html) {
 
 // ─── Helper: inline JS scripts into any HTML ───
 const scriptsToInline = [
-    'crypto-storage.js', 'i18n.js', 'store.js', 'ai.js',
+    'i18n.js', 'store.js',
     'board.js', 'namaz-tracker.js', 'main.js', 'activity-log.js', 'auth.js',
     'db.js', 'firebase-init.js'
 ];

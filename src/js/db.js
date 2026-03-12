@@ -117,11 +117,6 @@ window.DbSync = {
 
                 if (key === 'goals') {
                     localStorage.setItem('barakah_goals', JSON.stringify(data));
-                } else if (key === 'settings_ai') {
-                    if (data.apiKey && typeof window.encryptApiKey === 'function') {
-                        window.encryptApiKey(data.apiKey);
-                        if (window.aiAssistant) window.aiAssistant.apiKey = data.apiKey;
-                    }
                 } else if (key === 'board_state') {
                     localStorage.setItem('barakah_board_state', JSON.stringify(data));
                 } else if (key === 'board_drawing') {
@@ -154,11 +149,6 @@ window.DbSync = {
         try {
             const goals = localStorage.getItem('barakah_goals');
             if (goals) await this.syncToCloud('goals', JSON.parse(goals));
-
-            const aiKey = typeof window.decryptApiKey === 'function'
-                ? await window.decryptApiKey()
-                : localStorage.getItem('barakah_ai_key');
-            if (aiKey) await this.syncToCloud('settings_ai', { apiKey: aiKey });
 
             const board = localStorage.getItem('barakah_board_state');
             if (board) await this.syncToCloud('board_state', JSON.parse(board));

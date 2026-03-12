@@ -236,14 +236,12 @@
             }
         };
     </script>
-    <script src="./src/js/crypto-storage.js?v=2"></script>
     <script type="module" src="./src/js/firebase-init.js?v=7"></script>
     <script type="module" src="./src/js/auth.js?v=8"></script>
     <script type="module" src="./src/js/db.js?v=7"></script>
     <script type="module" src="./src/js/activity-log.js?v=3"></script>
     <script src="./src/js/i18n.js?v=4"></script>
     <script src="./src/js/store.js?v=5"></script>
-    <script src="./src/js/ai.js?v=8"></script>
     <script src="./src/js/board.js?v=6"></script>
     <script src="./src/js/muftyat-cities.js"
         onerror="console.warn('muftyat-cities.js not found, falling back to online search')"></script>
@@ -980,11 +978,6 @@
             aria-label="Поддержать проект" data-i18n="tooltip_donate" data-i18n-target="aria-label">
             <i class="fas fa-heart"></i>
         </button>
-        <!-- AI Floating Action Button -->
-        <button id="ai-fab-btn" dir="auto"
-            class="px-5 py-3 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-white shadow-[0_0_20px_rgba(124,58,237,0.5)] hover:scale-105 hover:shadow-[0_0_30px_rgba(124,58,237,0.8)] transition-all flex items-center justify-center gap-2 font-semibold text-sm">
-            <i class="fas fa-magic text-xl animate-pulse"></i> <span data-i18n="btn_ai">ИИ Ассистент</span>
-        </button>
     </div>
 
     <!-- Auth Modal -->
@@ -1288,90 +1281,6 @@
                         <div class="text-center text-sm font-semibold hidden mt-2" id="formMessage"></div>
                     </form>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- AI Modal -->
-    <div id="ai-modal"
-        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] hidden items-center justify-center p-4">
-        <div
-            class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 opacity-0 transition-all duration-300">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white relative">
-                <button id="close-ai-modal"
-                    class="absolute top-4 right-4 text-white/70 hover:text-white transition-colors">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-full bg-white/20 flex justify-center items-center">
-                        <i class="fas fa-robot text-2xl text-white"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-xl font-bold" data-i18n="ai_modal_title">ИИ Планировщик</h2>
-                        <p class="text-sm text-indigo-100 opacity-90" data-i18n="ai_modal_subtitle">На базе Google
-                            Gemini 3</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Body -->
-            <div class="p-6 space-y-5">
-                <!-- API Setup (hidden if configured) -->
-                <div id="ai-setup-area"
-                    class="bg-indigo-50 dark:bg-slate-800 rounded-xl p-4 border border-indigo-100 dark:border-slate-700 hidden">
-                    <p class="text-xs text-gray-500 mb-2" data-i18n="ai_setup_help">Для работы оффлайн-клиента
-                        требуется
-                        ваш API ключ Gemini.</p>
-                    <form id="ai-api-form" class="flex gap-2">
-                        <label for="ai-api-key" class="sr-only">Gemini API Key</label>
-                        <input type="password" id="ai-api-key" name="ai-api-key"
-                            placeholder="Gemini API Key (AIzaSy...)" autocomplete="off" data-i18n-target="placeholder"
-                            data-i18n="ai_setup_ph"
-                            class="flex-grow bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
-                        <button id="save-ai-key" type="submit"
-                            class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition-colors"
-                            data-i18n="btn_save">Сохранить</button>
-                    </form>
-                    <p class="text-[10px] text-gray-400 mt-2 text-right"><a
-                            href="https://aistudio.google.com/app/apikey" target="_blank"
-                            class="underline hover:text-indigo-600" data-i18n="ai_free_key">Получить бесплатный
-                            ключ</a>
-                    </p>
-                </div>
-
-                <!-- Prompt Area -->
-                <div id="ai-chat-area">
-                    <label for="ai-prompt" class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2"
-                        data-i18n="ai_prompt_label">Как
-                        распланировать день?</label>
-                    <div class="relative">
-                        <textarea id="ai-prompt" name="ai-prompt" rows="3" data-i18n="placeholder_ai" autocomplete="off"
-                            placeholder="Например: Утром тренировка, днем кодинг стартапа, Аср - чтение 10 страниц Корана..."
-                            class="w-full bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl p-4 text-gray-700 dark:text-gray-300 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"></textarea>
-
-                        <!-- AI Loading Overlay -->
-                        <div id="ai-loading"
-                            class="absolute inset-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-xl hidden flex-col items-center justify-center z-10">
-                            <i class="fas fa-circle-notch fa-spin text-3xl text-purple-600 mb-2"></i>
-                            <span class="text-sm font-semibold text-purple-800 animate-pulse"
-                                data-i18n="ai_loading_text">Нейросеть думает...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div
-                class="bg-gray-50 dark:bg-slate-800/50 p-4 px-6 flex justify-between items-center border-t border-gray-100 dark:border-slate-700">
-                <button id="ai-settings-btn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm"
-                    title="Настройки API">
-                    <i class="fas fa-cog"></i>
-                </button>
-                <button id="ai-submit-btn"
-                    class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-2 rounded-full font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <i class="fas fa-magic"></i> <span data-i18n="btn_generate">Создать план</span>
-                </button>
             </div>
         </div>
     </div>
