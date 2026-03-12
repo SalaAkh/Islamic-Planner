@@ -10,6 +10,35 @@
 const DB_NAME = 'barakah_db';
 const DB_VERSION = 1;
 const STORE_NAME = 'drawings';
+const IDB_FALLBACK_PREFIX = 'barakah_idb_fallback_';
+
+function fallbackKey(key) {
+    return `${IDB_FALLBACK_PREFIX}${key}`;
+}
+
+function fallbackGet(key) {
+    try {
+        return localStorage.getItem(fallbackKey(key)) ?? undefined;
+    } catch (_) {
+        return undefined;
+    }
+}
+
+function fallbackSet(key, value) {
+    try {
+        localStorage.setItem(fallbackKey(key), value);
+    } catch (_) {
+        // Ignore quota issues; IndexedDB remains the primary storage.
+    }
+}
+
+function fallbackDelete(key) {
+    try {
+        localStorage.removeItem(fallbackKey(key));
+    } catch (_) {
+        // no-op
+    }
+}
 
 function openDb() {
     return new Promise((resolve, reject) => {
@@ -31,12 +60,12 @@ async function idbGet(key) {
         return new Promise((resolve, reject) => {
             const tx = db.transaction(STORE_NAME, 'readonly');
             const req = tx.objectStore(STORE_NAME).get(key);
-            req.onsuccess = () => resolve(req.result);
+            req.onsuccess = () => resolve(req.result ?? fallbackGet(key));
             req.onerror = () => reject(req.error);
         });
     } catch (e) {
         console.warn('[Store] IndexedDB read failed:', e);
-        return undefined;
+        return fallbackGet(key);
     }
 }
 
@@ -46,11 +75,15 @@ async function idbSet(key, value) {
         return new Promise((resolve, reject) => {
             const tx = db.transaction(STORE_NAME, 'readwrite');
             const req = tx.objectStore(STORE_NAME).put(value, key);
-            req.onsuccess = () => resolve();
+            req.onsuccess = () => {
+                fallbackSet(key, value);
+                resolve();
+            };
             req.onerror = () => reject(req.error);
         });
     } catch (e) {
         console.warn('[Store] IndexedDB write failed:', e);
+        fallbackSet(key, value);
     }
 }
 
@@ -60,11 +93,15 @@ async function idbDelete(key) {
         return new Promise((resolve, reject) => {
             const tx = db.transaction(STORE_NAME, 'readwrite');
             const req = tx.objectStore(STORE_NAME).delete(key);
-            req.onsuccess = () => resolve();
+            req.onsuccess = () => {
+                fallbackDelete(key);
+                resolve();
+            };
             req.onerror = () => reject(req.error);
         });
     } catch (e) {
         console.warn('[Store] IndexedDB delete failed:', e);
+        fallbackDelete(key);
     }
 }
 

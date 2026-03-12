@@ -56,7 +56,7 @@ window.initBoard = function (showToast) {
     // Re-load on cloud sync
     document.addEventListener('cloudDataSynced', () => {
         console.log('[Board] Cloud data updated, refreshing...');
-        loadBoardData();
+        flushDrawingSave().finally(() => loadBoardData());
     });
 
     // =====================
@@ -323,6 +323,12 @@ window.initBoard = function (showToast) {
         }
     });
 
+    // Avoid losing the latest stroke when user closes/reloads the page quickly.
+    window.addEventListener('pagehide', () => { flushDrawingSave(); });
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') flushDrawingSave();
+    });
+
     // Keyboard
     document.addEventListener('keydown', (e) => {
         if (e.code === 'Space' && document.activeElement.tagName !== 'TEXTAREA' && document.activeElement.tagName !== 'INPUT') {
@@ -586,18 +592,35 @@ window.initBoard = function (showToast) {
     }
 
     let _drawSaveTimer = null;
-    function requestDrawingSave() {
+    let _drawSaveInFlight = null;
+    function requestDrawingSave(delayMs = 600) {
         if (_drawSaveTimer) clearTimeout(_drawSaveTimer);
-        _drawSaveTimer = setTimeout(saveDrawingData, 2000);
+        _drawSaveTimer = setTimeout(saveDrawingData, delayMs);
+    }
+
+    function flushDrawingSave() {
+        if (_drawSaveTimer) {
+            clearTimeout(_drawSaveTimer);
+            _drawSaveTimer = null;
+        }
+        return saveDrawingData();
     }
 
     async function saveDrawingData() {
-        try {
-            // Serialize strokes array as JSON — no canvas pixel manipulation needed
+        if (_drawSaveInFlight) return _drawSaveInFlight;
+
+        _drawSaveInFlight = (async () => {
+            _drawSaveTimer = null;
             await Store.saveDrawing(JSON.stringify(state.strokes));
             window.ActivityLog?.log('drawing_stroke_saved');
+        })();
+
+        try {
+            await _drawSaveInFlight;
         } catch (e) {
             console.error('[Board] Failed to save drawing:', e);
+        } finally {
+            _drawSaveInFlight = null;
         }
     }
 
