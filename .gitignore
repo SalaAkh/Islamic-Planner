@@ -28,3 +28,6 @@ Thumbs.db
 guides/
 
 google4a672bfea76db3c6.html
+
+# Firebase Admin SDK private key
+islamic-planer-firebase-adminsdk-fbsvc-*.json
