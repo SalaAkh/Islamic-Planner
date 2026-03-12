@@ -1002,11 +1002,11 @@ html[dir="rtl"] .rtl\:tooltip-right:hover::after,
 .board-toolbar {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     background: white;
     border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 8px 14px;
+    border-radius: 12px;
+    padding: 6px 10px;
     margin-bottom: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     flex-wrap: wrap;
@@ -1015,14 +1015,14 @@ html[dir="rtl"] .rtl\:tooltip-right:hover::after,
 .toolbar-group {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 2px;
 }
 
 .toolbar-divider {
     width: 1px;
-    height: 32px;
+    height: 30px;
     background: #e2e8f0;
-    margin: 0 4px;
+    margin: 0 2px;
     flex-shrink: 0;
 }
 
@@ -1032,16 +1032,16 @@ html[dir="rtl"] .rtl\:tooltip-right:hover::after,
     align-items: center;
     justify-content: center;
     gap: 2px;
-    min-width: 48px;
-    height: 48px;
-    border-radius: 10px;
+    min-width: 44px;
+    height: 44px;
+    border-radius: 8px;
     border: none;
     background: transparent;
     color: #64748b;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
     transition: all 0.15s ease;
-    padding: 4px 8px;
+    padding: 2px 6px;
 }
 
 .tool-btn:hover {
