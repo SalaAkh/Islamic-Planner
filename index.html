@@ -1064,7 +1064,7 @@
             applyLang();
 
             // Update app links
-            document.querySelectorAll('a[href="./app.html"]').forEach(function (a) {
+            document.querySelectorAll('a[href^="./app.html"]').forEach(function (a) {
                 a.href = './app.html?lang=' + lang;
             });
 
