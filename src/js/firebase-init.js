@@ -5,7 +5,7 @@ import { getMessaging, getToken, onMessage, isSupported } from "https://www.gsta
 
 // User's actual Firebase Config
 const firebaseConfig = {
-    apiKey: "AIzaSyAo7qZrXlVMx53rhmoyLgbJccVL7EMtNoU",
+    apiKey: "__FIREBASE_API_KEY__",
     authDomain: "islamic-planer.firebaseapp.com",
     projectId: "islamic-planer",
     storageBucket: "islamic-planer.firebasestorage.app",

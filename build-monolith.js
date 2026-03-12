@@ -91,7 +91,17 @@ if (fs.existsSync(PUBLIC_DIR)) {
     console.log('\nCopying public assets to dist root...');
     const files = fs.readdirSync(PUBLIC_DIR);
     files.forEach(file => {
-        fs.copyFileSync(path.join(PUBLIC_DIR, file), path.join(DIST_DIR, file));
+        const srcPath = path.join(PUBLIC_DIR, file);
+        const destPath = path.join(DIST_DIR, file);
+        if (file === 'firebase-messaging-sw.js') {
+            let content = fs.readFileSync(srcPath, 'utf8');
+            const apiKey = process.env.FIREBASE_API_KEY || '';
+            content = content.replace('__FIREBASE_API_KEY__', apiKey);
+            if (!apiKey) console.warn(`⚠️ WARNING: FIREBASE_API_KEY is not set for ${file}.`);
+            fs.writeFileSync(destPath, content);
+        } else {
+            fs.copyFileSync(srcPath, destPath);
+        }
     });
 }
 
