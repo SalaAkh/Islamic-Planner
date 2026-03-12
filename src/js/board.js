@@ -593,9 +593,11 @@ window.initBoard = function (showToast) {
 
     let _drawSaveTimer = null;
     let _drawSaveInFlight = null;
-    function requestDrawingSave(delayMs = 600) {
-        if (_drawSaveTimer) clearTimeout(_drawSaveTimer);
-        _drawSaveTimer = setTimeout(saveDrawingData, delayMs);
+    let _drawSaveNeedsResave = false;
+    let _lastSavedDrawingPayload = null;
+
+    function requestDrawingSave() {
+        return saveDrawingData(true);
     }
 
     function flushDrawingSave() {
@@ -603,20 +605,35 @@ window.initBoard = function (showToast) {
             clearTimeout(_drawSaveTimer);
             _drawSaveTimer = null;
         }
-        return saveDrawingData();
+        return saveDrawingData(false);
     }
 
-    async function saveDrawingData() {
-        if (_drawSaveInFlight) return _drawSaveInFlight;
+    async function saveDrawingData(showToastOnSuccess = true) {
+        const currentPayload = JSON.stringify(state.strokes);
+        if (!_drawSaveInFlight && currentPayload === _lastSavedDrawingPayload) return;
+
+        if (_drawSaveInFlight) {
+            _drawSaveNeedsResave = true;
+            return _drawSaveInFlight;
+        }
 
         _drawSaveInFlight = (async () => {
-            _drawSaveTimer = null;
-            await Store.saveDrawing(JSON.stringify(state.strokes));
-            window.ActivityLog?.log('drawing_stroke_saved');
+            do {
+                _drawSaveNeedsResave = false;
+                _drawSaveTimer = null;
+                const payload = JSON.stringify(state.strokes);
+                await Store.saveDrawing(payload);
+                _lastSavedDrawingPayload = payload;
+                window.ActivityLog?.log('drawing_stroke_saved');
+            } while (_drawSaveNeedsResave);
         })();
 
         try {
             await _drawSaveInFlight;
+            if (showToastOnSuccess) {
+                const msg = (window.t && window.t('toast_saved')) || 'Saved';
+                showToastSafe(msg);
+            }
         } catch (e) {
             console.error('[Board] Failed to save drawing:', e);
         } finally {
