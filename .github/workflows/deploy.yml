@@ -20,16 +20,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Tailwind CLI globally
-        run: npm install -g @tailwindcss/cli
-
-      - name: Build CSS
-        run: npx @tailwindcss/cli -i ./src/css/style.css -o ./src/css/tailwind.css --minify
-
-      - name: Build monolith
+      - name: Build project
         env:
           FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-        run: node build-monolith.js
+        run: npm run build
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
