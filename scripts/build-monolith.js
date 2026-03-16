@@ -46,7 +46,7 @@ function inlineScripts(html) {
                 let finalJs = js;
                 if (script === 'firebase-init.js') {
                     const apiKey = process.env.FIREBASE_API_KEY || '';
-                    finalJs = finalJs.replace('__FIREBASE_API_KEY__', apiKey);
+                    finalJs = finalJs.replace(/__FIREBASE_API_KEY__/g, apiKey);
                     if (!apiKey) console.warn('⚠️ WARNING: FIREBASE_API_KEY is not set.');
                 }
 
@@ -96,7 +96,7 @@ if (fs.existsSync(PUBLIC_DIR)) {
         if (file === 'firebase-messaging-sw.js') {
             let content = fs.readFileSync(srcPath, 'utf8');
             const apiKey = process.env.FIREBASE_API_KEY || '';
-            content = content.replace('__FIREBASE_API_KEY__', apiKey);
+            content = content.replace(/__FIREBASE_API_KEY__/g, apiKey);
             if (!apiKey) console.warn(`⚠️ WARNING: FIREBASE_API_KEY is not set for ${file}.`);
             fs.writeFileSync(destPath, content);
         } else {

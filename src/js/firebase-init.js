@@ -3,9 +3,16 @@ import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/
 import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { getMessaging, getToken, onMessage, isSupported } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging.js";
 
+// Use a real browser-safe API key in source so direct app.html runs don't fail.
+const FALLBACK_FIREBASE_API_KEY = "AIzaSyAo7qZrXlVMx53rhmoyLgbJccVL7EMtNoU";
+const BUILD_FIREBASE_API_KEY = "__FIREBASE_API_KEY__";
+const resolvedFirebaseApiKey =
+    (window.__FIREBASE_CONFIG__ && window.__FIREBASE_CONFIG__.apiKey) ||
+    (BUILD_FIREBASE_API_KEY === "__FIREBASE_API_KEY__" ? FALLBACK_FIREBASE_API_KEY : BUILD_FIREBASE_API_KEY);
+
 // User's actual Firebase Config
 const firebaseConfig = {
-    apiKey: "__FIREBASE_API_KEY__",
+    apiKey: resolvedFirebaseApiKey,
     authDomain: "islamic-planer.firebaseapp.com",
     projectId: "islamic-planer",
     storageBucket: "islamic-planer.firebasestorage.app",
