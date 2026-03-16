@@ -1,4 +1,4 @@
-const CACHE_NAME = 'barakah-planner-v23';
+const CACHE_NAME = 'barakah-planner-v24';
 const ASSETS_TO_CACHE = [
     './manifest.json',
     './favicon.ico',
