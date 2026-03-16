@@ -103,7 +103,25 @@ const translations = {
         "auth_err_in_use": "Email уже зарегистрирован", "auth_err_weak": "Пароль слишком простой (минимум 6 символов)",
         "auth_err_not_allowed": "Глобальная регистрация по Email отключена (Firebase)", "auth_register_btn": "Зарегистрироваться",
         "auth_login_btn": "Войти", "auth_loading": "Загрузка...", "auth_err_google": "Ошибка входа через Google. Попробуйте снова.",
-        "sync_loading": "Синхронизация...", "auth_logout": "Выйти"
+        "sync_loading": "Синхронизация...", "auth_logout": "Выйти",
+        "namaz_widget_title": "Нажмите, чтобы выбрать город",
+        "namaz_widget_default_title": "Трекер намазов",
+        "namaz_loading": "Загрузка...",
+        "namaz_current_prefix": "Сейчас:",
+        "namaz_duha_time": "Время духа (до Зухра)",
+        "namaz_until_prefix": "До",
+        "namaz_city_select": "Выбрать город...",
+        "namaz_city_not_selected": "Город не выбран",
+        "namaz_schedule_loading": "Получение расписания",
+        "namaz_error": "Ошибка",
+        "namaz_server_unavailable": "Сервер недоступен",
+        "namaz_prayer_sunrise": "Восход",
+        "city_select_title": "Выбор города (Казахстан)",
+        "city_search_ph": "Введите название города на кириллице...",
+        "city_search_empty": "Начните вводить название...",
+        "city_search_loading": "Поиск...",
+        "city_search_no_results": "Ничего не найдено",
+        "city_search_error": "Ошибка сети"
     },
     kk: {
         "seo_title": "Barakah Planner — Исламдық Күнделік және Намаз Жоспарлаушы",
@@ -208,7 +226,25 @@ const translations = {
         "auth_err_in_use": "Email тіркелген", "auth_err_weak": "Құпия сөз тым оңай (кемінде 6 таңба)",
         "auth_err_not_allowed": "Email арқылы тіркелу өшірілген (Firebase)", "auth_register_btn": "Тіркелу",
         "auth_login_btn": "Кіру", "auth_loading": "Жүктелуде...", "auth_err_google": "Google арқылы кіру қатесі. Қайта көріңіз.",
-        "sync_loading": "Синхрондау...", "auth_logout": "Шығу"
+        "sync_loading": "Синхрондау...", "auth_logout": "Шығу",
+        "namaz_widget_title": "Қаланы таңдау үшін басыңыз",
+        "namaz_widget_default_title": "Намаз трекері",
+        "namaz_loading": "Жүктелуде...",
+        "namaz_current_prefix": "Қазір:",
+        "namaz_duha_time": "Дұха уақыты (Бесінге дейін)",
+        "namaz_until_prefix": "Дейін",
+        "namaz_city_select": "Қаланы таңдау...",
+        "namaz_city_not_selected": "Қала таңдалмаған",
+        "namaz_schedule_loading": "Кесте жүктелуде",
+        "namaz_error": "Қате",
+        "namaz_server_unavailable": "Сервер қолжетімсіз",
+        "namaz_prayer_sunrise": "Күн шығуы",
+        "city_select_title": "Қаланы таңдау (Қазақстан)",
+        "city_search_ph": "Қала атауын кириллицамен енгізіңіз...",
+        "city_search_empty": "Атауды тере бастаңыз...",
+        "city_search_loading": "Іздеу...",
+        "city_search_no_results": "Ештеңе табылмады",
+        "city_search_error": "Желі қатесі"
     },
     ar: {
         "seo_title": "Barakah Planner — يوميات إسلامية ومخطط الصلاة",
@@ -313,7 +349,25 @@ const translations = {
         "auth_err_in_use": "البريد الإلكتروني مسجل بالفعل", "auth_err_weak": "كلمة المرور ضعيفة جدًا (6 أحرف على الأقل)",
         "auth_err_not_allowed": "تم إيقاف التسجيل بالبريد الإلكتروني (Firebase)", "auth_register_btn": "تسجيل",
         "auth_login_btn": "دخول", "auth_loading": "جاري التحميل...", "auth_err_google": "حدث خطأ أثناء تسجيل الدخول عبر Google. حاول مرة أخرى.",
-        "sync_loading": "المزامنة...", "auth_logout": "تسجيل خروج"
+        "sync_loading": "المزامنة...", "auth_logout": "تسجيل خروج",
+        "namaz_widget_title": "انقر لاختيار المدينة",
+        "namaz_widget_default_title": "متتبع الصلاة",
+        "namaz_loading": "جارٍ التحميل...",
+        "namaz_current_prefix": "الآن:",
+        "namaz_duha_time": "وقت الضحى (حتى الظهر)",
+        "namaz_until_prefix": "حتى",
+        "namaz_city_select": "اختر مدينة...",
+        "namaz_city_not_selected": "لم يتم اختيار مدينة",
+        "namaz_schedule_loading": "جارٍ تحميل المواقيت",
+        "namaz_error": "خطأ",
+        "namaz_server_unavailable": "الخادم غير متاح",
+        "namaz_prayer_sunrise": "الشروق",
+        "city_select_title": "اختيار المدينة (كازاخستان)",
+        "city_search_ph": "أدخل اسم المدينة بالأبجدية السيريلية...",
+        "city_search_empty": "ابدأ بكتابة اسم المدينة...",
+        "city_search_loading": "جارٍ البحث...",
+        "city_search_no_results": "لم يتم العثور على نتائج",
+        "city_search_error": "خطأ في الشبكة"
     },
     en: {
         "seo_title": "Barakah Planner — Islamic Daily Planner & Prayer Tracker",
@@ -418,7 +472,25 @@ const translations = {
         "auth_err_in_use": "Email is already registered", "auth_err_weak": "Password is too weak (min 6 chars)",
         "auth_err_not_allowed": "Email registration is disabled globally (Firebase)", "auth_register_btn": "Register",
         "auth_login_btn": "Login", "auth_loading": "Loading...", "auth_err_google": "Google Sign-In failed. Try again.",
-        "sync_loading": "Syncing...", "auth_logout": "Logout"
+        "sync_loading": "Syncing...", "auth_logout": "Logout",
+        "namaz_widget_title": "Click to select a city",
+        "namaz_widget_default_title": "Prayer tracker",
+        "namaz_loading": "Loading...",
+        "namaz_current_prefix": "Now:",
+        "namaz_duha_time": "Duha time (until Zuhr)",
+        "namaz_until_prefix": "Until",
+        "namaz_city_select": "Select a city...",
+        "namaz_city_not_selected": "No city selected",
+        "namaz_schedule_loading": "Loading schedule",
+        "namaz_error": "Error",
+        "namaz_server_unavailable": "Server unavailable",
+        "namaz_prayer_sunrise": "Sunrise",
+        "city_select_title": "City Selection (Kazakhstan)",
+        "city_search_ph": "Enter city name in Cyrillic...",
+        "city_search_empty": "Start typing a city name...",
+        "city_search_loading": "Searching...",
+        "city_search_no_results": "Nothing found",
+        "city_search_error": "Network error"
     }
 };
 
@@ -554,6 +626,8 @@ function initI18n() {
 }
 
 window.initI18n = initI18n;
+window.applyTranslations = applyTranslations;
+window.updateTranslations = () => applyTranslations(currentLang);
 window.translations = translations;
 window.getCurrentLang = () => currentLang;
 window.t = (key) => window.translations[currentLang]?.[key] || window.translations['ru']?.[key] || key;

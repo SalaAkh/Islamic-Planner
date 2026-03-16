@@ -10,6 +10,15 @@ const PRAYER_NAMES = {
     'isha': 'Иша'
 };
 
+const PRAYER_I18N_KEYS = {
+    'fajr': 'fajr',
+    'sunrise': 'namaz_prayer_sunrise',
+    'dhuhr': 'zuhr',
+    'asr': 'asr',
+    'maghrib': 'maghrib',
+    'isha': 'isha'
+};
+
 const PRAYER_CHECKBOХES = {
     'fajr': 'chk-fajr',
     'dhuhr': 'chk-zuhr',
@@ -25,31 +34,169 @@ let currentSchedule = null;
 let timerInterval = null;
 let normalizedCitiesCache = null;
 let normalizedCitiesSource = null;
+let namazHeaderStateKey = 'namaz_widget_default_title';
+let namazStatusStateKey = 'namaz_loading';
+let citySearchStateKey = 'city_search_empty';
+let citySearchStateTone = 'neutral';
+
+const FIXED_ABAY_CITY_TITLE = '\u0410\u0431\u0430\u0439 \u049b\u0430\u043b\u0430\u0441\u044b';
+const FIXED_ABAY_SHORT_TITLE = '\u0410\u0431\u0430\u0439';
+const FIXED_KARAGANDA_REGION = '\u049a\u0430\u0440\u0430\u0493\u0430\u043d\u0434\u044b \u043e\u0431\u043b\u044b\u0441\u044b';
+const FIXED_KARAGANDA_CITY_TITLE = '\u049a\u0430\u0440\u0430\u0493\u0430\u043d\u0434\u044b \u049b\u0430\u043b\u0430\u0441\u044b';
+const BROKEN_KARAGANDA_REGION = '\u049a\u0430\u0440\u0430\u0493\u0430\u043d\u0434\u044b \u043e\u0431\u043b\u044b\ufffd\ufffd\u044b';
+const ABAY_CITY_COORDS = '49.631899,72.859245';
+const KARAGANDA_SCHEDULE_FALLBACK = {
+    id: '39',
+    title: FIXED_KARAGANDA_CITY_TITLE,
+    lat: '49.806406',
+    lng: '73.085485'
+};
 
 const CITY_TEXT_FIXES = {
-    'Қарағанды облы��ы': 'Қарағанды облысы'
+    [BROKEN_KARAGANDA_REGION]: FIXED_KARAGANDA_REGION
 };
 
 const SCHEDULE_CITY_OVERRIDES = {
-    '164': { id: '39', title: 'Қарағанды қаласы', lat: '49.806406', lng: '73.085485' },
-    '49.631899,72.859245': { id: '39', title: 'Қарағанды қаласы', lat: '49.806406', lng: '73.085485' }
+    '164': KARAGANDA_SCHEDULE_FALLBACK,
+    [ABAY_CITY_COORDS]: KARAGANDA_SCHEDULE_FALLBACK
 };
 
-const FIXED_ABAY_CITY_TITLE = '\u0410\u0431\u0430\u0439 \u049b\u0430\u043b\u0430\u0441\u044b';
-const FIXED_KARAGANDA_REGION = '\u049a\u0430\u0440\u0430\u0493\u0430\u043d\u0434\u044b \u043e\u0431\u043b\u044b\u0441\u044b';
-const FIXED_KARAGANDA_CITY_TITLE = '\u049a\u0430\u0440\u0430\u0493\u0430\u043d\u0434\u044b \u049b\u0430\u043b\u0430\u0441\u044b';
-const SAFE_CITY_TEXT_FIXES = {
-    '\u049a\u0430\u0440\u0430\u0493\u0430\u043d\u0434\u044b \u043e\u0431\u043b\u044b\ufffd\ufffd\u044b': FIXED_KARAGANDA_REGION
-};
-const SAFE_SCHEDULE_CITY_OVERRIDES = {
-    '164': { id: '39', title: FIXED_KARAGANDA_CITY_TITLE, lat: '49.806406', lng: '73.085485' },
-    '49.631899,72.859245': { id: '39', title: FIXED_KARAGANDA_CITY_TITLE, lat: '49.806406', lng: '73.085485' }
-};
+function tNamaz(key, fallback = '') {
+    if (typeof window.t === 'function') {
+        const translated = window.t(key);
+        if (translated && translated !== key) return translated;
+    }
+    return fallback || key;
+}
+
+function getPrayerDisplayName(prayerKey) {
+    return tNamaz(PRAYER_I18N_KEYS[prayerKey], PRAYER_NAMES[prayerKey] || prayerKey);
+}
+
+function setNamazHeaderText(text) {
+    const titleEl = document.getElementById('namaz-current-time');
+    if (titleEl) titleEl.textContent = text;
+}
+
+function setNamazHeaderByKey(key, fallback) {
+    namazHeaderStateKey = key;
+    setNamazHeaderText(tNamaz(key, fallback));
+}
+
+function setNamazCountdownHtml(html) {
+    namazStatusStateKey = null;
+    const countdownEl = document.getElementById('namaz-countdown');
+    if (countdownEl) countdownEl.innerHTML = html;
+}
+
+function setNamazCountdownByKey(key, fallback) {
+    namazStatusStateKey = key;
+    const countdownEl = document.getElementById('namaz-countdown');
+    if (!countdownEl) return;
+    countdownEl.innerHTML = `<span>${tNamaz(key, fallback)}</span>`;
+}
+
+function renderCityEmptyState() {
+    citySearchStateKey = 'city_search_empty';
+    citySearchStateTone = 'neutral';
+
+    const container = document.getElementById('city-search-results');
+    if (!container) return;
+
+    container.innerHTML = `<div class="text-center text-sm text-gray-400 py-4" id="city-search-empty" data-i18n="city_search_empty">${tNamaz('city_search_empty', 'Начните вводить название...')}</div>`;
+}
+
+function renderCityStatusMessage(key, fallback, tone = 'neutral') {
+    citySearchStateKey = key;
+    citySearchStateTone = tone;
+
+    const container = document.getElementById('city-search-results');
+    if (!container) return;
+
+    let toneClasses = 'text-gray-400';
+    let prefix = '';
+    if (tone === 'loading') {
+        toneClasses = 'text-emerald-500';
+        prefix = '<i class="fas fa-spinner fa-spin mr-2"></i>';
+    } else if (tone === 'error') {
+        toneClasses = 'text-red-400';
+    }
+
+    container.innerHTML = `<div class="text-center text-sm ${toneClasses} py-4">${prefix}${tNamaz(key, fallback)}</div>`;
+}
+
+function clearCitySearchState() {
+    citySearchStateKey = null;
+    citySearchStateTone = null;
+}
+
+function refreshCityResultsForCurrentQuery() {
+    const modal = document.getElementById('city-selection-modal');
+    const searchInput = document.getElementById('city-search-input');
+    if (!modal || modal.classList.contains('hidden') || !searchInput) return;
+
+    const q = searchInput.value.trim().toLowerCase();
+    const cities = getAvailableCities();
+
+    if (q.length < 2) {
+        if (cities.length > 0) renderCityResults(cities.slice(0, 50));
+        else renderCityEmptyState();
+        return;
+    }
+
+    if (cities.length > 0) {
+        const results = cities.filter(c => (c.t || '').toLowerCase().includes(q)).slice(0, 50);
+        renderCityResults(results);
+    }
+}
+
+function handleNamazLanguageChange() {
+    if (!currentCityPref) {
+        updateHeaderCityName(tNamaz('namaz_city_select', 'Выбрать город...'));
+    }
+
+    if (namazHeaderStateKey) {
+        setNamazHeaderByKey(namazHeaderStateKey);
+    }
+
+    if (namazStatusStateKey) {
+        setNamazCountdownByKey(namazStatusStateKey);
+    }
+
+    if (!namazHeaderStateKey || !namazStatusStateKey) {
+        if (currentSchedule) updateNamazUI();
+        startTimer();
+    }
+
+    if (citySearchStateKey) {
+        if (citySearchStateKey === 'city_search_empty') {
+            renderCityEmptyState();
+        } else {
+            renderCityStatusMessage(citySearchStateKey, '', citySearchStateTone || 'neutral');
+        }
+    } else {
+        refreshCityResultsForCurrentQuery();
+    }
+}
 
 function normalizeCityText(value) {
     if (typeof value !== 'string') return value || '';
     const trimmed = value.trim();
-    return SAFE_CITY_TEXT_FIXES[trimmed] || CITY_TEXT_FIXES[trimmed] || trimmed.replace(/\uFFFD+/g, 'с');
+    return CITY_TEXT_FIXES[trimmed] || trimmed.replace(/\uFFFD+/g, 'с');
+}
+
+function isKaragandaAbayCity(city) {
+    if (!city) return false;
+
+    const title = normalizeCityText(city.title ?? city.t ?? '');
+    const region = normalizeCityText(city.r);
+    const coordsKey = `${String(city.lat ?? city.la ?? '')},${String(city.lng ?? city.lo ?? '')}`;
+    const cityId = String(city.id ?? city.i ?? '');
+
+    return cityId === '164'
+        || coordsKey === ABAY_CITY_COORDS
+        || title === FIXED_ABAY_CITY_TITLE
+        || (title === FIXED_ABAY_SHORT_TITLE && region === FIXED_KARAGANDA_REGION);
 }
 
 function normalizeCityEntry(city) {
@@ -72,7 +219,9 @@ function normalizeCityEntry(city) {
         r: normalizeCityText(city.r)
     };
 
-    if (normalized.id === '164') {
+    if (isKaragandaAbayCity(normalized)) {
+        normalized.id = '164';
+        normalized.i = '164';
         normalized.title = FIXED_ABAY_CITY_TITLE;
         normalized.t = FIXED_ABAY_CITY_TITLE;
         normalized.r = FIXED_KARAGANDA_REGION;
@@ -97,8 +246,11 @@ function getAvailableCities() {
 
 function resolveScheduleCity(targetCity) {
     const normalized = normalizeCityEntry(targetCity);
-    const byId = SAFE_SCHEDULE_CITY_OVERRIDES[normalized.id] || SCHEDULE_CITY_OVERRIDES[normalized.id];
-    const byCoords = SAFE_SCHEDULE_CITY_OVERRIDES[`${normalized.lat},${normalized.lng}`] || SCHEDULE_CITY_OVERRIDES[`${normalized.lat},${normalized.lng}`];
+    const byId = SCHEDULE_CITY_OVERRIDES[normalized.id];
+    const byCoords = SCHEDULE_CITY_OVERRIDES[`${normalized.lat},${normalized.lng}`];
+    if (isKaragandaAbayCity(normalized)) {
+        return { ...KARAGANDA_SCHEDULE_FALLBACK };
+    }
     return byId || byCoords || normalized;
 }
 
@@ -112,10 +264,9 @@ async function initNamazTracker() {
         updateHeaderCityName(currentCityPref.title);
         await loadScheduleForYear(new Date().getFullYear());
     } else {
-        updateHeaderCityName("Выбрать город...");
-        document.getElementById('namaz-current-time').textContent = "---";
-        const subtitle = document.querySelector('#namaz-countdown span');
-        if (subtitle) subtitle.textContent = "Город не выбран";
+        updateHeaderCityName(tNamaz('namaz_city_select', 'Выбрать город...'));
+        setNamazHeaderByKey('namaz_widget_default_title', 'Трекер намазов');
+        setNamazCountdownByKey('namaz_city_not_selected', 'Город не выбран');
     }
 
     startTimer();
@@ -123,6 +274,7 @@ async function initNamazTracker() {
     window.addEventListener('dateChanged', () => {
         updateNamazUI();
     });
+    document.addEventListener('langChanged', handleNamazLanguageChange);
 }
 
 function setupModalEvents() {
@@ -144,7 +296,7 @@ function setupModalEvents() {
         if (cities.length > 0) {
             renderCityResults(cities.slice(0, 50));
         } else {
-            document.getElementById('city-search-empty').classList.remove('hidden');
+            renderCityEmptyState();
         }
     });
 
@@ -153,8 +305,7 @@ function setupModalEvents() {
         setTimeout(() => {
             modal.classList.add('hidden');
             searchInput.value = '';
-            document.getElementById('city-search-results').innerHTML = '<div class="text-center text-sm text-gray-400 py-4" id="city-search-empty" data-i18n="city_search_empty">Начните вводить название...</div>';
-            if (window.updateTranslations) window.updateTranslations();
+            renderCityEmptyState();
         }, 300);
     };
 
@@ -174,6 +325,8 @@ function setupModalEvents() {
                 const cities = getAvailableCities();
                 if (cities.length > 0) {
                     renderCityResults(cities.slice(0, 50));
+                } else {
+                    renderCityEmptyState();
                 }
                 return;
             }
@@ -197,7 +350,7 @@ function setupModalEvents() {
                     renderCityResults(mapped);
                 } catch (e) {
                     console.error("City search failed:", e);
-                    document.getElementById('city-search-results').innerHTML = '<div class="text-center text-sm text-red-400 py-4">Ошибка сети</div>';
+                    renderCityStatusMessage('city_search_error', 'Ошибка сети', 'error');
                 }
             }
         }, 300);
@@ -209,9 +362,8 @@ function setupModalEvents() {
         updateHeaderCityName(currentCityPref.title);
         closeModal();
 
-        document.getElementById('namaz-current-time').textContent = "Загрузка...";
-        const subtitle = document.querySelector('#namaz-countdown span');
-        if (subtitle) subtitle.textContent = "Получение расписания";
+        setNamazHeaderByKey('namaz_loading', 'Загрузка...');
+        setNamazCountdownByKey('namaz_schedule_loading', 'Получение расписания');
 
         await loadScheduleForYear(new Date().getFullYear(), true);
         updateNamazUI();
@@ -219,16 +371,19 @@ function setupModalEvents() {
 }
 
 function renderCityResults(cities, isLoading = false) {
-    const container = document.getElementById('city-search-results');
     if (isLoading) {
-        container.innerHTML = '<div class="text-center text-sm text-emerald-500 py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Поиск...</div>';
+        renderCityStatusMessage('city_search_loading', 'Поиск...', 'loading');
         return;
     }
 
     if (!cities || cities.length === 0) {
-        container.innerHTML = '<div class="text-center text-sm text-gray-400 py-4">Ничего не найдено</div>';
+        renderCityStatusMessage('city_search_no_results', 'Ничего не найдено');
         return;
     }
+
+    clearCitySearchState();
+    const container = document.getElementById('city-search-results');
+    if (!container) return;
 
     let html = '';
     cities.forEach(c => {
@@ -346,9 +501,8 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
         }
 
         if (!currentSchedule) {
-            document.getElementById('namaz-current-time').textContent = "Ошибка";
-            const subtitle = document.querySelector('#namaz-countdown span');
-            if (subtitle) subtitle.textContent = "Сервер недоступен";
+            setNamazHeaderByKey('namaz_error', 'Ошибка');
+            setNamazCountdownByKey('namaz_server_unavailable', 'Сервер недоступен');
         }
     }
 }
@@ -459,13 +613,13 @@ function updateNamazUI() {
         }
     }
 
-    const titleEl = document.getElementById('namaz-current-time');
     if (currentPrayerName && currentPrayerName !== 'sunrise') {
-        titleEl.textContent = `Сейчас: ${PRAYER_NAMES[currentPrayerName] || currentPrayerName}`;
+        namazHeaderStateKey = null;
+        setNamazHeaderText(`${tNamaz('namaz_current_prefix', 'Сейчас:')} ${getPrayerDisplayName(currentPrayerName)}`);
     } else if (currentPrayerName === 'sunrise') {
-        titleEl.textContent = `Время духа (до Зухра)`;
+        setNamazHeaderByKey('namaz_duha_time', 'Время духа (до Зухра)');
     } else {
-        titleEl.textContent = `Трекер намазов`;
+        setNamazHeaderByKey('namaz_widget_default_title', 'Трекер намазов');
     }
 
     window._nextNamazInfo = { name: nextPrayerName, time: nextPrayerTime };
@@ -511,17 +665,17 @@ function startTimer() {
         }
 
         const diffStr = getCountdownString(diff);
-        const nName = PRAYER_NAMES[window._nextNamazInfo.name] || window._nextNamazInfo.name;
+        const nName = getPrayerDisplayName(window._nextNamazInfo.name);
 
         const countSpan = document.getElementById('namaz-countdown');
         if (countSpan && currentCityPref) {
             const cityName = currentCityPref.title;
-            countSpan.innerHTML = `
-                До ${nName} <b>${diffStr}</b> 
+            setNamazCountdownHtml(`
+                ${tNamaz('namaz_until_prefix', 'До')} ${nName} <b>${diffStr}</b> 
                 <span class="mx-1 text-slate-300 dark:text-slate-600">|</span> 
                 <i class="fas fa-map-marker-alt text-rose-500 mr-0.5"></i> 
                 <span id="namaz-city-name" class="underline decoration-dotted decoration-slate-300 dark:decoration-slate-500 cursor-pointer">${cityName}</span>
-            `;
+            `);
         }
     };
 

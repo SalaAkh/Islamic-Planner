@@ -1,7 +1,5 @@
-const CACHE_NAME = 'barakah-planner-v22';
+const CACHE_NAME = 'barakah-planner-v23';
 const ASSETS_TO_CACHE = [
-    './',
-    './index.html',
     './manifest.json',
     './favicon.ico',
     'https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap',
@@ -38,6 +36,15 @@ const SKIP_CACHE_PATTERNS = [
     /__\/auth\//,
 ];
 
+function isCacheableResponse(response) {
+    return response && response.status === 200 && response.type !== 'opaque';
+}
+
+function isHtmlRequest(request) {
+    const accept = request.headers.get('accept') || '';
+    return request.mode === 'navigate' || accept.includes('text/html');
+}
+
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
     if (!event.request.url.startsWith('http')) return;
@@ -45,18 +52,39 @@ self.addEventListener('fetch', (event) => {
     // Skip Firebase Auth and other non-cacheable URLs
     if (SKIP_CACHE_PATTERNS.some(pattern => pattern.test(event.request.url))) return;
 
+    if (isHtmlRequest(event.request)) {
+        event.respondWith(
+            fetch(event.request).then((networkResponse) => {
+                if (isCacheableResponse(networkResponse)) {
+                    const responseToCache = networkResponse.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseToCache).catch(err => {
+                            console.warn('[Barakah Planner] SW HTML cache put error:', err);
+                        });
+                    });
+                }
+                return networkResponse;
+            }).catch(async () => {
+                const cachedResponse = await caches.match(event.request);
+                if (cachedResponse) return cachedResponse;
+
+                return new Response('Content not available offline', {
+                    status: 503,
+                    statusText: 'Service Unavailable',
+                    headers: new Headers({ 'Content-Type': 'text/plain' })
+                });
+            })
+        );
+        return;
+    }
+
     event.respondWith(
         caches.match(event.request)
             .then((cachedResponse) => {
                 if (cachedResponse) return cachedResponse;
 
                 return fetch(event.request).then((networkResponse) => {
-                    // Only cache valid, non-opaque responses (opaque = status 0, no CORS)
-                    if (
-                        networkResponse &&
-                        networkResponse.status === 200 &&
-                        networkResponse.type !== 'opaque'
-                    ) {
+                    if (isCacheableResponse(networkResponse)) {
                         const responseToCache = networkResponse.clone();
                         caches.open(CACHE_NAME).then((cache) => {
                             cache.put(event.request, responseToCache).catch(err => {
