@@ -17,12 +17,12 @@ const firebaseConfig = {
 try {
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    
+
     // Barakah Planner: Включаем офлайн-кэш для Firestore (будет работать даже без интернета)
     const db = initializeFirestore(app, {
-        localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
+        localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
     });
-    
+
     const googleProvider = new GoogleAuthProvider();
 
     // Export to window for classic scripts to use
