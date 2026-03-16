@@ -18,7 +18,7 @@ try {
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     
-    // SurviveKit: Включаем офлайн-кэш для Firestore (будет работать даже без интернета)
+    // Barakah Planner: Включаем офлайн-кэш для Firestore (будет работать даже без интернета)
     const db = initializeFirestore(app, {
         localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})
     });
@@ -65,7 +65,7 @@ try {
         }
     });
 
-    console.log("[Firebase] Initialized successfully. (SurviveKit Ready)");
+    console.log("[Firebase] Initialized successfully. (Barakah Planner Ready)");
 } catch (error) {
     console.warn("[Firebase] Initialization skipped or failed (offline/placeholder config):", error);
 }

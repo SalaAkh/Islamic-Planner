@@ -195,14 +195,22 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
 
     try {
         const { lat, lng } = targetCity;
-        const res = await fetch(`https://api.muftyat.kz/prayer-times/${year}/${lat}/${lng}`);
-        if (!res.ok) throw new Error("API status " + res.status);
+        let res = await fetch(`https://api.muftyat.kz/prayer-times/${year}/${lat}/${lng}`);
+        if (!res.ok) {
+            console.log(`[NamazTracker] ${year} API error for ${targetCity.title}, falling back to ${year - 1}`);
+            res = await fetch(`https://api.muftyat.kz/prayer-times/${year - 1}/${lat}/${lng}`);
+            if (!res.ok) throw new Error("API status " + res.status);
+        }
         const data = await res.json();
 
         if (data && data.result) {
             const scheduleMap = {};
             data.result.forEach(day => {
-                scheduleMap[day.Date] = day;
+                let dateStr = day.Date;
+                if (!dateStr.startsWith(year.toString())) {
+                    dateStr = year.toString() + dateStr.substring(4);
+                }
+                scheduleMap[dateStr] = day;
             });
             currentSchedule = scheduleMap;
             // Always save under the original user preference ID so they don't know it fell back
@@ -211,7 +219,7 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
             updateNamazUI();
         }
     } catch (e) {
-        console.error("Failed to fetch schedule for " + targetCity.title, e);
+        console.warn(`[NamazTracker] Failed to fetch schedule for ${targetCity.title}: ${e.message}`);
 
         // Limit fallback depth by checking ignoreSet size (max 5 fallbacks)
         if (ignoreSet.size < 5) {
