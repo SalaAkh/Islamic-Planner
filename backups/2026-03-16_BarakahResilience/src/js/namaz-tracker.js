@@ -23,92 +23,13 @@ const ORDERED_PRAYERS = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
 let currentCityPref = null;
 let currentSchedule = null;
 let timerInterval = null;
-let normalizedCitiesCache = null;
-let normalizedCitiesSource = null;
-
-const CITY_TEXT_FIXES = {
-    'Қарағанды облы��ы': 'Қарағанды облысы'
-};
-
-const SCHEDULE_CITY_OVERRIDES = {
-    '164': { id: '39', title: 'Қарағанды қаласы', lat: '49.806406', lng: '73.085485' },
-    '49.631899,72.859245': { id: '39', title: 'Қарағанды қаласы', lat: '49.806406', lng: '73.085485' }
-};
-
-const FIXED_ABAY_CITY_TITLE = '\u0410\u0431\u0430\u0439 \u049b\u0430\u043b\u0430\u0441\u044b';
-const FIXED_KARAGANDA_REGION = '\u049a\u0430\u0440\u0430\u0493\u0430\u043d\u0434\u044b \u043e\u0431\u043b\u044b\u0441\u044b';
-const FIXED_KARAGANDA_CITY_TITLE = '\u049a\u0430\u0440\u0430\u0493\u0430\u043d\u0434\u044b \u049b\u0430\u043b\u0430\u0441\u044b';
-const SAFE_CITY_TEXT_FIXES = {
-    '\u049a\u0430\u0440\u0430\u0493\u0430\u043d\u0434\u044b \u043e\u0431\u043b\u044b\ufffd\ufffd\u044b': FIXED_KARAGANDA_REGION
-};
-const SAFE_SCHEDULE_CITY_OVERRIDES = {
-    '164': { id: '39', title: FIXED_KARAGANDA_CITY_TITLE, lat: '49.806406', lng: '73.085485' },
-    '49.631899,72.859245': { id: '39', title: FIXED_KARAGANDA_CITY_TITLE, lat: '49.806406', lng: '73.085485' }
-};
-
-function normalizeCityText(value) {
-    if (typeof value !== 'string') return value || '';
-    const trimmed = value.trim();
-    return SAFE_CITY_TEXT_FIXES[trimmed] || CITY_TEXT_FIXES[trimmed] || trimmed.replace(/\uFFFD+/g, 'с');
-}
-
-function normalizeCityEntry(city) {
-    if (!city) return null;
-    const rawId = city.id ?? city.i ?? '';
-    const rawTitle = city.title ?? city.t ?? '';
-    const rawLat = city.lat ?? city.la ?? '';
-    const rawLng = city.lng ?? city.lo ?? '';
-
-    const normalized = {
-        ...city,
-        id: String(rawId),
-        i: String(rawId),
-        title: normalizeCityText(rawTitle),
-        t: normalizeCityText(rawTitle),
-        lat: String(rawLat),
-        la: String(rawLat),
-        lng: String(rawLng),
-        lo: String(rawLng),
-        r: normalizeCityText(city.r)
-    };
-
-    if (normalized.id === '164') {
-        normalized.title = FIXED_ABAY_CITY_TITLE;
-        normalized.t = FIXED_ABAY_CITY_TITLE;
-        normalized.r = FIXED_KARAGANDA_REGION;
-    }
-
-    return normalized;
-}
-
-function getAvailableCities() {
-    if (!Array.isArray(window.MUFTYAT_CITIES)) return [];
-    if (normalizedCitiesSource === window.MUFTYAT_CITIES && normalizedCitiesCache) {
-        return normalizedCitiesCache;
-    }
-
-    normalizedCitiesSource = window.MUFTYAT_CITIES;
-    normalizedCitiesCache = window.MUFTYAT_CITIES
-        .map(normalizeCityEntry)
-        .filter(Boolean);
-
-    return normalizedCitiesCache;
-}
-
-function resolveScheduleCity(targetCity) {
-    const normalized = normalizeCityEntry(targetCity);
-    const byId = SAFE_SCHEDULE_CITY_OVERRIDES[normalized.id] || SCHEDULE_CITY_OVERRIDES[normalized.id];
-    const byCoords = SAFE_SCHEDULE_CITY_OVERRIDES[`${normalized.lat},${normalized.lng}`] || SCHEDULE_CITY_OVERRIDES[`${normalized.lat},${normalized.lng}`];
-    return byId || byCoords || normalized;
-}
 
 async function initNamazTracker() {
     setupModalEvents();
 
     const saved = localStorage.getItem(PREF_CITY_KEY);
     if (saved) {
-        currentCityPref = normalizeCityEntry(JSON.parse(saved));
-        localStorage.setItem(PREF_CITY_KEY, JSON.stringify(currentCityPref));
+        currentCityPref = JSON.parse(saved);
         updateHeaderCityName(currentCityPref.title);
         await loadScheduleForYear(new Date().getFullYear());
     } else {
@@ -140,9 +61,8 @@ function setupModalEvents() {
             modalContent.classList.remove('scale-95', 'opacity-0');
             searchInput.focus();
         }, 10);
-        const cities = getAvailableCities();
-        if (cities.length > 0) {
-            renderCityResults(cities.slice(0, 50));
+        if (window.MUFTYAT_CITIES && window.MUFTYAT_CITIES.length > 0) {
+            renderCityResults(window.MUFTYAT_CITIES.slice(0, 50));
         } else {
             document.getElementById('city-search-empty').classList.remove('hidden');
         }
@@ -171,16 +91,14 @@ function setupModalEvents() {
 
         debounceTimer = setTimeout(async () => {
             if (q.length < 2) {
-                const cities = getAvailableCities();
-                if (cities.length > 0) {
-                    renderCityResults(cities.slice(0, 50));
+                if (window.MUFTYAT_CITIES) {
+                    renderCityResults(window.MUFTYAT_CITIES.slice(0, 50));
                 }
                 return;
             }
 
-            const cities = getAvailableCities();
-            if (cities.length > 0) {
-                const results = cities.filter(c => (c.t || '').toLowerCase().includes(q)).slice(0, 50);
+            if (window.MUFTYAT_CITIES && window.MUFTYAT_CITIES.length > 0) {
+                const results = window.MUFTYAT_CITIES.filter(c => (c.t || '').toLowerCase().includes(q)).slice(0, 50);
                 renderCityResults(results);
             } else {
                 renderCityResults([], true);
@@ -193,7 +111,7 @@ function setupModalEvents() {
                         la: c.lat,
                         lo: c.lng,
                         r: c.region || ''
-                    })).map(normalizeCityEntry);
+                    }));
                     renderCityResults(mapped);
                 } catch (e) {
                     console.error("City search failed:", e);
@@ -204,9 +122,15 @@ function setupModalEvents() {
     });
 
     window.selectNamazCity = async (id, title, lat, lng) => {
-        currentCityPref = normalizeCityEntry({ id, i: id, title, t: title, lat, la: lat, lng, lo: lng, r: '' });
+        // Standardize structure: always use numbers for ID and coordinates
+        currentCityPref = { 
+            id: parseInt(id), 
+            title: title, 
+            lat: parseFloat(lat), 
+            lng: parseFloat(lng) 
+        };
         localStorage.setItem(PREF_CITY_KEY, JSON.stringify(currentCityPref));
-        updateHeaderCityName(currentCityPref.title);
+        updateHeaderCityName(title);
         closeModal();
 
         document.getElementById('namaz-current-time').textContent = "Загрузка...";
@@ -256,12 +180,13 @@ function updateHeaderCityName(name) {
 async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null, ignoreSet = new Set()) {
     if (!currentCityPref && !fallbackCity) return;
 
-    const targetCity = normalizeCityEntry(fallbackCity || currentCityPref);
-    const apiCity = resolveScheduleCity(targetCity);
-    const storeKey = `${NAMAZ_STORAGE_KEY_PREFIX}${targetCity.id}_${year}`;
+    const targetCity = fallbackCity || currentCityPref;
+    // Standardize ID (could be .i from raw cities or .id from our objects)
+    const cityId = parseInt(targetCity.id || targetCity.i);
+    const storeKey = `${NAMAZ_STORAGE_KEY_PREFIX}${cityId}_${year}`;
 
     // Add current target to ignore set so we don't pick it as fallback
-    ignoreSet.add(targetCity.id);
+    ignoreSet.add(cityId);
 
     if (!forceFetch) {
         const cached = localStorage.getItem(storeKey);
@@ -277,36 +202,52 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
     }
 
     try {
-        const { lat, lng } = apiCity;
-        const res = await fetch(`https://api.muftyat.kz/prayer-times/${year}/${lat}/${lng}`);
-        if (!res.ok) throw new Error("API status " + res.status);
+        const lat = targetCity.lat || targetCity.la;
+        const lng = targetCity.lng || targetCity.lo;
+        let res = await fetch(`https://api.muftyat.kz/prayer-times/${year}/${lat}/${lng}`);
+        
+        // If current year fails, try year - 1
+        if (!res.ok) {
+            console.warn(`[NamazTracker] ${year} API error (${res.status}) for ${targetCity.title}, trying ${year - 1}...`);
+            res = await fetch(`https://api.muftyat.kz/prayer-times/${year - 1}/${lat}/${lng}`);
+            
+            // IF BOTH FAIL, we throw an error to trigger the fallback city logic in the catch block
+            if (!res.ok) {
+                throw new Error(`API error ${res.status} for both ${year} and ${year - 1}`);
+            }
+        }
+        
         const data = await res.json();
-
         if (data && data.result) {
             const scheduleMap = {};
             data.result.forEach(day => {
-                scheduleMap[day.Date] = day;
+                let dateStr = day.Date;
+                // Important: if we're using data from previous year, we need to correct the year string
+                if (!dateStr.startsWith(year.toString())) {
+                    dateStr = year.toString() + dateStr.substring(4);
+                }
+                scheduleMap[dateStr] = day;
             });
             currentSchedule = scheduleMap;
-            // Always save under the original user preference ID so they don't know it fell back
-            const prefStoreKey = `${NAMAZ_STORAGE_KEY_PREFIX}${currentCityPref.id}_${year}`;
+            // Cache the result for the specific city and year
+            const prefStoreKey = `${NAMAZ_STORAGE_KEY_PREFIX}${cityId}_${year}`;
             localStorage.setItem(prefStoreKey, JSON.stringify(scheduleMap));
             updateNamazUI();
         }
     } catch (e) {
-        console.error("Failed to fetch schedule for " + targetCity.title, e);
+        console.warn(`[NamazTracker] Load failed for ${targetCity.title}: ${e.message}`);
 
         // Limit fallback depth by checking ignoreSet size (max 5 fallbacks)
         if (ignoreSet.size < 5) {
-            console.log("Attempting to find nearest working city as fallback...");
+            console.warn("[NamazTracker] Searching for nearest city as fallback...");
 
             // Wait up to 2 seconds for MUFTYAT_CITIES to load if it's external
-            if (!Array.isArray(window.MUFTYAT_CITIES)) {
+            if (!window.MUFTYAT_CITIES) {
                 console.log("Waiting for cities JS to load...");
                 await new Promise(resolve => {
                     let checks = 0;
                     const interval = setInterval(() => {
-                        if (Array.isArray(window.MUFTYAT_CITIES) || checks > 20) {
+                        if (window.MUFTYAT_CITIES || checks > 20) {
                             clearInterval(interval);
                             resolve();
                         }
@@ -315,11 +256,11 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
                 });
             }
 
-            if (getAvailableCities().length > 0) {
-                const nearest = getNearestCity(targetCity.lat, targetCity.lng, ignoreSet);
+            if (window.MUFTYAT_CITIES) {
+                const nearest = getNearestCity(lat, lng, ignoreSet);
                 if (nearest) {
-                    console.log(`Fallback city found: ${nearest.t}`);
-                    const fallbackObj = { id: nearest.i, title: nearest.t, lat: nearest.la, lng: nearest.lo, r: nearest.r };
+                    console.warn(`[NamazTracker] Fallback found: ${nearest.t}`);
+                    const fallbackObj = { id: parseInt(nearest.i), title: nearest.t, lat: parseFloat(nearest.la), lng: parseFloat(nearest.lo) };
                     await loadScheduleForYear(year, true, fallbackObj, ignoreSet);
                     return;
                 }
@@ -349,27 +290,31 @@ function getDistance(lat1, lon1, lat2, lon2) {
     return R * c; // Distance in km
 }
 
-function getNearestCity(latStr, lngStr, ignoreSet = new Set()) {
-    const cities = getAvailableCities();
-    if (cities.length === 0) return null;
-    const originLat = parseFloat(latStr);
-    const originLng = parseFloat(lngStr);
+function getNearestCity(originLat, originLng, ignoreSet = new Set()) {
+    if (!window.MUFTYAT_CITIES) return null;
+    
+    // Ensure origin coordinates are numbers
+    originLat = parseFloat(originLat);
+    originLng = parseFloat(originLng);
 
     let closest = null;
     let minDistance = Infinity;
 
-    for (const city of cities) {
-        // Skip exact same city strings to avoid infinite loop
-        if (city.la === latStr && city.lo === lngStr) continue;
+    for (const city of window.MUFTYAT_CITIES) {
+        const cityLat = parseFloat(city.la);
+        const cityLng = parseFloat(city.lo);
+        const cityId = parseInt(city.i);
 
-        // Skip cities we've already tried
-        if (ignoreSet.has(city.i)) continue;
+        // Skip exact same location (within ~100 meters) to avoid infinite loop
+        const dist = getDistance(originLat, originLng, cityLat, cityLng);
+        if (dist < 0.1) continue;
 
-        const d = getDistance(originLat, originLng, parseFloat(city.la), parseFloat(city.lo));
-        // Find nearest city (hopefully valid in api)
-        if (d < minDistance) {
-            minDistance = d;
-            closest = city;
+        // Skip cities we've already tried (robust ID check)
+        if (ignoreSet.has(cityId)) continue;
+
+        if (dist < minDistance) {
+            minDistance = dist;
+            closest = { ...city, dist };
         }
     }
     return closest;

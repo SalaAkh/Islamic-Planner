@@ -1,0 +1,1450 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+
+/* Screen-reader only (accessible label, visually hidden) */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+:root {
+    --bg-main: #f1f5f9;
+    --bg-dots: #cbd5e1;
+    --paper: #ffffff;
+    --ink: #1e293b;
+    --primary: #10b981;
+    --primary-light: rgba(16, 185, 129, 0.1);
+    --lines: #e2e8f0;
+    --tab-daily: #64748b;
+    --tab-calendar: #10b981;
+    --tab-goals: #f59e0b;
+    --tab-board: #6366f1;
+    --tab-home: #94a3b8;
+}
+
+.dark {
+    --bg-main: #0f172a;
+    --bg-dots: #334155;
+    --paper: #1e293b;
+    --ink: #f8fafc;
+    --primary: #34d399;
+    --primary-light: rgba(52, 211, 153, 0.15);
+    --lines: #334155;
+    --tab-daily: #475569;
+    --tab-calendar: #059669;
+    --tab-goals: #d97706;
+    --tab-board: #4f46e5;
+    --tab-home: #334155;
+}
+
+html,
+body {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-main);
+    background-image: radial-gradient(var(--bg-dots) 1px, transparent 1px);
+    background-size: 20px 20px;
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 4rem 2rem 3rem;
+    overflow-x: hidden;
+}
+
+.notebook-wrapper {
+    position: relative;
+    max-width: 1200px;
+    width: 100%;
+}
+
+.notebook-page {
+    background-color: var(--paper);
+    width: 100%;
+    min-height: 1100px;
+    border-radius: 4px 24px 24px 4px;
+    box-shadow:
+        12px 15px 40px rgba(0, 0, 0, 0.08),
+        -5px 0 20px rgba(0, 0, 0, 0.03);
+    position: relative;
+    padding: 3rem 4rem 8rem 5rem;
+    z-index: 2;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.notebook-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 40px;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.02) 100%);
+    border-left: 8px solid var(--primary);
+    border-radius: 4px 0 0 4px;
+    z-index: 5;
+}
+
+.binder-holes {
+    position: absolute;
+    left: 15px;
+    top: 2rem;
+    bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 10;
+}
+
+.hole {
+    width: 14px;
+    height: 14px;
+    background-color: #cbd5e1;
+    border-radius: 50%;
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.planner-tabs {
+    position: absolute;
+    right: -48px;
+    /* Выдвигаем вкладку наружу ровно на ее ширину */
+    top: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1;
+}
+
+.tab-btn {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    padding: 20px 15px;
+    /* Увеличил ширину вкладки (было 10px) */
+    border-radius: 0 12px 12px 0;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    box-shadow: 6px 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s, right 0.2s, background-color 0.2s;
+    position: relative;
+    right: 0;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-left: none;
+}
+
+.tab-btn:hover {
+    transform: translateX(8px);
+}
+
+/* ── NAV LOGO ── */
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--text);
+    text-decoration: none;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.nav-logo:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+.nav-logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--green, #34d399), #10b981);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: white;
+}
+
+.tab-btn.active {
+    right: 0;
+    border-left: 3px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 10px 6px 18px rgba(0, 0, 0, 0.25);
+    filter: brightness(1.15);
+    z-index: 2;
+}
+
+.tab-daily {
+    background-color: var(--tab-daily);
+}
+
+.tab-calendar {
+    background-color: var(--tab-calendar);
+}
+
+.tab-goals {
+    background-color: var(--tab-goals);
+}
+
+.tab-board {
+    background-color: var(--tab-board);
+}
+
+.tab-home {
+    background-color: var(--tab-home);
+}
+
+.page-view {
+    display: none;
+}
+
+.page-view.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+/* --- ПРЕМИАЛЬНАЯ ПЛАВНАЯ АНИМАЦИЯ СТРАНИЦ ДЛЯ ТАБОВ --- */
+.page-flip-container {
+    perspective: 2500px;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.page-flip-out {
+    animation: pageSlideDownOut 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 20;
+    background-color: var(--paper);
+    /* Прячем нижний слой */
+    display: block !important;
+}
+
+.page-flip-in {
+    animation: pageSlideUpIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+    position: relative;
+    z-index: 10;
+    display: block !important;
+}
+
+@keyframes pageSlideDownOut {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+        filter: blur(0px);
+    }
+
+    100% {
+        transform: translateY(20px) scale(0.98);
+        opacity: 0;
+        filter: blur(2px);
+    }
+}
+
+@keyframes pageSlideUpIn {
+    0% {
+        transform: translateY(-20px) scale(0.98);
+        opacity: 0;
+        filter: blur(2px);
+    }
+
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+        filter: blur(0px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- ПРЕМИАЛЬНАЯ АНИМАЦИЯ ПЕРЕКЛЮЧЕНИЯ ДАТЫ (DATE SLIDE) --- */
+.date-anim-container {
+    position: relative;
+}
+
+.date-slide-out-next {
+    animation: slideOutLeft 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.date-slide-in-next {
+    animation: slideInRight 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.date-slide-out-prev {
+    animation: slideOutRight 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.date-slide-in-prev {
+    animation: slideInLeft 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideOutLeft {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-30px) scale(0.98);
+        filter: blur(1px);
+    }
+}
+
+@keyframes slideInRight {
+    0% {
+        opacity: 0;
+        transform: translateX(30px) scale(0.98);
+        filter: blur(1px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0px);
+    }
+}
+
+@keyframes slideOutRight {
+    0% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0px);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(30px) scale(0.98);
+        filter: blur(1px);
+    }
+}
+
+@keyframes slideInLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-30px) scale(0.98);
+        filter: blur(1px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0px);
+    }
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-8px);
+    }
+
+    50% {
+        transform: translateX(8px);
+    }
+
+    75% {
+        transform: translateX(-4px);
+    }
+}
+
+.handwriting {
+    font-family: 'Caveat', cursive;
+    font-size: 1.4rem;
+    color: var(--ink);
+}
+
+.tasks-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    /* Увеличил до 1.5rem для наглядности */
+    margin-top: 0.75rem !important;
+}
+
+.tasks-wrapper>div {
+    margin-bottom: 0.5rem !important;
+}
+
+.ruled-input {
+    background: transparent;
+    border: none;
+    border-bottom: 2px dotted var(--lines);
+    width: 100%;
+    padding: 4px 0;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.ruled-input:focus {
+    border-bottom: 2px solid var(--primary);
+}
+
+.ruled-textarea {
+    background: transparent;
+    border: none;
+    width: 100%;
+    line-height: 2rem;
+    background-image: repeating-linear-gradient(transparent, transparent 31px, var(--lines) 31px, var(--lines) 32px);
+    outline: none;
+    resize: none;
+}
+
+.arabic {
+    font-family: 'Amiri', serif;
+}
+
+.paper-checkbox {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #94a3b8;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    background: transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.paper-checkbox:checked {
+    border-color: var(--primary);
+    transform: scale(1.15) rotate(5deg);
+    background-color: var(--primary-light);
+}
+
+.paper-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: sans-serif;
+    color: var(--primary);
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Task toggle buttons — same visual style as paper-checkbox */
+.task-toggle {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border: 2px solid #94a3b8 !important;
+    border-radius: 4px !important;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    background: transparent !important;
+    padding: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent !important;
+}
+
+.task-toggle:hover {
+    border-color: var(--primary) !important;
+    background-color: var(--primary-light) !important;
+}
+
+.task-toggle.task-done {
+    border-color: var(--primary) !important;
+    transform: scale(1.15) rotate(5deg);
+    background-color: var(--primary-light) !important;
+}
+
+.task-toggle.task-done::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: sans-serif;
+    color: var(--primary);
+    font-size: 15px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.section-title {
+    position: relative;
+    display: inline-block;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: var(--primary-light);
+    z-index: -1;
+    transform: rotate(-1deg);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.calendar-day-header {
+    text-align: center;
+    font-weight: 600;
+    color: var(--primary);
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--lines);
+}
+
+.calendar-cell {
+    min-height: 100px;
+    border: 1px solid var(--lines);
+    border-radius: 8px;
+    padding: 5px;
+    position: relative;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.calendar-cell:hover {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-cell.sunnah-fast {
+    background-color: rgba(212, 175, 55, 0.1);
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+@keyframes emerald-glow {
+    0% {
+        box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.1);
+    }
+
+    50% {
+        box-shadow: inset 0 0 25px rgba(16, 185, 129, 0.25);
+        border-color: rgba(16, 185, 129, 0.5);
+    }
+
+    100% {
+        box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.1);
+    }
+}
+
+.calendar-cell.jumuah-day {
+    background-color: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.35);
+    animation: emerald-glow 3s infinite ease-in-out;
+}
+
+.dark .calendar-cell.jumuah-day {
+    background-color: rgba(16, 185, 129, 0.2);
+    border-color: rgba(16, 185, 129, 0.5);
+}
+
+.calendar-cell.empty {
+    background: transparent;
+    border: none;
+    cursor: default;
+}
+
+.calendar-cell.empty:hover {
+    border: none;
+    background: transparent;
+    transform: none;
+    box-shadow: none;
+}
+
+.calendar-date {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #475569;
+}
+
+.sunnah-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.6rem;
+    background: #d4af37;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(212, 175, 55, 0.3);
+}
+
+.jumuah-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.6rem;
+    background: #10b981;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+/* Nav styles for days */
+.nav-btn {
+    color: var(--primary);
+    transition: transform 0.2s, color 0.2s;
+    cursor: pointer;
+}
+
+.nav-btn:hover {
+    transform: scale(1.1);
+    color: #166534;
+    /* darker green */
+}
+
+@keyframes gold-pulse {
+    0% {
+        box-shadow: 0 0 5px rgba(245, 158, 11, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.8);
+    }
+
+    100% {
+        box-shadow: 0 0 5px rgba(245, 158, 11, 0.4);
+    }
+}
+
+.bg-amber-500 {
+    animation: gold-pulse 2s infinite ease-in-out;
+}
+
+/* Tafakkur Board Styles */
+.bg-paper {
+    background-color: var(--paper);
+}
+
+.board-container {
+    user-select: none;
+    /* Предотвращаем выделение текста при панорамировании */
+    touch-action: none;
+    /* CRITICAL: prevents scroll/pull-to-refresh while drawing on mobile */
+}
+
+.board-container.panning {
+    cursor: grabbing !important;
+}
+
+.infinite-canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
+.canvas-grid-bg {
+    position: absolute;
+    top: -5000px;
+    left: -5000px;
+    width: 10000px;
+    height: 10000px;
+    background-image:
+        radial-gradient(circle, #cbd5e1 1.5px, transparent 1.5px),
+        radial-gradient(circle, #cbd5e1 1.5px, transparent 1.5px);
+    background-size: 40px 40px;
+    background-position: 0 0, 20px 20px;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* Sticky Notes */
+.sticky-note {
+    position: absolute;
+    width: 200px;
+    min-height: 200px;
+    padding: 15px 15px 25px 15px;
+    border-radius: 2px 2px 10px 2px;
+    /* Эффект загнутого угла */
+    box-shadow:
+        3px 4px 10px rgba(0, 0, 0, 0.1),
+        inset -1px -2px 10px rgba(0, 0, 0, 0.05);
+    /* Легкая тень внутри */
+    cursor: grab;
+    transform-origin: center center;
+    transition: box-shadow 0.2s, z-index 0s;
+    display: flex;
+    flex-direction: column;
+}
+
+.sticky-note:active {
+    cursor: grabbing;
+    box-shadow:
+        6px 8px 15px rgba(0, 0, 0, 0.15),
+        inset -1px -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Угол стикера */
+.sticky-note::after {
+    content: "";
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    border-width: 10px 10px 0 0;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.1) white transparent transparent;
+    border-radius: 0 0 10px 0;
+    box-shadow: -1px -1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.sticky-content {
+    flex-grow: 1;
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1.3rem;
+    line-height: 1.5;
+    color: var(--ink);
+    resize: none;
+    cursor: text;
+    overflow-y: hidden;
+}
+
+.sticky-content::placeholder {
+    color: rgba(0, 0, 0, 0.3);
+}
+
+/* Кнопка удаления на стикере */
+.delete-note-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s, color 0.2s;
+}
+
+.sticky-note:hover .delete-note-btn {
+    opacity: 1;
+}
+
+.delete-note-btn:hover {
+    background: rgba(239, 68, 68, 0.8);
+    /* Красный цвет Tailwind text-red-500 */
+    color: white;
+}
+
+/* Цвета стикеров */
+.note-yellow {
+    background-color: #fef08a;
+}
+
+/* bg-yellow-200 */
+.note-green {
+    background-color: #bbf7d0;
+}
+
+/* bg-green-200 */
+.note-blue {
+    background-color: #bfdbfe;
+}
+
+/* bg-blue-200 */
+
+/* Tooltip */
+.tooltip {
+    position: relative;
+}
+
+.tooltip:hover::after {
+    content: attr(aria-label);
+    position: absolute;
+    bottom: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+.tooltip-left:hover::after,
+.ltr\:tooltip-left:hover::after {
+    left: auto;
+    right: 100%;
+    margin-right: 12px;
+    bottom: 50%;
+    transform: translateY(50%);
+}
+
+html[dir="rtl"] .rtl\:tooltip-right:hover::after,
+[dir="rtl"] .rtl\:tooltip-right:hover::after {
+    right: auto;
+    left: 100%;
+    margin-left: 12px;
+    margin-right: 0;
+    /* Reset */
+    bottom: 50%;
+    transform: translateY(50%);
+}
+
+/* ============================================
+   STICKY NOTES — IMPROVED WITH DRAG HANDLE
+   ============================================ */
+.sticky-note {
+    position: absolute;
+    width: 220px;
+    min-height: 180px;
+    border-radius: 3px 3px 12px 3px;
+    box-shadow:
+        4px 5px 14px rgba(0, 0, 0, 0.12),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.04);
+    transform-origin: center center;
+    transition: box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sticky-note:hover {
+    box-shadow:
+        8px 10px 20px rgba(0, 0, 0, 0.16),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.04);
+    transform: rotate(-0.5deg);
+}
+
+/* Worn corner */
+.sticky-note::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    border-width: 12px 12px 0 0;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.08) white transparent transparent;
+    border-radius: 0 0 12px 0;
+}
+
+/* Drag handle bar at top of note */
+.note-drag-handle {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    color: rgba(0, 0, 0, 0.2);
+    font-size: 12px;
+    flex-shrink: 0;
+    position: relative;
+    transition: color 0.2s;
+}
+
+.note-drag-handle:hover {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.note-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Delete button on handle */
+.delete-note-btn {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    font-size: 10px;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s, color 0.2s;
+}
+
+.sticky-note:hover .delete-note-btn {
+    opacity: 1;
+}
+
+.delete-note-btn:hover {
+    background: rgba(239, 68, 68, 0.85);
+    color: white;
+}
+
+.sticky-content {
+    flex-grow: 1;
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: rgba(0, 0, 0, 0.75);
+    resize: none;
+    cursor: text;
+    padding: 4px 14px 18px;
+    min-height: 120px;
+}
+
+.sticky-content::placeholder {
+    color: rgba(0, 0, 0, 0.25);
+}
+
+/* Note colors */
+.note-yellow {
+    background-color: #fef3a0;
+}
+
+.note-green {
+    background-color: #c6f6d5;
+}
+
+.note-blue {
+    background-color: #bee3f8;
+}
+
+.note-pink {
+    background-color: #fbcfe8;
+}
+
+.note-yellow .note-drag-handle {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.note-green .note-drag-handle {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.note-blue .note-drag-handle {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.note-pink .note-drag-handle {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+/* ============================================
+   DRAWING CANVAS
+   ============================================ */
+.drawing-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* default: pan mode */
+    z-index: 5;
+}
+
+/* ============================================
+   BOARD DRAWING TOOLBAR
+   ============================================ */
+.board-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 6px 10px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    flex-wrap: wrap;
+}
+
+.toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 30px;
+    background: #e2e8f0;
+    margin: 0 2px;
+    flex-shrink: 0;
+}
+
+.tool-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.15s ease;
+    padding: 2px 6px;
+}
+
+.tool-btn:hover {
+    background: #f1f5f9;
+    color: #334155;
+    transform: translateY(-1px);
+}
+
+.tool-btn.tool-active {
+    background: #e0e7ff;
+    color: #4338ca;
+    font-weight: 600;
+    box-shadow: 0 0 0 2px #c7d2fe;
+}
+
+.tool-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+}
+
+.tool-label-sm {
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+/* Color picker */
+.color-picker-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #e2e8f0;
+    cursor: pointer;
+    padding: 2px;
+    background: none;
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.color-picker-btn:hover {
+    border-color: #4338ca;
+    transform: scale(1.1);
+}
+
+/* Brush size range input */
+.brush-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 80px;
+    height: 4px;
+    border-radius: 2px;
+    background: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+    margin-left: 6px;
+}
+
+.brush-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4338ca;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(67, 56, 202, 0.4);
+    transition: transform 0.15s;
+}
+
+.brush-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+/* Keyboard shortcut badges */
+.kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1px 5px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #f8fafc;
+    font-size: 10px;
+    font-family: monospace;
+    color: #475569;
+    box-shadow: 0 1px 0 #cbd5e1;
+}
+
+.toolbar-shortcuts {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-left: auto;
+}
+
+/* ============================================
+   DESIGN IMPROVEMENTS — Body + General Shell
+   ============================================ */
+
+/* Nicer body background */
+body {
+    background: linear-gradient(135deg, #c8d8e8 0%, #b8c9da 50%, #c5d5e5 100%);
+    background-image:
+        radial-gradient(#94a3b8 1px, transparent 1px),
+        linear-gradient(135deg, #c8d8e8 0%, #b8c9da 100%);
+    background-size: 20px 20px, 100% 100%;
+}
+
+/* Subtle notebook paper texture and glow */
+.notebook-page {
+    box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.15),
+        0 5px 20px rgba(0, 0, 0, 0.08),
+        -5px 0 20px rgba(0, 0, 0, 0.05);
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* Smooth tab hover scale was missing */
+.tab-btn:hover {
+    transform: translateX(6px) !important;
+}
+
+/* ============================================
+   MOBILE / TABLET RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    body {
+        padding: 0.5rem 2.5rem 0.5rem 2.5rem;
+    }
+
+    .notebook-page {
+        padding: 1.5rem 1.5rem 8rem 3rem;
+        min-height: unset;
+        border-radius: 4px 12px 12px 4px;
+    }
+
+    .planner-tabs {
+        right: -35px;
+        top: 60px;
+        gap: 6px;
+    }
+
+    .tab-btn {
+        padding: 14px 8px;
+        font-size: 13px;
+    }
+
+    .binder-holes {
+        left: 10px;
+    }
+
+    .hole {
+        width: 11px;
+        height: 11px;
+    }
+
+    .board-toolbar {
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 10px;
+    }
+
+    .tool-btn {
+        min-width: 40px;
+        height: 40px;
+        font-size: 13px;
+    }
+
+    .brush-slider {
+        width: 60px;
+    }
+
+    .toolbar-shortcuts {
+        display: none;
+    }
+
+    .toolbar-divider {
+        display: none;
+    }
+
+    /* Calendar cells smaller on mobile */
+    .calendar-cell {
+        min-height: 60px;
+        font-size: 0.85rem;
+    }
+
+    .calendar-grid {
+        gap: 4px;
+    }
+
+    .sunnah-badge {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 0.25rem 2.5rem 0.25rem 2rem;
+    }
+
+    .notebook-page {
+        padding: 1rem 1rem 8rem 2.5rem;
+    }
+}
+
+/* ============================================
+   AUDIT LOG PREMIUM STYLES
+   ============================================ */
+
+/* Glassmorphism Effect - Refined for readability */
+.glass-panel {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.dark .glass-panel {
+    background: #1e293b;
+    /* Slate-800 */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Fallback for browsers with backdrop-filter support to keep a hint of premium feel without sacrificing readability */
+@supports (backdrop-filter: blur(1px)) {
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+    }
+
+    .dark .glass-panel {
+        background: rgba(30, 41, 59, 0.96);
+        backdrop-filter: blur(16px);
+    }
+}
+
+/* Custom Premium Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.2);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.4);
+}
+
+/* Animations */
+@keyframes audit-slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.audit-animate-in {
+    animation: audit-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ==========================================================================
+   MOBILE BOTTOM NAVIGATION (Phase 2 UX)
+   ========================================================================== */
+@media (max-width: 768px) {
+    body {
+        /* Add padding at bottom to prevent content being hidden behind the nav bar */
+        padding: 1rem 0.5rem 6.5rem 0.5rem;
+    }
+
+    .notebook-wrapper {
+        border-radius: 20px;
+    }
+
+    .notebook-page {
+        padding: 1.5rem 1rem 3rem 1rem;
+        min-height: calc(100vh - 8rem);
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .notebook-page::before {
+        display: none;
+        /* Hide binder edge on mobile */
+    }
+
+    .binder-holes {
+        display: none;
+        /* Hide binder holes on mobile */
+    }
+
+    .planner-tabs {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+        flex-direction: row;
+        justify-content: space-around;
+        background-color: var(--paper);
+        z-index: 100;
+        padding: 0.5rem 0.5rem;
+        padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+        box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.08);
+        border-top: 1px solid var(--lines);
+        border-radius: 24px 24px 0 0;
+        gap: 0;
+        width: 100%;
+        max-width: 100vw;
+        box-sizing: border-box;
+    }
+
+    .dark .planner-tabs {
+        box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .tab-btn {
+        writing-mode: horizontal-tb;
+        flex-direction: column;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        padding: 0.5rem 0;
+        border-radius: 16px;
+        font-size: 0.70rem;
+        box-shadow: none !important;
+        border: none !important;
+        border-left: none !important;
+        color: #94a3b8;
+        /* slate-400 */
+        font-weight: 700;
+        background-color: transparent !important;
+        transform: none !important;
+        right: auto !important;
+        appearance: none;
+        -webkit-appearance: none;
+        transition: color 0.2s, background-color 0.2s;
+    }
+
+    .tab-btn:hover {
+        transform: none !important;
+    }
+
+    .tab-btn.active {
+        padding: 0.5rem 0 !important;
+        /* Force reset from desktop */
+        right: auto !important;
+        transform: none !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-left: none !important;
+        outline: none !important;
+        filter: none !important;
+        border-radius: 16px !important;
+        flex: 1 !important;
+        /* Ensure it stays flex: 1 and doesn't expand */
+    }
+
+    /* Active states for mobile bottom nav */
+    .tab-btn.active.tab-daily {
+        color: var(--tab-daily);
+        background-color: rgba(100, 116, 139, 0.1) !important;
+    }
+
+    .tab-btn.active.tab-calendar {
+        color: var(--tab-calendar);
+        background-color: rgba(16, 185, 129, 0.1) !important;
+    }
+
+    .tab-btn.active.tab-goals {
+        color: var(--tab-goals);
+        background-color: rgba(245, 158, 11, 0.1) !important;
+    }
+
+    .tab-btn.active.tab-board {
+        color: var(--tab-board);
+        background-color: rgba(99, 102, 241, 0.1) !important;
+    }
+}

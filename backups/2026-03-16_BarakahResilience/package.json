@@ -1,0 +1,30 @@
+{
+  "name": "islamic-planner",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx @tailwindcss/cli -i ./src/css/style.css -o ./src/css/tailwind.css --watch",
+    "build": "npx @tailwindcss/cli -i ./src/css/style.css -o ./src/css/tailwind.css --minify && node scripts/patch-tailwind-css.js && node scripts/build-monolith.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SalaAkh/Islamic-Planner.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/SalaAkh/Islamic-Planner/issues"
+  },
+  "homepage": "https://github.com/SalaAkh/Islamic-Planner#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.1",
+    "tailwindcss": "^4.2.1"
+  },
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "firebase": "^12.10.0"
+  }
+}
