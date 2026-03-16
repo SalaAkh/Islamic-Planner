@@ -1,17 +1,64 @@
 import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
-    signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     signOut,
     onAuthStateChanged,
     updateProfile
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
+const GOOGLE_REDIRECT_PENDING_KEY = 'barakah_google_redirect_pending';
+const GOOGLE_REDIRECT_LOG_KEY = 'barakah_google_redirect_log';
+
 window.Auth = {
     user: null,
 
+    clearGoogleRedirectState() {
+        sessionStorage.removeItem(GOOGLE_REDIRECT_PENDING_KEY);
+        sessionStorage.removeItem(GOOGLE_REDIRECT_LOG_KEY);
+    },
+
+    showGoogleAuthError(message) {
+        const authModal = document.getElementById('auth-modal');
+        const errorEl = document.getElementById('auth-error');
+
+        if (errorEl) {
+            errorEl.textContent = message || (window.t ? window.t('auth_err_google') : "Ошибка входа через Google. Попробуйте снова.");
+        }
+
+        if (authModal && window.location.protocol !== 'file:') {
+            authModal.classList.remove('hidden');
+            authModal.classList.add('flex');
+        }
+    },
+
+    async handleGoogleRedirectResult() {
+        if (!window.firebaseAuth) return;
+
+        try {
+            const result = await getRedirectResult(window.firebaseAuth);
+            sessionStorage.removeItem(GOOGLE_REDIRECT_PENDING_KEY);
+
+            if (!result) {
+                sessionStorage.removeItem(GOOGLE_REDIRECT_LOG_KEY);
+                return;
+            }
+
+            sessionStorage.removeItem(GOOGLE_REDIRECT_LOG_KEY);
+            console.log("[Auth] Google redirect sign-in success:", result.user.email);
+            await window.ActivityLog?.log('user_login', { method: 'google' });
+        } catch (error) {
+            this.clearGoogleRedirectState();
+            console.error("[Auth] Google redirect sign-in error:", error);
+            this.showGoogleAuthError(window.t ? window.t('auth_err_google') : "Ошибка входа через Google. Попробуйте снова.");
+        }
+    },
+
     init() {
         if (!window.firebaseAuth) return;
+
+        this.handleGoogleRedirectResult();
 
         // Sync UI on auth state change
         onAuthStateChanged(window.firebaseAuth, (user) => {
@@ -20,8 +67,11 @@ window.Auth = {
             const authBtn = document.getElementById('auth-btn');
             const authModal = document.getElementById('auth-modal');
             const authCloseBtn = document.getElementById('auth-close-btn');
+            const isGoogleRedirectPending = sessionStorage.getItem(GOOGLE_REDIRECT_PENDING_KEY) === '1';
 
             if (user) {
+                sessionStorage.removeItem(GOOGLE_REDIRECT_PENDING_KEY);
+
                 // --- LOGGED IN ---
                 if (authIcon) {
                     authIcon.classList.remove('fa-user');
@@ -98,8 +148,13 @@ window.Auth = {
                     }
                 } else {
                     if (authModal) {
-                        authModal.classList.remove('hidden');
-                        authModal.classList.add('flex');
+                        if (isGoogleRedirectPending) {
+                            authModal.classList.add('hidden');
+                            authModal.classList.remove('flex');
+                        } else {
+                            authModal.classList.remove('hidden');
+                            authModal.classList.add('flex');
+                        }
                     }
                     if (authCloseBtn) {
                         authCloseBtn.classList.add('hidden');
@@ -173,16 +228,14 @@ window.Auth = {
     async signInWithGoogle() {
         if (!window.firebaseAuth) return { error: "Firebase not configured" };
         try {
-            const result = await signInWithPopup(window.firebaseAuth, window.googleProvider);
-            console.log("[Auth] Google sign-in success:", result.user.email);
-            window.ActivityLog?.log('user_login', { method: 'google' });
-            return { user: result.user };
+            sessionStorage.setItem(GOOGLE_REDIRECT_PENDING_KEY, '1');
+            sessionStorage.setItem(GOOGLE_REDIRECT_LOG_KEY, '1');
+            await signInWithRedirect(window.firebaseAuth, window.googleProvider);
+            return { pending: true };
         } catch (error) {
-            // User closed the popup — not a real error
-            if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
-                return { error: null };
-            }
-            console.error("[Auth] Google sign-in error:", error);
+            // Redirect init failed before the browser navigated away.
+            this.clearGoogleRedirectState();
+            console.error("[Auth] Google redirect start error:", error);
             return { error: error.message };
         }
     },
@@ -276,16 +329,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnGoogle) {
         btnGoogle.addEventListener('click', async () => {
             const prevHtml = btnGoogle.innerHTML;
+            const errorEl = document.getElementById('auth-error');
+            if (errorEl) errorEl.textContent = '';
             btnGoogle.innerHTML = `<i class="fas fa-circle-notch fa-spin text-gray-500"></i> ${window.t ? window.t('auth_loading') : 'Загрузка...'}`;
             btnGoogle.disabled = true;
 
             const result = await Auth.signInWithGoogle();
 
+            if (result?.pending) {
+                return;
+            }
+
             if (!result.error) {
                 document.getElementById('auth-modal').classList.add('hidden');
                 document.getElementById('auth-modal').classList.remove('flex');
             } else {
-                const errorEl = document.getElementById('auth-error');
                 if (errorEl) errorEl.textContent = (window.t ? window.t('auth_err_google') : "Ошибка входа через Google. Попробуйте снова.");
             }
 

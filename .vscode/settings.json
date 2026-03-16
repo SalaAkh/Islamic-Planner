@@ -1,5 +1,6 @@
 {
     "css.lint.unknownAtRules": "ignore",
     "github-actions.workflows.pinned.workflows": [],
-    "github-actions.org-secrets": []
+    "github-actions.org-secrets": [],
+    "chatgpt.openOnStartup": false
 }
