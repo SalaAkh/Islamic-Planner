@@ -258,10 +258,11 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
 
     const targetCity = normalizeCityEntry(fallbackCity || currentCityPref);
     const apiCity = resolveScheduleCity(targetCity);
-    const storeKey = `${NAMAZ_STORAGE_KEY_PREFIX}${targetCity.id}_${year}`;
+    const cityId = parseInt(targetCity.id || targetCity.i, 10);
+    const storeKey = `${NAMAZ_STORAGE_KEY_PREFIX}${cityId}_${year}`;
 
     // Add current target to ignore set so we don't pick it as fallback
-    ignoreSet.add(targetCity.id);
+    ignoreSet.add(cityId);
 
     if (!forceFetch) {
         const cached = localStorage.getItem(storeKey);
@@ -277,28 +278,44 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
     }
 
     try {
-        const { lat, lng } = apiCity;
-        const res = await fetch(`https://api.muftyat.kz/prayer-times/${year}/${lat}/${lng}`);
-        if (!res.ok) throw new Error("API status " + res.status);
-        const data = await res.json();
+        const lat = apiCity.lat || apiCity.la;
+        const lng = apiCity.lng || apiCity.lo;
+        let res = await fetch(`https://api.muftyat.kz/prayer-times/${year}/${lat}/${lng}`);
 
+        // If current year fails, try year - 1
+        if (!res.ok) {
+            console.warn(`[NamazTracker] ${year} API error (${res.status}) for ${targetCity.title}, trying ${year - 1}...`);
+            res = await fetch(`https://api.muftyat.kz/prayer-times/${year - 1}/${lat}/${lng}`);
+
+            // IF BOTH FAIL, we throw an error to trigger the fallback city logic in the catch block
+            if (!res.ok) {
+                throw new Error(`API error ${res.status} for both ${year} and ${year - 1}`);
+            }
+        }
+
+        const data = await res.json();
         if (data && data.result) {
             const scheduleMap = {};
             data.result.forEach(day => {
-                scheduleMap[day.Date] = day;
+                let dateStr = day.Date;
+                // Important: if we're using data from previous year, we need to correct the year string
+                if (!dateStr.startsWith(year.toString())) {
+                    dateStr = year.toString() + dateStr.substring(4);
+                }
+                scheduleMap[dateStr] = day;
             });
             currentSchedule = scheduleMap;
-            // Always save under the original user preference ID so they don't know it fell back
-            const prefStoreKey = `${NAMAZ_STORAGE_KEY_PREFIX}${currentCityPref.id}_${year}`;
+            // Cache the result for the specific city and year
+            const prefStoreKey = `${NAMAZ_STORAGE_KEY_PREFIX}${cityId}_${year}`;
             localStorage.setItem(prefStoreKey, JSON.stringify(scheduleMap));
             updateNamazUI();
         }
     } catch (e) {
-        console.error("Failed to fetch schedule for " + targetCity.title, e);
+        console.warn(`[NamazTracker] Load failed for ${targetCity.title}: ${e.message}`);
 
         // Limit fallback depth by checking ignoreSet size (max 5 fallbacks)
         if (ignoreSet.size < 5) {
-            console.log("Attempting to find nearest working city as fallback...");
+            console.warn("[NamazTracker] Searching for nearest city as fallback...");
 
             // Wait up to 2 seconds for MUFTYAT_CITIES to load if it's external
             if (!Array.isArray(window.MUFTYAT_CITIES)) {
@@ -316,9 +333,9 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
             }
 
             if (getAvailableCities().length > 0) {
-                const nearest = getNearestCity(targetCity.lat, targetCity.lng, ignoreSet);
+                const nearest = getNearestCity(lat, lng, ignoreSet);
                 if (nearest) {
-                    console.log(`Fallback city found: ${nearest.t}`);
+                    console.warn(`[NamazTracker] Fallback found: ${nearest.t}`);
                     const fallbackObj = { id: nearest.i, title: nearest.t, lat: nearest.la, lng: nearest.lo, r: nearest.r };
                     await loadScheduleForYear(year, true, fallbackObj, ignoreSet);
                     return;
@@ -349,27 +366,30 @@ function getDistance(lat1, lon1, lat2, lon2) {
     return R * c; // Distance in km
 }
 
-function getNearestCity(latStr, lngStr, ignoreSet = new Set()) {
+function getNearestCity(originLat, originLng, ignoreSet = new Set()) {
     const cities = getAvailableCities();
     if (cities.length === 0) return null;
-    const originLat = parseFloat(latStr);
-    const originLng = parseFloat(lngStr);
+    originLat = parseFloat(originLat);
+    originLng = parseFloat(originLng);
 
     let closest = null;
     let minDistance = Infinity;
 
     for (const city of cities) {
-        // Skip exact same city strings to avoid infinite loop
-        if (city.la === latStr && city.lo === lngStr) continue;
+        const cityLat = parseFloat(city.la);
+        const cityLng = parseFloat(city.lo);
+        const cityId = parseInt(city.i, 10);
 
-        // Skip cities we've already tried
-        if (ignoreSet.has(city.i)) continue;
+        // Skip exact same location (within ~100 meters) to avoid infinite loop
+        const dist = getDistance(originLat, originLng, cityLat, cityLng);
+        if (dist < 0.1) continue;
 
-        const d = getDistance(originLat, originLng, parseFloat(city.la), parseFloat(city.lo));
-        // Find nearest city (hopefully valid in api)
-        if (d < minDistance) {
-            minDistance = d;
-            closest = city;
+        // Skip cities we've already tried (robust ID check)
+        if (ignoreSet.has(cityId)) continue;
+
+        if (dist < minDistance) {
+            minDistance = dist;
+            closest = { ...city, dist };
         }
     }
     return closest;

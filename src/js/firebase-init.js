@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
 import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { getMessaging, getToken, onMessage, isSupported } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging.js";
 
 // User's actual Firebase Config
@@ -17,7 +17,12 @@ const firebaseConfig = {
 try {
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const db = getFirestore(app);
+
+    // Barakah Planner: Включаем офлайн-кэш для Firestore (будет работать даже без интернета)
+    const db = initializeFirestore(app, {
+        localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+    });
+
     const googleProvider = new GoogleAuthProvider();
 
     // Export to window for classic scripts to use
@@ -60,7 +65,7 @@ try {
         }
     });
 
-    console.log("[Firebase] Initialized successfully. (SurviveKit Ready)");
+    console.log("[Firebase] Initialized successfully. (Barakah Planner Ready)");
 } catch (error) {
     console.warn("[Firebase] Initialization skipped or failed (offline/placeholder config):", error);
 }

@@ -250,7 +250,7 @@ window.Store = {
         }
     },
 
-    // ── Data Backup & Restore (SurviveKit) ─────────────────────────
+    // ── Data Backup & Restore (Barakah Planner) ─────────────────────────
     async exportAllData() {
         const data = {
             localStorage: {},
