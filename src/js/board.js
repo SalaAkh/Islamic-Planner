@@ -69,6 +69,11 @@ window.initBoard = function (showToast) {
     });
     noteLayer.add(tr);
     let selectedNode = null;
+    let boardEditorCounter = 0;
+
+    function isNodeAttachedToStage(node) {
+        return !!node && typeof node.getStage === 'function' && node.getStage() === stage;
+    }
 
     // --- Grid Background ---
     const DOT_SPACING = 50;
@@ -204,7 +209,11 @@ window.initBoard = function (showToast) {
 
     // --- Selection and Context Menu Logic ---
     function updateContextMenuPosition() {
-        if (!selectedNode || !ctxMenu) {
+        if (!isNodeAttachedToStage(selectedNode) || !ctxMenu) {
+            if (!isNodeAttachedToStage(selectedNode)) {
+                selectedNode = null;
+                tr.nodes([]);
+            }
             if(ctxMenu) {
                 ctxMenu.style.opacity = '0';
                 ctxMenu.style.pointerEvents = 'none';
@@ -229,20 +238,21 @@ window.initBoard = function (showToast) {
     }
 
     function selectNode(node) {
-        if (selectedNode === node) return;
-        selectedNode = node;
+        const nextNode = isNodeAttachedToStage(node) ? node : null;
+        if (selectedNode === nextNode) return;
+        selectedNode = nextNode;
         if (node) {
-            tr.nodes([node]);
+            tr.nodes([selectedNode]);
             tr.moveToTop();
-            node.moveToTop();
+            selectedNode.moveToTop();
             
             // Sync selected node color to visually highlight current color
             let nodeColor = '#fef08a';
-            if (node.getClassName() === 'Rect') nodeColor = node.fill();
-            else if (node.getClassName() === 'Arrow') nodeColor = node.stroke();
-            else if (node.getClassName() === 'Group') {
-                const rect = node.getChildren((n) => n.getClassName() === 'Rect')[0];
-                const text = node.getChildren((n) => n.getClassName() === 'Text')[0] || node.getChildren((n) => n.getClassName() === 'Text')[1];
+            if (selectedNode.getClassName() === 'Rect') nodeColor = selectedNode.fill();
+            else if (selectedNode.getClassName() === 'Arrow') nodeColor = selectedNode.stroke();
+            else if (selectedNode.getClassName() === 'Group') {
+                const rect = selectedNode.getChildren((n) => n.getClassName() === 'Rect')[0];
+                const text = selectedNode.getChildren((n) => n.getClassName() === 'Text')[0] || selectedNode.getChildren((n) => n.getClassName() === 'Text')[1];
                 if (rect) nodeColor = rect.fill();
                 else if (text) nodeColor = text.fill();
             }
@@ -673,6 +683,10 @@ window.initBoard = function (showToast) {
         const top  = containerRect.top  + absPos.y + window.scrollY;
 
         const textarea = document.createElement('textarea');
+        const editorId = `board-text-editor-${++boardEditorCounter}`;
+        textarea.id = editorId;
+        textarea.name = editorId;
+        textarea.setAttribute('aria-label', 'Board text editor');
         document.body.appendChild(textarea);
 
         const nodeW = Math.max(100, textNode.width()  * scale);
@@ -717,13 +731,26 @@ window.initBoard = function (showToast) {
         textarea.addEventListener('input', autoGrow);
         autoGrow();
 
+        let isSaving = false;
+        let isClosed = false;
+
+        const cleanupTextarea = () => {
+            if (isClosed) return;
+            isClosed = true;
+            textarea.removeEventListener('input', autoGrow);
+            textarea.removeEventListener('keydown', handleKeydown);
+            textarea.removeEventListener('blur', saveHandler);
+            textarea.remove();
+        };
+
         const saveHandler = () => {
-            if (!textarea.parentNode) return;
+            if (isSaving || isClosed) return;
+            isSaving = true;
             try {
                 if(textarea.value.trim() === '') {
                     if (group.getChildren((n) => n.getClassName() === 'Rect').length === 0) {
+                        if (selectedNode === group) selectNode(null);
                         group.destroy();
-                        selectNode(null);
                     } else {
                         textNode.text('');
                         textNode.show();
@@ -733,19 +760,22 @@ window.initBoard = function (showToast) {
                     textNode.show();
                 }
                 tr.show();
-                if (textarea.parentNode) textarea.parentNode.removeChild(textarea);
+                cleanupTextarea();
                 saveBoardState();
                 if (tr.nodes().length > 0) tr.forceUpdate();
                 stage.draw();
             } catch(e) {
                 console.warn('[Board] saveHandler error:', e.message);
+            } finally {
+                isSaving = false;
             }
         };
 
-        textarea.addEventListener('keydown', function(e) {
+        function handleKeydown(e) {
             if(e.keyCode === 13 && !e.shiftKey) { e.preventDefault(); saveHandler(); }
             if(e.keyCode === 27) saveHandler();
-        });
+        }
+        textarea.addEventListener('keydown', handleKeydown);
         textarea.addEventListener('blur', saveHandler);
     }
 
@@ -820,12 +850,14 @@ window.initBoard = function (showToast) {
                 viewport: { x: stage.x(), y: stage.y(), zoom: stage.scaleX() },
                 konvaNotes: noteLayer.toJSON()
             }, window.currentBoardId || 'main_board');
-            if (selectedNode) trNode.nodes([selectedNode]); // restore selection
+            if (isNodeAttachedToStage(selectedNode)) trNode.nodes([selectedNode]); // restore selection
+            else selectedNode = null;
         }, 500);
     }
 
     async function loadData() {
         const boardData = window.Store.getBoardData(window.currentBoardId || 'main_board');
+        selectNode(null);
         if(boardData) {
             if(boardData.viewport) {
                 stage.x(boardData.viewport.x);
