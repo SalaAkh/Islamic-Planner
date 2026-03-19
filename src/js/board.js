@@ -604,6 +604,7 @@ window.initBoard = function (showToast) {
                 selectNode(tempShape);
                 setMode('pan');
                 saveBoardState();
+                saveHistory();
             } else {
                 saveHistory();
                 requestPathSave();
@@ -611,30 +612,42 @@ window.initBoard = function (showToast) {
         }
     });
 
-    // --- Undo / Redo (Only for Path Layer) ---
+    // --- Undo / Redo (Full Board State: pathLayer + noteLayer) ---
     function saveHistory() {
         historyStep++;
         history.splice(historyStep);
-        history.push(pathLayer.toJSON());
+        history.push({
+            path: pathLayer.toJSON(),
+            notes: noteLayer.toJSON()
+        });
     }
 
     function undo() {
         if (historyStep > 0) {
             historyStep--;
-            restorePathLayerFromJSON(history[historyStep]);
+            const snap = history[historyStep];
+            restorePathLayerFromJSON(snap.path);
+            restoreNoteLayerFromJSON(snap.notes);
             requestPathSave();
+            saveBoardState();
         } else if (historyStep === 0) {
             historyStep--;
             pathLayer.destroyChildren();
+            noteLayer.destroyChildren();
+            noteLayer.add(tr);
             requestPathSave();
+            saveBoardState();
         }
     }
 
     function redo() {
         if (historyStep < history.length - 1) {
             historyStep++;
-            restorePathLayerFromJSON(history[historyStep]);
+            const snap = history[historyStep];
+            restorePathLayerFromJSON(snap.path);
+            restoreNoteLayerFromJSON(snap.notes);
             requestPathSave();
+            saveBoardState();
         }
     }
 
@@ -649,6 +662,28 @@ window.initBoard = function (showToast) {
         children.forEach(c => pathLayer.add(c));
         tempLayer.destroy();
     }
+
+    function restoreNoteLayerFromJSON(jsonStr) {
+        selectNode(null);
+        noteLayer.destroyChildren();
+        noteLayer.add(tr);
+        if (!jsonStr) return;
+        const tempLayer = Konva.Node.create(jsonStr);
+        tempLayer.getChildren().forEach(blob => {
+            if (blob.getClassName() === 'Transformer') return;
+            const node = blob.clone();
+            if (node.getClassName() === 'Group') {
+                const textNode = node.getChildren(n => n.getClassName() === 'Text')[0];
+                if (textNode) textNode.on('dblclick dbltap', () => bindTextArea(textNode, node));
+                node.on('dragend', () => saveBoardState());
+            } else if (node.getClassName() === 'Rect' || node.getClassName() === 'Arrow') {
+                node.on('dragend', () => saveBoardState());
+            }
+            noteLayer.add(node);
+        });
+        tempLayer.destroy();
+    }
+
 
     if(btnClearDrawing) {
         btnClearDrawing.addEventListener('click', () => {
@@ -798,10 +833,11 @@ window.initBoard = function (showToast) {
         noteLayer.add(group);
 
         textNode.on('dblclick dbltap', () => bindTextArea(textNode, group));
-        group.on('dragend', () => saveBoardState());
+        group.on('dragend', () => { saveBoardState(); saveHistory(); });
 
         selectNode(group);
         bindTextArea(textNode, group); // Edit immediately
+        saveHistory();
     }
 
     function addStickyNote(colorKey, startX, startY) {
@@ -830,11 +866,12 @@ window.initBoard = function (showToast) {
         noteLayer.add(group);
 
         textNode.on('dblclick dbltap', () => bindTextArea(textNode, group));
-        group.on('dragend', () => saveBoardState());
+        group.on('dragend', () => { saveBoardState(); saveHistory(); });
 
         selectNode(group);
         window.ActivityLog?.log('note_created', { colorKey });
         saveBoardState();
+        saveHistory();
     }
 
     // --- Sync Save/Load ---
@@ -882,9 +919,9 @@ window.initBoard = function (showToast) {
                     if (node.getClassName() === 'Group') {
                         const textNode = node.getChildren((n) => n.getClassName() === 'Text')[0] || node.getChildren((n) => n.getClassName() === 'Text')[1];
                         if(textNode) textNode.on('dblclick dbltap', () => bindTextArea(textNode, node));
-                        node.on('dragend', () => saveBoardState());
+                        node.on('dragend', () => { saveBoardState(); saveHistory(); });
                     } else if (node.getClassName() === 'Rect' || node.getClassName() === 'Arrow') {
-                        node.on('dragend', () => saveBoardState());
+                        node.on('dragend', () => { saveBoardState(); saveHistory(); });
                     }
                     
                     noteLayer.add(node);
