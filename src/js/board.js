@@ -25,7 +25,6 @@ window.initBoard = function (showToast) {
 
     // Context Menu elements
     const ctxMenu = document.getElementById('canvas-context-menu');
-    const ctxColorIndicator = document.getElementById('ctx-color-indicator');
     const ctxFontUp = document.getElementById('ctx-font-up');
     const ctxFontDown = document.getElementById('ctx-font-down');
     const ctxFront = document.getElementById('ctx-front');
@@ -237,8 +236,8 @@ window.initBoard = function (showToast) {
             tr.moveToTop();
             node.moveToTop();
             
-            // Sync Color Indicator
-            let nodeColor = '#000000';
+            // Sync selected node color to visually highlight current color
+            let nodeColor = '#fef08a';
             if (node.getClassName() === 'Rect') nodeColor = node.fill();
             else if (node.getClassName() === 'Arrow') nodeColor = node.stroke();
             else if (node.getClassName() === 'Group') {
@@ -247,9 +246,14 @@ window.initBoard = function (showToast) {
                 if (rect) nodeColor = rect.fill();
                 else if (text) nodeColor = text.fill();
             }
-            if(ctxColorIndicator) {
-                ctxColorIndicator.style.backgroundColor = (nodeColor === 'transparent' || !nodeColor) ? '#f8fafc' : nodeColor;
-            }
+            // Highlight the matching swatch
+            document.querySelectorAll('.ctx-color-option').forEach(sw => {
+                const swColor = sw.style.backgroundColor;
+                const matches = nodeColor && swColor && (swColor === nodeColor || 
+                    colorsMap[sw.dataset.color] === nodeColor);
+                sw.style.borderColor = matches ? '#6366f1' : 'transparent';
+                sw.style.transform = matches ? 'scale(1.2)' : '';
+            });
             
             // Enable/Disable Font Size buttons based on node type
             const isText = node.getClassName() === 'Group' && node.getChildren((n) => n.getClassName() === 'Text').length > 0;
@@ -292,17 +296,16 @@ window.initBoard = function (showToast) {
     // --- Context Menu Actions ---
     const colorsMap = {
         yellow: '#fef08a', green: '#bbf7d0', blue: '#bfdbfe', pink: '#fbcfe8',
-        white: '#ffffff', slate: '#334155', red: '#ef4444', transparent: 'transparent'
+        orange: '#fde68a', white: '#ffffff', slate: '#334155', red: '#ef4444', transparent: 'transparent'
     };
 
     document.querySelectorAll('.ctx-color-option').forEach(btn => {
         btn.addEventListener('click', (e) => {
             if (!selectedNode) return;
-            const colorKey = e.target.dataset.color || 'yellow';
+            const colorKey = e.target.closest('[data-color]')?.dataset.color || 'yellow';
             const color = colorsMap[colorKey] || e.target.style.backgroundColor;
             
-            ctxColorIndicator.style.backgroundColor = color === 'transparent' ? '#f8fafc' : color;
-            currentColor = color === 'transparent' ? '#1e293b' : color; // Also update active drawing color
+            currentColor = (color === 'transparent') ? '#1e293b' : color;
             
             if (selectedNode.getClassName() === 'Rect') {
                 selectedNode.fill(color);
@@ -376,12 +379,74 @@ window.initBoard = function (showToast) {
     if(btnPan) btnPan.addEventListener('click', () => setMode('pan'));
     if(btnText) btnText.addEventListener('click', () => setMode('text'));
     if(btnSticky) btnSticky.addEventListener('click', () => setMode('sticky'));
-    if(btnShape) btnShape.addEventListener('click', () => setMode('shape'));
+    // btnShape handled inside initShapePicker (opens picker, not setMode directly)
     if(btnArrow) btnArrow.addEventListener('click', () => setMode('arrow'));
     if(btnPencil) btnPencil.addEventListener('click', () => setMode('pencil'));
     if(btnEraser) btnEraser.addEventListener('click', () => setMode('eraser'));
     // Expose setMode globally so shape picker can use it
     window.board_setMode = setMode;
+
+    // --- Shape Picker Init ---
+    (function initShapePicker() {
+        const shapeIcons = {
+            rect: 'far fa-square', circle: 'far fa-circle', ellipse: 'fas fa-egg',
+            star: 'far fa-star', diamond: 'far fa-gem'
+        };
+        window._activeShapeType = window._activeShapeType || 'rect';
+        const picker = document.getElementById('shape-picker');
+        const shapeBtn = document.getElementById('tool-shape');
+        const shapeIcon = document.getElementById('tool-shape-icon');
+        if (!picker || !shapeBtn) return;
+
+        // Clicking the shape button just opens the picker
+        shapeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            picker.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('.shape-pick-btn').forEach(function(pb) {
+            pb.addEventListener('click', function(e) {
+                e.stopPropagation();
+                window._activeShapeType = pb.dataset.shape;
+                const ic = shapeIcons[pb.dataset.shape];
+                if (ic && shapeIcon) shapeIcon.className = ic;
+                picker.classList.add('hidden');
+                setMode('shape');
+            });
+        });
+
+        // Close picker on outside click
+        document.addEventListener('click', function() {
+            picker.classList.add('hidden');
+        });
+    })();
+
+    // --- Keyboard Shortcuts ---
+    function handleBoardKeys(e) {
+        // Don't trigger when typing in inputs/textareas/contenteditable
+        const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        const isEditing = tag === 'input' || tag === 'textarea' || document.activeElement.isContentEditable;
+        
+        if (e.ctrlKey || e.metaKey) {
+            if (e.key === 'z' || e.key === 'Z') { e.preventDefault(); undo(); return; }
+            if (e.key === 'y' || e.key === 'Y') { e.preventDefault(); redo(); return; }
+        }
+        if (isEditing) return;
+
+        switch(e.key.toLowerCase()) {
+            case 'v': setMode('pan'); break;
+            case 't': setMode('text'); break;
+            case 'n': setMode('sticky'); break;
+            case 's': setMode('shape'); break;
+            case 'a': setMode('arrow'); break;
+            case 'p': setMode('pencil'); break;
+            case 'e': setMode('eraser'); break;
+            case 'escape': setMode('pan'); break;
+        }
+    }
+    document.addEventListener('keydown', handleBoardKeys);
+    // Store cleanup ref so we can remove it if board is destroyed
+    window._boardKeyHandler = handleBoardKeys;
 
 
     // --- Drawing Events ---
@@ -408,13 +473,13 @@ window.initBoard = function (showToast) {
         
         if (mode === 'pencil' || mode === 'eraser') {
             tempShape = new Konva.Line({
-                stroke: mode === 'eraser' ? 'white' : currentColor,
-                strokeWidth: mode === 'eraser' ? brushSize * 5 : brushSize,
+                stroke: mode === 'eraser' ? 'rgba(0,0,0,1)' : currentColor,
+                strokeWidth: mode === 'eraser' ? brushSize * 8 : brushSize,
                 globalCompositeOperation: mode === 'eraser' ? 'destination-out' : 'source-over',
                 lineCap: 'round',
                 lineJoin: 'round',
                 points: [pos.x, pos.y],
-                listening: false, // unselectable
+                listening: false,
             });
             pathLayer.add(tempShape);
         } else if (mode === 'arrow') {
@@ -596,38 +661,64 @@ window.initBoard = function (showToast) {
         }
 
         textNode.hide();
-        tr.hide(); 
-        const textPosition = textNode.absolutePosition();
-        const areaPosition = {
-            x: stage.container().offsetLeft + textPosition.x,
-            y: stage.container().offsetTop + textPosition.y,
-        };
+        tr.hide();
+
+        // Accurate position: container rect + node's absolute position on stage
+        const containerRect = container.getBoundingClientRect();
+        const absPos = textNode.absolutePosition();
+        const scale = stage.scaleX();
+
+        // absPos is in stage-space pixels relative to the canvas top-left
+        const left = containerRect.left + absPos.x + window.scrollX;
+        const top  = containerRect.top  + absPos.y + window.scrollY;
+
         const textarea = document.createElement('textarea');
         document.body.appendChild(textarea);
-        textarea.value = textNode.text().replace('Дважды кликните...', '').replace('Нажмите ESC...', '');
-        textarea.style.position = 'absolute';
-        textarea.style.top = areaPosition.y + 'px';
-        textarea.style.left = areaPosition.x + 'px';
-        textarea.style.width = Math.max(100, textNode.width() * stage.scaleX()) + 20 + 'px';
-        textarea.style.height = Math.max(50, textNode.height() * stage.scaleY()) + 20 + 'px';
-        textarea.style.fontSize = (textNode.fontSize() * stage.scaleX()) + 'px';
-        textarea.style.border = '1px dashed #3b82f6';
-        textarea.style.padding = '0';
-        textarea.style.margin = '0';
-        textarea.style.overflow = 'hidden';
-        textarea.style.background = 'transparent';
-        textarea.style.outline = 'none';
-        textarea.style.resize = 'both';
-        textarea.style.lineHeight = textNode.lineHeight();
-        textarea.style.fontFamily = textNode.fontFamily();
-        textarea.style.transformOrigin = 'left top';
-        textarea.style.textAlign = textNode.align();
-        textarea.style.color = textNode.fill() === 'transparent' ? '#1e293b' : textNode.fill();
-        textarea.style.zIndex = '1000';
+
+        const nodeW = Math.max(100, textNode.width()  * scale);
+        const nodeH = Math.max(40,  textNode.height() * scale);
+        const fontSize = Math.max(12, textNode.fontSize() * scale);
+
+        textarea.value = textNode.text()
+            .replace('Дважды кликните...', '')
+            .replace('Нажмите ESC...', '');
+
+        Object.assign(textarea.style, {
+            position:        'absolute',
+            left:            left + 'px',
+            top:             top + 'px',
+            width:           nodeW + 'px',
+            minHeight:       nodeH + 'px',
+            fontSize:        fontSize + 'px',
+            fontFamily:      textNode.fontFamily(),
+            lineHeight:      '1.4',
+            color:           textNode.fill() === 'transparent' ? '#1e293b' : textNode.fill(),
+            border:          '2px dashed #3b82f6',
+            borderRadius:    '4px',
+            padding:         Math.round(textNode.padding() * scale || 0) + 'px',
+            margin:          '0',
+            overflow:        'hidden',
+            background:      'transparent',
+            outline:         'none',
+            resize:          'none',
+            textAlign:       textNode.align() || 'left',
+            transformOrigin: 'left top',
+            zIndex:          '10001',
+            boxSizing:       'border-box',
+        });
         textarea.focus();
+        textarea.select();
+
+        // Auto-grow height
+        function autoGrow() {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.max(nodeH, textarea.scrollHeight) + 'px';
+        }
+        textarea.addEventListener('input', autoGrow);
+        autoGrow();
 
         const saveHandler = () => {
-            if (!textarea.parentNode) return; // Гард от повторного вызова
+            if (!textarea.parentNode) return;
             try {
                 if(textarea.value.trim() === '') {
                     if (group.getChildren((n) => n.getClassName() === 'Rect').length === 0) {
@@ -644,8 +735,8 @@ window.initBoard = function (showToast) {
                 tr.show();
                 if (textarea.parentNode) textarea.parentNode.removeChild(textarea);
                 saveBoardState();
-                // Безопасный forceUpdate только если есть активные ноды
                 if (tr.nodes().length > 0) tr.forceUpdate();
+                stage.draw();
             } catch(e) {
                 console.warn('[Board] saveHandler error:', e.message);
             }
@@ -861,6 +952,13 @@ window.openBoard = function(boardId) {
         
         document.getElementById('btn-back-to-boards').classList.remove('hidden');
         
+        // Show the creation toolbar
+        const creationBar = document.getElementById('miro-creation-bar');
+        if (creationBar) {
+            creationBar.classList.remove('hidden');
+            creationBar.style.display = 'flex';
+        }
+        
         if(!window._boardInitialized) {
             window.initBoard();
             window._boardInitialized = true;
@@ -910,6 +1008,10 @@ function initDashboardEvents() {
         setTimeout(() => {
             boardView.classList.add('hidden');
             boardView.classList.remove('page-flip-out');
+            
+            // Hide the creation toolbar
+            const _bar = document.getElementById('miro-creation-bar');
+            if (_bar) { _bar.classList.add('hidden'); _bar.style.display = ''; }
             
             viewsBoards.classList.remove('hidden');
             viewsBoards.classList.add('active', 'page-flip-in');
