@@ -250,6 +250,27 @@ window.Store = {
         }
     },
 
+    // ── To-Do Lists ─────────────────────────────────────────────────────
+    getTodoLists() {
+        try {
+            const lists = localStorage.getItem('barakah_todo_lists');
+            return lists ? JSON.parse(lists) : [];
+        } catch (e) {
+            return [];
+        }
+    },
+
+    saveTodoLists(lists) {
+        try {
+            const normalizedLists = Array.isArray(lists) ? lists : [];
+            localStorage.setItem('barakah_todo_lists', JSON.stringify(normalizedLists));
+            if (window.DbSync) window.DbSync.syncToCloud('todo_lists', normalizedLists);
+            window.ActivityLog?.log('todo_lists_saved', { count: normalizedLists.length });
+        } catch (e) {
+            console.error('[Store] Failed to save todo lists:', e);
+        }
+    },
+
     // ── Data Backup & Restore (Barakah Planner) ─────────────────────────
     async exportAllData() {
         const data = {

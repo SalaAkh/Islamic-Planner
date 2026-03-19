@@ -1,6 +1,3 @@
-import db from './db.js';
-import store from './store.js';
-
 class TodoManager {
     constructor() {
         this.lists = [];
@@ -28,9 +25,7 @@ class TodoManager {
     initListeners() {
         const tabLists = document.getElementById('tab-lists');
         if (tabLists) {
-            tabLists.addEventListener('click', () => {
-                if(this.lists.length === 0) this.loadLists();
-            });
+            tabLists.addEventListener('click', () => this.loadLists());
         }
 
         this.addListBtn?.addEventListener('click', () => this.createNewList());
@@ -45,12 +40,11 @@ class TodoManager {
     }
 
     async loadLists() {
-        if (!store.user) return;
+        if (!window.Store || typeof window.Store.getTodoLists !== 'function') return;
         
         this.showLoading(true);
         try {
-            const res = await db.collection(`users/${store.user.uid}/todoLists`).get();
-            this.lists = res || [];
+            this.lists = window.Store.getTodoLists();
             this.lists.sort((a,b) => (a.createdAt || 0) - (b.createdAt || 0));
 
             // Attach parent list ID to all tasks for smart views
@@ -430,11 +424,6 @@ class TodoManager {
     }
 
     async createNewList() {
-        if (!store.user) {
-            alert('Войдите в аккаунт для облачной синхронизации.');
-            return;
-        }
-        
         const title = prompt('Название нового списка:');
         if (!title || !title.trim()) return;
 
@@ -527,17 +516,13 @@ class TodoManager {
         this.currentListId = null;
         
         this.selectList('smart_my_day'); // Fallback to Smart View
-
-        try {
-            await db.deleteDocument(`users/${store.user.uid}/todoLists/${listId}`);
-        } catch(e) { console.error('Error deleting list', e); }
+        await this.syncList();
     }
 
-    async syncList(list) {
-        if (!store.user) return;
+    async syncList(_list) {
+        if (!window.Store || typeof window.Store.saveTodoLists !== 'function') return;
         try {
-            // Drop temporary UI state before saving if needed (parentListId is fine to keep)
-            await db.setDocument(`users/${store.user.uid}/todoLists/${list.id}`, list);
+            window.Store.saveTodoLists(this.lists);
         } catch (e) {
             console.error('Error syncing list:', e);
         }
@@ -553,4 +538,3 @@ class TodoManager {
 
 const todoManager = new TodoManager();
 window.todoManager = todoManager;
-export default todoManager;

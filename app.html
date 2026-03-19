@@ -894,104 +894,70 @@
             <div id="view-board" class="page-view" style="height: 100%;">
                 <header
                     class="mb-4 border-b-2 border-slate-200 pb-4 flex flex-wrap justify-between items-center relative z-10 bg-paper gap-3">
-                    <div>
-                        <h1 class="text-3xl font-bold text-indigo-900 dark:text-indigo-400 tracking-tight">Tafakkur
-                            Board</h1>
-                        <p class="text-gray-500 mt-1 text-sm"><i class="fas fa-infinity mr-1"></i> <span
-                                data-i18n="board_desc">Бесконечный холст · Pinch-to-zoom на мобильном</span></p>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <button id="btn-miro-thumbnail" class="w-14 h-14 rounded-xl shadow-sm border border-gray-200 hover:border-blue-500 overflow-hidden flex items-center justify-center bg-white flex-shrink-0 relative group transition-colors" title="Select thumbnail">
+                            <img id="board-thumbnail-img" src="https://mirostatic.com/board-image-assets/20250610/112x112/board_icon_1.png" class="w-[85%] h-[85%] object-contain">
+                            <div class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center text-white backdrop-blur-[1px]"><i class="fas fa-pen text-sm"></i></div>
+                        </button>
+                        <div>
+                            <h1 class="text-3xl font-bold text-indigo-900 dark:text-indigo-400 tracking-tight">Tafakkur
+                                Board</h1>
+                            <p class="text-gray-500 mt-1 text-sm"><i class="fas fa-infinity mr-1"></i> <span
+                                    data-i18n="board_desc">Бесконечный холст · Pinch-to-zoom на мобильном</span></p>
+                        </div>
                     </div>
-                    <div class="flex flex-wrap gap-2 items-center">
-                        <button id="add-note-yellow"
-                            class="w-10 h-10 rounded-full bg-yellow-200 border-2 border-yellow-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-yellow-700 tooltip"
-                            aria-label="Жёлтый стикер" data-i18n="sticker_yellow" data-i18n-target="aria-label"><i
-                                class="fas fa-plus"></i></button>
-                        <button id="add-note-green"
-                            class="w-10 h-10 rounded-full bg-green-200 border-2 border-green-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-green-700 dark:text-green-400 tooltip"
-                            aria-label="Зелёный стикер" data-i18n="sticker_green" data-i18n-target="aria-label"><i
-                                class="fas fa-plus"></i></button>
-                        <button id="add-note-blue"
-                            class="w-10 h-10 rounded-full bg-blue-200 border-2 border-blue-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-blue-700 tooltip"
-                            aria-label="Синий стикер" data-i18n="sticker_blue" data-i18n-target="aria-label"><i
-                                class="fas fa-plus"></i></button>
-                        <button id="add-note-pink"
-                            class="w-10 h-10 rounded-full bg-pink-200 border-2 border-pink-400 shadow-md hover:scale-110 transition-transform flex items-center justify-center text-pink-700 dark:text-pink-400 tooltip"
-                            aria-label="Розовый стикер" data-i18n="sticker_pink" data-i18n-target="aria-label"><i
-                                class="fas fa-plus"></i></button>
-                        <div class="w-px h-8 bg-gray-200 mx-1 hidden md:block"></div>
+                    <div class="flex items-center gap-2">
                         <button id="reset-board-view"
                             class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold transition-colors">
-                            <i class="fas fa-crosshairs mr-1"></i><span data-i18n="center_btn">Центр</span></button>
+                            <i class="fas fa-crosshairs mr-1"></i><span data-i18n="center_btn">Центр</span>
+                        </button>
                     </div>
                 </header>
 
-                <!-- Drawing Toolbar -->
-                <div class="board-toolbar">
-                    <div class="toolbar-group">
-                        <button id="tool-pan" class="tool-btn" title="Перемещение (V)" data-i18n-target="title"
-                            data-i18n="tool_hand_title">
-                            <i class="fas fa-hand-paper"></i>
-                            <span class="tool-label" data-i18n="tool_hand_label">Рука</span>
-                        </button>
-                        <button id="tool-pencil" class="tool-btn" title="Карандаш (P)" data-i18n-target="title"
-                            data-i18n="tool_pencil_title">
-                            <i class="fas fa-pencil-alt"></i>
-                            <span class="tool-label" data-i18n="tool_pencil_label">Рисунок</span>
-                        </button>
-                        <button id="tool-arrow" class="tool-btn" title="Стрелка (A)" data-i18n-target="title">
-                            <i class="fas fa-long-arrow-alt-right"></i>
-                            <span class="tool-label">Стрелка</span>
-                        </button>
-                        <button id="tool-shape" class="tool-btn" title="Фигура (S)" data-i18n-target="title">
-                            <i class="far fa-square"></i>
-                            <span class="tool-label">Фигура</span>
-                        </button>
-                        <button id="tool-text" class="tool-btn" title="Текст (T)" data-i18n-target="title">
-                            <i class="fas fa-font"></i>
-                            <span class="tool-label">Текст</span>
-                        </button>
-                        <button id="tool-eraser" class="tool-btn" title="Ластик (E)" data-i18n-target="title"
-                            data-i18n="tool_eraser_title">
-                            <i class="fas fa-eraser"></i>
-                            <span class="tool-label" data-i18n="tool_eraser_label">Ластик</span>
-                        </button>
+                <div id="board-container" class="board-container relative overflow-hidden bg-gray-50 rounded-2xl w-full"
+                    style="min-height: 720px;">
+                    <!-- Konva Stage mounts here -->
+                    
+                    <!-- Vertical Creation Bar (Miro Style) -->
+                    <div id="miro-creation-bar" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700 flex flex-col p-1.5 space-y-1 z-40">
+                        <button id="tool-pan" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors tool-active" title="Выделение / Рука (V)"><i class="fas fa-mouse-pointer"></i></button>
+                        <button id="tool-text" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Текст (T)"><i class="fas fa-font"></i></button>
+                        <button id="tool-sticky" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Стикер (N)"><i class="far fa-sticky-note"></i></button>
+                        <button id="tool-shape" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Фигура (S)"><i class="far fa-square"></i></button>
+                        <button id="tool-arrow" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Стрелка (A)"><i class="fas fa-long-arrow-alt-right"></i></button>
+                        <button id="tool-pencil" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Карандаш (P)"><i class="fas fa-pen"></i></button>
+                        <div class="h-px w-full bg-gray-200 dark:bg-slate-700 my-1"></div>
+                        <button id="tool-eraser" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Ластик (E)"><i class="fas fa-eraser"></i></button>
+                        <button id="clear-drawing" class="w-10 h-10 rounded-lg flex items-center justify-center text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors" title="Очистить доску"><i class="fas fa-trash-alt"></i></button>
+                        <div class="h-px w-full bg-gray-200 dark:bg-slate-700 my-1"></div>
+                        <button id="tool-undo" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Отменить (Ctrl+Z)"><i class="fas fa-reply"></i></button>
+                        <button id="tool-redo" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Вернуть (Ctrl+Y)"><i class="fas fa-share"></i></button>
                     </div>
-                    <div class="toolbar-divider inline-block ml-1"></div>
-                    <div class="toolbar-group">
-                        <button id="tool-undo" class="tool-btn" title="Отменить (Ctrl+Z)" data-i18n-target="title" data-i18n="tool_undo_title">
-                            <i class="fas fa-undo"></i>
-                            <span class="tool-label" data-i18n="tool_undo_label">Назад</span>
-                        </button>
-                        <button id="tool-redo" class="tool-btn" title="Вернуть (Ctrl+Y)" data-i18n-target="title" data-i18n="tool_redo_title">
-                            <i class="fas fa-redo"></i>
-                            <span class="tool-label" data-i18n="tool_redo_label">Вперед</span>
-                        </button>
+
+                    <!-- Floating Context Menu -->
+                    <div id="canvas-context-menu" class="absolute bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 px-2 py-1 flex items-center gap-1 z-50 transition-opacity duration-200 opacity-0 pointer-events-none" style="top: -100px; left: -100px;">
+                        <div class="relative group flex items-center justify-center">
+                            <button class="w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-center relative outline-none">
+                                <div id="ctx-color-indicator" class="w-5 h-5 rounded-full border border-gray-300 shadow-inner" style="background-color: #fef08a;"></div>
+                            </button>
+                            <div class="absolute top-10 left-0 bg-white dark:bg-slate-800 shadow-xl rounded-lg p-2 grid grid-cols-4 gap-2 hidden group-hover:grid border border-gray-200 dark:border-slate-700 z-50 w-32">
+                                <button class="ctx-color-option w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform" style="background-color: #fef08a;" data-color="yellow"></button>
+                                <button class="ctx-color-option w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform" style="background-color: #bbf7d0;" data-color="green"></button>
+                                <button class="ctx-color-option w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform" style="background-color: #bfdbfe;" data-color="blue"></button>
+                                <button class="ctx-color-option w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform" style="background-color: #fbcfe8;" data-color="pink"></button>
+                                <button class="ctx-color-option w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform" style="background-color: #ffffff;" data-color="white"></button>
+                                <button class="ctx-color-option w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform" style="background-color: #334155;" data-color="slate"></button>
+                                <button class="ctx-color-option w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform" style="background-color: #ef4444;" data-color="red"></button>
+                                <button class="ctx-color-option w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform flex items-center justify-center overflow-hidden" style="background-color: #f8fafc;" data-color="transparent"><div class="w-full h-px bg-red-400 rotate-45"></div></button>
+                            </div>
+                        </div>
+                        <div class="w-px h-5 bg-gray-300 dark:bg-slate-600 mx-1"></div>
+                        <button id="ctx-font-up" class="w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-center text-gray-700 dark:text-gray-300 transition-colors" title="Увеличить текст"><i class="fas fa-plus"></i></button>
+                        <button id="ctx-font-down" class="w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-center text-gray-700 dark:text-gray-300 transition-colors" title="Уменьшить текст"><i class="fas fa-minus"></i></button>
+                        <div class="w-px h-5 bg-gray-300 dark:bg-slate-600 mx-1"></div>
+                        <button id="ctx-front" class="w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-center text-gray-700 dark:text-gray-300 transition-colors" title="На передний план"><i class="fas fa-layer-group"></i></button>
+                        <button id="ctx-delete" class="w-8 h-8 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500 transition-colors flex items-center justify-center" title="Удалить"><i class="fas fa-trash-alt"></i></button>
                     </div>
-                    <div class="toolbar-divider"></div>
-                    <div class="toolbar-group items-center">
-                        <label for="draw-color" class="tool-label-sm" data-i18n="tool_color_label">Цвет</label>
-                        <input type="color" id="draw-color" name="draw-color" value="#1e293b" class="color-picker-btn"
-                            title="Цвет кисти" aria-label="Цвет кисти">
-                    </div>
-                    <div class="toolbar-group items-center">
-                        <label for="brush-size" class="tool-label-sm" data-i18n="tool_size_label">Размер</label>
-                        <input type="range" id="brush-size" name="brush-size" min="1" max="20" value="3"
-                            class="brush-slider" aria-label="Размер кисти">
-                    </div>
-                    <div class="toolbar-divider hidden md:block"></div>
-                    <button id="clear-drawing" class="tool-btn text-red-400 hover:text-red-600" title="Очистить рисунок"
-                        data-i18n-target="title" data-i18n="tool_clear_title">
-                        <i class="fas fa-trash-alt"></i>
-                        <span class="tool-label" data-i18n="tool_clear_label">Очистить</span>
-                    </button>
-                    <div class="toolbar-shortcuts hidden lg:flex items-center gap-1 ml-2 text-gray-400 text-xs">
-                        <span class="kbd">P</span> <span data-i18n="shortcut_draw">рисунок</span>
-                        <span class="kbd">E</span> <span data-i18n="shortcut_eraser">ластик</span>
-                        <span class="kbd">V</span> <span data-i18n="shortcut_hand">рука</span>
-                        <span class="kbd">Space</span> <span data-i18n="shortcut_pan">пан</span>
-                        <span class="kbd">Ctrl+Z</span> <span data-i18n="shortcut_undo">назад</span>
-                        <span class="kbd">Ctrl+Y</span> <span data-i18n="shortcut_redo">вперед</span>
-                    </div>
-                </div>
 
                 <div id="board-container" class="board-container relative overflow-hidden bg-gray-50 rounded-2xl w-full"
                     style="min-height: 720px;">
@@ -1701,6 +1667,82 @@
                     });
             });
         }
+    </script>
+
+    <!-- Miro Thumbnail Modal -->
+    <div id="miro-thumb-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center pointer-events-auto">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-[560px] max-w-[95%] overflow-hidden flex flex-col transform transition-all scale-95 opacity-0 duration-200" id="miro-thumb-modal-content">
+            <div class="p-5 pb-4 flex justify-between items-center border-b border-gray-100 dark:border-slate-700">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Select thumbnail</h1>
+                <button id="miro-thumb-close" class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-slate-700 dark:hover:text-gray-200 transition-colors"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[50vh] custom-scrollbar">
+                <div class="grid grid-cols-6 sm:grid-cols-7 gap-3" id="miro-thumb-grid">
+                    <!-- JS populated -->
+                </div>
+            </div>
+            <div class="p-5 pt-4 border-t border-gray-100 dark:border-slate-700 flex justify-between gap-3">
+                <button class="flex-1 flex items-center justify-center gap-2 px-6 py-2 border border-blue-500 font-semibold text-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                    <i class="fas fa-arrow-up"></i> Upload
+                </button>
+                <button class="flex-1 flex items-center justify-center gap-2 px-6 py-2 border border-blue-500 font-semibold text-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                    <i class="far fa-object-group"></i> Select board area
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const icons = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,17,19,21,22,24,26,27,28,29,30,31,32,33,34,35,37,39,40,41,42,43,44,45,46,47];
+            const grid = document.getElementById('miro-thumb-grid');
+            const mainThumb = document.getElementById('board-thumbnail-img');
+            const modal = document.getElementById('miro-thumb-modal');
+            const modalContent = document.getElementById('miro-thumb-modal-content');
+            
+            if(!grid || !mainThumb) return;
+            
+            let selectedIcon = localStorage.getItem('barakah_board_thumb') || 1;
+            mainThumb.src = `https://mirostatic.com/board-image-assets/20250610/112x112/board_icon_${selectedIcon}.png`;
+
+            icons.forEach(id => {
+                const btn = document.createElement('button');
+                btn.className = `w-14 h-14 sm:w-16 sm:h-16 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all ${selectedIcon == id ? 'border-blue-500 bg-blue-50' : 'border-transparent hover:bg-slate-100 dark:hover:bg-slate-700'} p-2`;
+                btn.innerHTML = `<img src="https://mirostatic.com/board-image-assets/20250610/112x112/board_icon_${id}.png" class="w-full h-full object-contain" alt="Thumbnail ${id}">`;
+                btn.onclick = () => {
+                    grid.querySelectorAll('button').forEach(b => b.className = 'w-14 h-14 sm:w-16 sm:h-16 rounded-xl border-2 border-transparent hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center flex-shrink-0 transition-all p-2');
+                    btn.className = 'w-14 h-14 sm:w-16 sm:h-16 rounded-xl border-2 border-blue-500 bg-blue-50 flex items-center justify-center flex-shrink-0 transition-all p-2';
+                    mainThumb.src = `https://mirostatic.com/board-image-assets/20250610/112x112/board_icon_${id}.png`;
+                    localStorage.setItem('barakah_board_thumb', id);
+                    closeModal();
+                };
+                grid.appendChild(btn);
+            });
+
+            function openModal() {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                setTimeout(() => {
+                    modalContent.classList.remove('scale-95', 'opacity-0');
+                    modalContent.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+
+            function closeModal() {
+                modalContent.classList.remove('scale-100', 'opacity-100');
+                modalContent.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }, 200);
+            }
+
+            document.getElementById('btn-miro-thumbnail')?.addEventListener('click', openModal);
+            document.getElementById('miro-thumb-close')?.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal) closeModal();
+            });
+        });
     </script>
 </body>
 

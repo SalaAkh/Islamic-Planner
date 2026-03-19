@@ -128,6 +128,8 @@ window.DbSync = {
                     }
                 } else if (key === 'events') {
                     localStorage.setItem('barakah_events', JSON.stringify(data));
+                } else if (key === 'todo_lists') {
+                    localStorage.setItem('barakah_todo_lists', JSON.stringify(data));
                 } else if (key.startsWith('day_')) {
                     localStorage.setItem(`barakah_${key}`, JSON.stringify(data));
                 }
@@ -155,6 +157,9 @@ window.DbSync = {
 
             const events = localStorage.getItem('barakah_events');
             if (events) await this.syncToCloud('events', JSON.parse(events));
+
+            const todoLists = localStorage.getItem('barakah_todo_lists');
+            if (todoLists) await this.syncToCloud('todo_lists', JSON.parse(todoLists));
 
             if (window.Store && typeof window.Store.getDrawing === 'function') {
                 const drawing = await window.Store.getDrawing();
