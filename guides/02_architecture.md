@@ -1,49 +1,147 @@
-﻿# Ð¢ÐµÑ…Ð½Ð¸Ñ‡ÐµÑÐºÐ°Ñ ÐÑ€Ñ…Ð¸Ñ‚ÐµÐºÑ‚ÑƒÑ€Ð° (Barakah Planner)
+# Техническая Архитектура (Barakah Planner)
 
-ÐœÐ°ÑˆÐ°ÐÐ»Ð»Ð°Ñ…, Ð½Ð°Ñˆ ÐºÐ¾Ð´ Ñ‡Ð¸ÑÑ‚, Ð¿Ñ€Ð¾ÑÑ‚ Ð¸ Ð½Ð°Ð´ÐµÐ¶ÐµÐ½ ÐºÐ°Ðº Ð°Ð²Ñ‚Ð¾Ð¼Ð°Ñ‚ ÐšÐ°Ð»Ð°ÑˆÐ½Ð¸ÐºÐ¾Ð²Ð°. Ð’Ð¾Ñ‚ ÐºÐ°Ðº Ð²ÑÐµ ÑƒÑÑ‚Ñ€Ð¾ÐµÐ½Ð¾ Ð¿Ð¾Ð´ ÐºÐ°Ð¿Ð¾Ñ‚Ð¾Ð¼:
+МашаАллах, наш код чист, прост и надёжен как автомат Калашникова. Вот как всё устроено под капотом:
 
-## ðŸ—ï¸ Ð¡Ñ‚ÐµÐº Ð¢ÐµÑ…Ð½Ð¾Ð»Ð¾Ð³Ð¸Ð¹
+## 🏗️ Стек Технологий
 
-- **HTML5:** Ð”Ð²Ðµ Ð¾ÑÐ½Ð¾Ð²Ð½Ñ‹Ðµ ÑÑ‚Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸Ðµ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñ‹: `index.html` (Ð›ÐµÐ½Ð´Ð¸Ð½Ð³) Ð¸ `app.html` (Ð“Ð»Ð°Ð²Ð½Ð¾Ðµ PWA-Ð¿Ñ€Ð¸Ð»Ð¾Ð¶ÐµÐ½Ð¸Ðµ).
-- **CSS3 / TailwindCSS:** Ð”Ð¸Ð·Ð°Ð¹Ð½ Ñ‡ÐµÑ€ÐµÐ· ÐºÐ»Ð°ÑÑÑ‹ Tailwind, ÐºÐ°ÑÑ‚Ð¾Ð¼Ð½Ñ‹Ðµ Ð°Ð½Ð¸Ð¼Ð°Ñ†Ð¸Ð¸ Ð¸ `style.css`.
-- **Vanilla JavaScript:** Ð¡Ñ‚Ñ€Ð¾Ð³Ð¸Ð¹ ES Modules Ð¿Ð¾Ð´Ñ…Ð¾Ð´ Ð´Ð»Ñ ÑÑÐ½Ð¾ÑÑ‚Ð¸ Ð¸ Ð¾Ñ‚ÑÑƒÑ‚ÑÑ‚Ð²Ð¸Ñ "Ð¼Ð°Ð³Ð¸Ð¸" Ñ„Ñ€ÐµÐ¹Ð¼Ð²Ð¾Ñ€ÐºÐ¾Ð².
-- **Ð¢Ñ€Ð¾Ð¹Ð½Ð¾Ðµ Ñ…Ñ€Ð°Ð½Ð¸Ð»Ð¸Ñ‰Ðµ (Triple Storage) & Sync:**
-  - `LocalStorage`: Ð´Ð»Ñ Ð±Ñ‹ÑÑ‚Ñ€Ñ‹Ñ… Ð´Ð°Ð½Ð½Ñ‹Ñ… (Ñ‚ÐµÐºÑÑ‚ Ð·Ð°Ð´Ð°Ñ‡, Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸, ÑÐ·Ñ‹Ðº).
-  - `IndexedDB`: Ð´Ð»Ñ Ñ‚ÑÐ¶ÐµÐ»Ñ‹Ñ… Ð´Ð°Ð½Ð½Ñ‹Ñ… (Ñ…Ð¾Ð»ÑÑ‚ Tafakkur Board, base64 Ð»Ð¸Ð½Ð¸Ð¸).
-  - `Firebase Firestore`: Ð´Ð»Ñ ÑÐ¸Ð½Ñ…Ñ€Ð¾Ð½Ð¸Ð·Ð°Ñ†Ð¸Ð¸ Ð² Ñ€ÐµÐ°Ð»ÑŒÐ½Ð¾Ð¼ Ð²Ñ€ÐµÐ¼ÐµÐ½Ð¸ Ð¿Ñ€Ð¸ Ð²Ñ…Ð¾Ð´Ðµ Ð¿Ð¾ Ð¿Ð¾Ñ‡Ñ‚Ðµ (Google/Email).
+| Слой | Технология | Назначение |
+| ---- | ---------- | ---------- |
+| HTML | HTML5 | `index.html` (Лендинг) и `app.html` (PWA-приложение) |
+| CSS | Tailwind CSS v4 + кастомный `style.css` | Дизайн, анимации, тёмная тема |
+| JS | Vanilla JavaScript (ES Modules) | Вся логика без фреймворков |
+| Canvas | **Konva.js** | Tafakkur Board (infinite canvas) |
+| Хранилище | LocalStorage + IndexedDB | Оффлайн-данные |
+| Синхронизация | Firebase Auth + Firestore | Облачный бэкап при входе |
+| Сборка | Кастомный `scripts/build-monolith.js` | Node.js сборщик |
+| Хостинг | Firebase Hosting | `dist/` → продакшн |
 
-## ðŸ“‚ Ð¡Ñ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð° Ð˜ÑÑ…Ð¾Ð´Ð½Ð¸ÐºÐ¾Ð² (`src/`)
+---
 
-- `index.html` â€” ÐŸÐ¾Ð»Ð½Ð¾Ñ†ÐµÐ½Ð½Ñ‹Ð¹ 4-ÑÐ·Ñ‹Ñ‡Ð½Ñ‹Ð¹ Landing Page Ñ 3D-Ð°Ð½Ð¸Ð¼Ð°Ñ†Ð¸ÑÐ¼Ð¸ Tailwind, SEO-Ð¼ÐµÑ‚Ð°Ñ‚ÐµÐ³Ð°Ð¼Ð¸, ÐºÐ½Ð¾Ð¿ÐºÐ¾Ð¹ Ð·Ð°Ð¿ÑƒÑÐºÐ° Ð¿Ñ€Ð¸Ð»Ð¾Ð¶ÐµÐ½Ð¸Ñ.
-- `app.html` â€” PWA. Ð¡Ð°Ð¼ Ð¿Ð»Ð°Ð½ÐµÑ€ ÑÐ¾ Ð²ÑÐµÐ¼Ð¸ Ð¸Ð½ÑÑ‚Ñ€ÑƒÐ¼ÐµÐ½Ñ‚Ð°Ð¼Ð¸.
-- `src/css/style.css` â€” Ð“Ð»Ð°Ð²Ð½Ñ‹Ð¹ Ñ„Ð°Ð¹Ð» ÑÑ‚Ð¸Ð»ÐµÐ¹ (ÑˆÑ€Ð¸Ñ„Ñ‚Ñ‹ Ñ€ÑƒÐºÐ¾Ð¿Ð¸ÑÐ½Ñ‹Ðµ, Ñ„Ð¾Ð½Ñ‹ "binder-holes", Ñ†Ð²ÐµÑ‚Ð° Ñ‚Ð°Ð±Ð¾Ð², ÑÐ²Ð¸Ñ‚Ñ‡).
-- `src/js/store.js` â€” Data Layer (LocalStorage / IndexedDB / Export-Import JSON).
-- `src/js/i18n.js` â€” Ð¡Ð¸ÑÑ‚ÐµÐ¼Ð° Ð»Ð¾ÐºÐ°Ð»Ð¸Ð·Ð°Ñ†Ð¸Ð¸. ÐœÐ°ÑÑÐ¸Ð²Ñ‹ RU/KK/AR/EN. ÐŸÐµÑ€ÐµÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ðµ Ð½Ð° Ð»ÐµÑ‚Ñƒ (`?lang=`).
-- `src/js/board.js` â€” Ð”Ð²Ð¸Ð¶Ð¾Ðº Ð±ÐµÑÐºÐ¾Ð½ÐµÑ‡Ð½Ð¾Ð³Ð¾ Ñ…Ð¾Ð»ÑÑ‚Ð° (Zoom, Pan, Sticky Notes 4-Ñ… Ñ†Ð²ÐµÑ‚Ð¾Ð², Ñ€Ð¸ÑÐ¾Ð²Ð°Ð½Ð¸Ðµ).
-- `src/js/activity-log.js` â€” Ð˜ÑÑ‚Ð¾Ñ€Ð¸Ñ Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ð¹ ÑŽÐ·ÐµÑ€Ð° (Audit Trail) Ñ Ð¿Ð¾Ð´Ð´ÐµÑ€Ð¶ÐºÐ¾Ð¹ Firestore.
-- `src/js/auth.js`, `db.js`, `firebase-init.js` â€” ÐÐ²Ñ‚Ð¾Ñ€Ð¸Ð·Ð°Ñ†Ð¸Ñ Ð¸ ÑÐ¸Ð½Ñ…Ñ€Ð¾Ð½Ð¸Ð·Ð°Ñ†Ð¸Ñ Ð¿Ñ€Ð¾Ñ„Ð¸Ð»Ñ Ð² Google Firebase.
-- `src/js/namaz-tracker.js` â€” Ð’Ð¸Ð´Ð¶ÐµÑ‚ Ñ€Ð°ÑÐ¿Ð¸ÑÐ°Ð½Ð¸Ñ Ð½Ð°Ð¼Ð°Ð·Ð¾Ð² (Ñ‚Ð°Ð¹Ð¼ÐµÑ€, Ð¸Ð½Ñ‚ÐµÐ³Ñ€Ð°Ñ†Ð¸Ñ Ñ ÐœÑƒÑ„Ñ‚Ð¸ÑÑ‚Ð¾Ð¼, graceful fallback).
-- `src/js/muftyat-cities.js` â€” ÐžÐ³Ñ€Ð¾Ð¼Ð½Ð°Ñ Ð±Ð°Ð·Ð° ÐºÐ¾Ð¾Ñ€Ð´Ð¸Ð½Ð°Ñ‚ 6000+ Ð³Ð¾Ñ€Ð¾Ð´Ð¾Ð² Ð´Ð»Ñ Ð²Ñ‹Ñ‡Ð¸ÑÐ»ÐµÐ½Ð¸Ñ Ð±Ð»Ð¸Ð¶Ð°Ð¹ÑˆÐµÐ³Ð¾ Ð³Ð¾Ñ€Ð¾Ð´Ð° Ð±ÐµÐ· API.
-- `src/js/main.js` â€” Ð“Ð»Ð°Ð²Ð½Ñ‹Ð¹ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»Ð»ÐµÑ€ DOM Ð¸ Ñ€Ð¾ÑƒÑ‚ÐµÑ€ Ð²ÐºÐ»Ð°Ð´Ð¾Ðº.
-- `build-monolith.js` â€” ÐÐ°Ñˆ ÑÐ¾Ð±ÑÑ‚Ð²ÐµÐ½Ð½Ñ‹Ð¹ Node.js-ÑÐ±Ð¾Ñ€Ñ‰Ð¸Ðº.
+## 📂 Структура Файлов
 
-## âš¡ ÐžÑ„Ñ„Ð»Ð°Ð¹Ð½-First & Ð¡Ð±Ð¾Ñ€ÐºÐ° (Monolith Builder)
+```text
+Islamic-Planner/
+├── app.html              ← PWA (источник; после build содержит инлайн JS+CSS)
+├── index.html            ← Лендинг (4 языка)
+│
+├── src/
+│   ├── css/
+│   │   ├── style.css         ← Исходник: @import tailwindcss + кастомные классы
+│   │   └── tailwind.css      ← Скомпилированный CSS (генерируется CLI)
+│   └── js/
+│       ├── board.js          ← Tafakkur Board: Konva.js движок
+│       ├── main.js           ← Главный контроллер DOM и роутер вкладок
+│       ├── store.js          ← Data Layer (LocalStorage / IndexedDB / JSON export)
+│       ├── i18n.js           ← Система локализации (RU/KK/AR/EN)
+│       ├── auth.js           ← Firebase Auth (Google/Email + Local Mode)
+│       ├── db.js             ← Firestore Sync (DbSync)
+│       ├── firebase-init.js  ← Firebase конфиг (API ключ через .env)
+│       ├── namaz-tracker.js  ← Намаз-виджет (muftyat.kz API + fallback)
+│       ├── muftyat-cities.js ← База 6000+ городов для оффлайн-поиска
+│       ├── activity-log.js   ← Аudит действий пользователя
+│       └── todo-manager.js   ← Менеджер задач
+│
+├── scripts/
+│   ├── build-monolith.js     ← Основной сборщик (Node.js)
+│   └── patch-tailwind-css.js ← Патч скомпилированного CSS
+│
+├── public/
+│   ├── sw.js                 ← Service Worker (PWA кэш)
+│   ├── manifest.json         ← PWA Manifest
+│   └── favicon.ico
+│
+├── functions/                ← Firebase Cloud Functions (опционально)
+├── guides/                   ← Документация
+├── dist/                     ← Финальная сборка (деплоится на Firebase)
+└── .env                      ← FIREBASE_API_KEY (локально, не в git)
+```
 
-ÐœÑ‹ Ð¸ÑÐ¿Ð¾Ð»ÑŒÐ·ÑƒÐµÐ¼ ÐºÐ°ÑÑ‚Ð¾Ð¼Ð½Ñ‹Ð¹ ÑÐºÑ€Ð¸Ð¿Ñ‚ `build-monolith.js`.
-**Ð—Ð°Ñ‡ÐµÐ¼?**
+---
 
-1. Ð¡ÐºÑ€Ð¸Ð¿Ñ‚ Ð±ÐµÑ€Ñ‘Ñ‚ `index.html` Ð¸ `app.html`, Ð²ÑÑ‚Ñ€Ð°Ð¸Ð²Ð°ÐµÑ‚ (`inline`) Ð²ÐµÑÑŒ JS Ð¸ Ð¼Ð¸Ð½Ð¸Ñ„Ð¸Ñ†Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ð¹ Ñ‡ÐµÑ€ÐµÐ· Tailwind CLI CSS.
-2. Ð˜Ñ‚Ð¾Ð³ ÐºÐ»Ð°Ð´Ñ‘Ñ‚ÑÑ Ð² Ð¿Ð°Ð¿ÐºÑƒ `dist/`. `firebase.json` Ð½Ð°ÑÑ‚Ñ€Ð¾ÐµÐ½ Ñ‚Ð°Ðº, Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ñ…Ð¾ÑÑ‚Ð¸Ñ‚ÑŒ Ð²ÑÑ‘ Ð¸Ð· `dist/`.
-3. Ð”Ð»Ñ Landing Page (`index.html`) ÑÐºÑ€Ð¸Ð¿Ñ‚ Ð³ÐµÐ½ÐµÑ€Ð¸Ñ€ÑƒÐµÑ‚ Ñ„Ð¸Ð·Ð¸Ñ‡ÐµÑÐºÐ¸Ðµ ÐºÐ¾Ð¿Ð¸Ð¸ Ð² Ð¿Ð°Ð¿ÐºÐ°Ñ… `dist/kk/index.html`, `dist/ar/index.html` Ð¸ Ñ‚.Ð´., Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð±Ð¾Ñ‚Ñ‹ (Google) Ð¸ ÑÑÑ‹Ð»ÐºÐ¸ Ñ€Ð°Ð±Ð¾Ñ‚Ð°Ð»Ð¸ Ð¿Ð¾ Ð¿Ñ€Ð°Ð²Ð¸Ð»ÑŒÐ½Ð¾Ð¼Ñƒ SEO (Ð½Ð°Ð¿Ñ€Ð¸Ð¼ÐµÑ€ `islamic-planer.web.app/ar`).
-4. **PWA (Service Worker - `sw.js`):** ÐšÑÑˆÐ¸Ñ€ÑƒÐµÑ‚ Ð¾Ð±Ð° Ð¼Ð¾Ð½Ð¾Ð»Ð¸Ñ‚Ð°, ÑˆÑ€Ð¸Ñ„Ñ‚Ñ‹ Ð¸ ÐºÐ°Ñ€Ñ‚Ð¸Ð½ÐºÐ¸. Ð®Ð·ÐµÑ€ Ð² Ð¿ÑƒÑÑ‚Ñ‹Ð½Ðµ Ð±ÐµÐ· Ð¸Ð½Ñ‚ÐµÑ€Ð½ÐµÑ‚Ð°? ÐŸÐ»Ð°Ð½ÐµÑ€ Ñ€Ð°Ð±Ð¾Ñ‚Ð°ÐµÑ‚ Ð±ÐµÐ·ÑƒÐ¿Ñ€ÐµÑ‡Ð½Ð¾.
+## ⚡ Процесс Сборки (Monolith Builder)
 
-## ðŸ  Ð›Ð¾ÐºÐ°Ð»ÑŒÐ½Ñ‹Ð¹ Ð ÐµÐ¶Ð¸Ð¼ Ð¸ Ð Ð¾ÑƒÑ‚Ð¸Ð½Ð³ (Firebase.json)
+Мы используем кастомный скрипт `scripts/build-monolith.js`.
 
-- **Firebase Hosting Rewrites:** `firebase.json` Ð¿ÐµÑ€ÐµÑ…Ð²Ð°Ñ‚Ñ‹Ð²Ð°ÐµÑ‚ Ð¿ÑƒÑ‚Ð¸ `/ar`, `/en`, `/kk` Ð¸ Ð¿Ñ€Ð¾ÐºÑÐ¸Ñ€ÑƒÐµÑ‚ Ð¸Ñ… Ð½Ð° Ñ„Ð¸Ð·Ð¸Ñ‡ÐµÑÐºÐ¸Ðµ index.html Ð²Ð½ÑƒÑ‚Ñ€Ð¸ `dist`. Ð Ð·Ð°Ð¿Ñ€Ð¾Ñ Ðº `/app` Ð²Ð¾Ð·Ð²Ñ€Ð°Ñ‰Ð°ÐµÑ‚ `/app.html`.
-- **ÐÐ²Ñ‚Ð¾Ð´ÐµÑ‚ÐµÐºÑ†Ð¸Ñ `file://`:** `auth.js` Ð¿Ð¾Ð½Ð¸Ð¼Ð°ÐµÑ‚, ÐµÑÐ»Ð¸ ÑŽÐ·ÐµÑ€ Ð¾Ñ‚ÐºÑ€Ñ‹Ð» ÑÐºÐ°Ñ‡Ð°Ð½Ð½Ñ‹Ð¹ `app.html` Ð¿Ñ€ÑÐ¼Ð¾ Ñ Ð´Ð¸ÑÐºÐ°, Ð¿Ñ€Ð¾Ð¿ÑƒÑÐºÐ°Ñ Firebase, Ð¸ Ð²ÐºÐ»ÑŽÑ‡Ð°ÐµÑ‚ "Local Mode" Ñ PIN-ÐºÐ¾Ð´Ð¾Ð¼, Ð»Ð¾ÐºÐ°Ð»ÑŒÐ½Ñ‹Ð¼ Ð±ÑÐºÐ°Ð¿Ð¾Ð¼ Ð¸ Ð¾Ð±Ñ…Ð¾Ð´Ð¾Ð¼ CORS.
+### Почему монолит?
 
-## ðŸ” Ð‘ÐµÐ·Ð¾Ð¿Ð°ÑÐ½Ð¾ÑÑ‚ÑŒ (Security)
+1. **Один HTML = мгновенная загрузка.** Никаких дополнительных HTTP-запросов за JS и CSS.
+2. **Работает оффлайн как нативное приложение.** Service Worker кэширует один файл.
+3. **Без webpack/vite** — меньше зависимостей, меньше проблем.
 
-- **Firestore Rules:** Ð¢Ð¾Ð»ÑŒÐºÐ¾ Ð°Ð²Ñ‚Ð¾Ñ€Ð¸Ð·Ð¾Ð²Ð°Ð½Ð½Ñ‹Ð¹ ÑŽÐ·ÐµÑ€ `request.auth.uid == userId` Ð¼Ð¾Ð¶ÐµÑ‚ Ñ‡Ð¸Ñ‚Ð°Ñ‚ÑŒ/Ð¿Ð¸ÑÐ°Ñ‚ÑŒ Ð² ÑÐ²Ð¾Ð¸ Ð»Ð¾ÐºÐ°Ñ†Ð¸Ð¸ (Ð½Ð°Ð¿Ñ€Ð¸Ð¼ÐµÑ€, `/users/{userId}/reminders/{reminderId}`). ÐžÐ³Ñ€Ð°Ð½Ð¸Ñ‡ÐµÐ½Ñ‹ Ð½Ð°Ð·Ð²Ð°Ð½Ð¸Ñ ÐºÐ¾Ð»Ð»ÐµÐºÑ†Ð¸Ð¹.
-- **Headers:** ÐŸÐ°Ñ‚Ñ‚ÐµÑ€Ð½ HTTP-Ð±Ñ€Ð¾Ð½Ð¸ (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`).
-- ÐšÐ¾Ð½Ñ‚ÐµÐ½Ñ‚ Ð¿Ð¾Ð»ÑŒÐ·Ð¾Ð²Ð°Ñ‚ÐµÐ»ÐµÐ¹ Ð·Ð°Ñ‰Ð¸Ñ‰Ñ‘Ð½ (disable pull-to-refresh iOS, pointer-events none).
+## Что делает build
+
+```bash
+npm run build
+# ↕
+# 1. npx @tailwindcss/cli → компилирует style.css → tailwind.css (минифицирует)
+# 2. scripts/patch-tailwind-css.js → исправляет известные конфликты в CSS
+# 3. scripts/build-monolith.js:
+#    - Читает app.html (исходник)
+#    - Встраивает (inline) tailwind.css → <style>
+#    - Встраивает (inline) все src/js/*.js → <script>
+#    - Генерирует dist/app.html (PWA монолит)
+#    - Генерирует dist/index.html (Лендинг)
+#    - Генерирует dist/kk|en|ar/index.html (SEO страницы)
+```
+
+> ⚠️ **Важно для разработки:** Корневой `app.html` — это **источник** (HTML-структура + ссылки на `src/js/*.js`). Для локальной разработки открывайте его через Live Server VS Code. После каждого изменения JS/CSS запускайте `npm run build` → результат в `dist/app.html` автоматически копируется в корень.
+
+---
+
+## 🔄 Архитектура Данных (Triple Storage)
+
+```text
+Пользователь вводит данные
+        ↓
+[LocalStorage]          ← Быстрые данные: задачи, настройки, язык, намерение
+[IndexedDB]             ← Тяжёлые данные: холст Konva (JSON), рисунки (path)
+[Firebase Firestore]    ← Синхронизация при наличии интернета и авторизации
+        ↓
+JSON Export/Import      ← Универсальный бэкап всего
+```
+
+## Ключевые ключи LocalStorage
+
+- `barakah_tasks_{date}` — задачи дня
+- `barakah_board_state_{boardId}` — состояние доски (ноды Konva)
+- `barakah_boards_meta` — список всех досок (id, name, thumbnail)
+- `barakah_lang` — выбранный язык
+
+## IndexedDB (через `store.js`)
+
+- `drawing_{boardId}` — JSON-слой рисования Konva (PathLayer)
+
+---
+
+## 🗺️ Tafakkur Board — Архитектура Konva.js
+
+```text
+#board-container (HTML div)
+    └── Konva.Stage
+        ├── noteLayer       ← Стикеры (Konva.Group), текстовые блоки, фигуры, стрелки
+        └── pathLayer       ← Рисование (Konva.Line paths)
+```
+
+**Компоненты board.js:**
+
+- `initBoard()` — инициализация Stage, слоёв, трансформера, событий мыши
+- `setMode(mode)` — переключает режим тулбара (pan/text/sticky/shape/arrow/pencil/eraser)
+- `bindTextArea()` — overlay-textarea для редактирования текста на canvas
+- `selectNode()` — выбор объекта + показ context menu с цветами
+- `saveBoardState()` / `loadBoardState()` — сохранение/загрузка из LocalStorage + IndexedDB
+- `openBoard(boardId)` / `deleteBoard()` — управление несколькими досками
+
+---
+
+## 🏠 Локальный Режим и Роутинг
+
+- **Firebase Hosting Rewrites:** `firebase.json` перехватывает пути `/ar`, `/en`, `/kk` и проксирует их на физические index.html внутри `dist`. Запрос к `/app` возвращает `/app.html`.
+- **Автодетекция `file://`:** `auth.js` понимает, если юзер открыл скачанный `app.html` прямо с диска, пропускает Firebase, и включает "Local Mode" с PIN-кодом, локальным бэкапом и обходом CORS.
+
+---
+
+## 🔐 Безопасность (Security)
+
+- **Firestore Rules:** Только авторизованный юзер `request.auth.uid == userId` может читать/писать в свои локации (например, `/users/{userId}/reminders/{reminderId}`). Ограничены названия коллекций.
+- **Headers:** Паттерн HTTP-брони (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`).
+- Контент пользователей защищён (disable pull-to-refresh iOS, pointer-events none).

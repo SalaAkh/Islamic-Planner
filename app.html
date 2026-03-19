@@ -1993,6 +1993,121 @@ window.Store = {
         try {
             const data = localStorage.getItem(`barakah_day_${dateString}`);
             return data ? JSON.parse(data) : { tasks: {}, texts: {}, checkboxes: {} };
+window.getCurrentLang = () => currentLang;
+window.t = (key) => window.translations[currentLang]?.[key] || window.translations['ru']?.[key] || key;
+
+</script>
+    <script>
+/**
+ * Barakah Store — Centralized state management
+ * - LocalStorage: lightweight text/checkbox data (fast, sync)
+ * - IndexedDB:    heavy binary data like canvas drawings (no size limit)
+ */
+
+// =====================================================================
+// INDEXEDDB — for heavy drawing data (no 5MB limit!)
+// =====================================================================
+const DB_NAME = 'barakah_db';
+const DB_VERSION = 1;
+const STORE_NAME = 'drawings';
+const IDB_FALLBACK_PREFIX = 'barakah_idb_fallback_';
+
+function fallbackKey(key) {
+    return `${IDB_FALLBACK_PREFIX}${key}`;
+}
+
+function fallbackGet(key) {
+    try {
+        return localStorage.getItem(fallbackKey(key)) ?? undefined;
+    } catch (_) {
+        return undefined;
+    }
+}
+
+function fallbackSet(key, value) {
+    try {
+        localStorage.setItem(fallbackKey(key), value);
+    } catch (_) {
+        // Ignore quota issues; IndexedDB remains the primary storage.
+    }
+}
+
+function fallbackDelete(key) {
+    try {
+        localStorage.removeItem(fallbackKey(key));
+    } catch (_) {
+        // no-op
+    }
+}
+
+function openDb() {
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME);
+            }
+        };
+        req.onsuccess = (e) => resolve(e.target.result);
+        req.onerror = (e) => reject(e.target.error);
+    });
+}
+
+async function idbGet(key) {
+    try {
+        const db = await openDb();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const req = tx.objectStore(STORE_NAME).get(key);
+            req.onsuccess = () => resolve(req.result ?? fallbackGet(key));
+            req.onerror = () => reject(req.error);
+        });
+    } catch (e) {
+        console.warn('[Store] IndexedDB read failed:', e);
+        return fallbackGet(key);
+    }
+}
+
+async function idbSet(key, value) {
+    fallbackSet(key, value);
+    try {
+        const db = await openDb();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const req = tx.objectStore(STORE_NAME).put(value, key);
+            req.onsuccess = () => resolve();
+            req.onerror = () => reject(req.error);
+        });
+    } catch (e) {
+        console.warn('[Store] IndexedDB write failed:', e);
+    }
+}
+
+async function idbDelete(key) {
+    fallbackDelete(key);
+    try {
+        const db = await openDb();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const req = tx.objectStore(STORE_NAME).delete(key);
+            req.onsuccess = () => resolve();
+            req.onerror = () => reject(req.error);
+        });
+    } catch (e) {
+        console.warn('[Store] IndexedDB delete failed:', e);
+    }
+}
+
+// =====================================================================
+// LOCALSTORAGE — for lightweight text/state data (fast, sync)
+// =====================================================================
+window.Store = {
+    // ── Daily Planner ──────────────────────────────────────────────
+    getDayData(dateString) {
+        try {
+            const data = localStorage.getItem(`barakah_day_${dateString}`);
+            return data ? JSON.parse(data) : { tasks: {}, texts: {}, checkboxes: {} };
         } catch (e) {
             return { tasks: {}, texts: {}, checkboxes: {} };
         }
@@ -2448,6 +2563,8 @@ window.initBoard = function (showToast) {
     }
 
     // --- Selection and Context Menu Logic ---
+    // colorsMap moved above selectNode
+
     function updateContextMenuPosition() {
         if (!isNodeAttachedToStage(selectedNode) || !ctxMenu) {
             if (!isNodeAttachedToStage(selectedNode)) {
@@ -2464,18 +2581,26 @@ window.initBoard = function (showToast) {
         const box = selectedNode.getClientRect();
         const containerPos = container.getBoundingClientRect();
         
-        // Calculate absolute position
-        let top = containerPos.top + box.y - ctxMenu.offsetHeight - 15;
-        let left = containerPos.left + box.x + box.width / 2 - ctxMenu.offsetWidth / 2;
+        // Account for offsetParent to fix position when inside relative container
+        const parentRect = ctxMenu.offsetParent?.getBoundingClientRect() || { top: 0, left: 0 };
+        
+        // Calculate position relative to container, adjusted for parent offset
+        let top = containerPos.top + box.y - ctxMenu.offsetHeight - 15 - parentRect.top;
+        let left = containerPos.left + box.x + box.width / 2 - ctxMenu.offsetWidth / 2 - parentRect.left;
         
         // Prevent going off-screen top
-        if (top < containerPos.top + 10) top = containerPos.top + box.y + box.height + 15;
+        if (top < 10) top = containerPos.top + box.y + box.height + 15 - parentRect.top;
 
         ctxMenu.style.left = `${left}px`;
         ctxMenu.style.top = `${top}px`;
         ctxMenu.style.opacity = '1';
         ctxMenu.style.pointerEvents = 'auto';
     }
+
+    const colorsMap = {
+        yellow: '#fef08a', green: '#bbf7d0', blue: '#bfdbfe', pink: '#fbcfe8',
+        orange: '#fde68a', white: '#ffffff', slate: '#334155', red: '#ef4444', transparent: 'transparent'
+    };
 
     function selectNode(node) {
         const nextNode = isNodeAttachedToStage(node) ? node : null;
@@ -2544,10 +2669,6 @@ window.initBoard = function (showToast) {
     tr.on('dragmove', () => updateContextMenuPosition());
     
     // --- Context Menu Actions ---
-    const colorsMap = {
-        yellow: '#fef08a', green: '#bbf7d0', blue: '#bfdbfe', pink: '#fbcfe8',
-        orange: '#fde68a', white: '#ffffff', slate: '#334155', red: '#ef4444', transparent: 'transparent'
-    };
 
     document.querySelectorAll('.ctx-color-option').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -2640,7 +2761,8 @@ window.initBoard = function (showToast) {
     (function initShapePicker() {
         const shapeIcons = {
             rect: 'far fa-square', circle: 'far fa-circle', ellipse: 'fas fa-egg',
-            star: 'far fa-star', diamond: 'far fa-gem'
+            star: 'far fa-star', diamond: 'far fa-gem',
+            triangle: 'fas fa-play fa-rotate-270', pentagon: 'fas fa-draw-polygon', hexagon: 'fas fa-vector-square'
         };
         window._activeShapeType = window._activeShapeType || 'rect';
         const picker = document.getElementById('shape-picker');
@@ -2919,8 +3041,8 @@ window.initBoard = function (showToast) {
         const scale = stage.scaleX();
 
         // absPos is in stage-space pixels relative to the canvas top-left
-        const left = containerRect.left + absPos.x + window.scrollX;
-        const top  = containerRect.top  + absPos.y + window.scrollY;
+        const left = containerRect.left + absPos.x;
+        const top  = containerRect.top  + absPos.y;
 
         const textarea = document.createElement('textarea');
         const editorId = `board-text-editor-${++boardEditorCounter}`;
@@ -2938,7 +3060,7 @@ window.initBoard = function (showToast) {
             .replace('Нажмите ESC...', '');
 
         Object.assign(textarea.style, {
-            position:        'absolute',
+            position:        'fixed',
             left:            left + 'px',
             top:             top + 'px',
             width:           nodeW + 'px',
@@ -3232,7 +3354,7 @@ window.openBoard = function(boardId) {
         }
         
         if(!window._boardInitialized) {
-            window.initBoard();
+            window.initBoard(window.showToast);
             window._boardInitialized = true;
         } else {
             document.dispatchEvent(new CustomEvent('loadSpecificBoard'));

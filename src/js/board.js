@@ -208,6 +208,11 @@ window.initBoard = function (showToast) {
     }
 
     // --- Selection and Context Menu Logic ---
+    const colorsMap = {
+        yellow: '#fef08a', green: '#bbf7d0', blue: '#bfdbfe', pink: '#fbcfe8',
+        orange: '#fde68a', white: '#ffffff', slate: '#334155', red: '#ef4444', transparent: 'transparent'
+    };
+
     function updateContextMenuPosition() {
         if (!isNodeAttachedToStage(selectedNode) || !ctxMenu) {
             if (!isNodeAttachedToStage(selectedNode)) {
@@ -223,19 +228,21 @@ window.initBoard = function (showToast) {
         }
         const box = selectedNode.getClientRect();
         const containerPos = container.getBoundingClientRect();
+        // Account for offsetParent to fix position when ctxMenu is inside a relative container
+        const parentRect = ctxMenu.offsetParent?.getBoundingClientRect() || { top: 0, left: 0 };
         
-        // Calculate absolute position
-        let top = containerPos.top + box.y - ctxMenu.offsetHeight - 15;
-        let left = containerPos.left + box.x + box.width / 2 - ctxMenu.offsetWidth / 2;
+        let top = containerPos.top + box.y - ctxMenu.offsetHeight - 15 - parentRect.top;
+        let left = containerPos.left + box.x + box.width / 2 - ctxMenu.offsetWidth / 2 - parentRect.left;
         
         // Prevent going off-screen top
-        if (top < containerPos.top + 10) top = containerPos.top + box.y + box.height + 15;
+        if (top < 10) top = containerPos.top + box.y + box.height + 15 - parentRect.top;
 
         ctxMenu.style.left = `${left}px`;
         ctxMenu.style.top = `${top}px`;
         ctxMenu.style.opacity = '1';
         ctxMenu.style.pointerEvents = 'auto';
     }
+
 
     function selectNode(node) {
         const nextNode = isNodeAttachedToStage(node) ? node : null;
@@ -304,10 +311,6 @@ window.initBoard = function (showToast) {
     tr.on('dragmove', () => updateContextMenuPosition());
     
     // --- Context Menu Actions ---
-    const colorsMap = {
-        yellow: '#fef08a', green: '#bbf7d0', blue: '#bfdbfe', pink: '#fbcfe8',
-        orange: '#fde68a', white: '#ffffff', slate: '#334155', red: '#ef4444', transparent: 'transparent'
-    };
 
     document.querySelectorAll('.ctx-color-option').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -400,7 +403,8 @@ window.initBoard = function (showToast) {
     (function initShapePicker() {
         const shapeIcons = {
             rect: 'far fa-square', circle: 'far fa-circle', ellipse: 'fas fa-egg',
-            star: 'far fa-star', diamond: 'far fa-gem'
+            triangle: 'fas fa-caret-up', star: 'far fa-star',
+            pentagon: 'fas fa-draw-polygon', hexagon: 'fas fa-draw-polygon', diamond: 'far fa-gem'
         };
         window._activeShapeType = window._activeShapeType || 'rect';
         const picker = document.getElementById('shape-picker');
@@ -678,9 +682,9 @@ window.initBoard = function (showToast) {
         const absPos = textNode.absolutePosition();
         const scale = stage.scaleX();
 
-        // absPos is in stage-space pixels relative to the canvas top-left
-        const left = containerRect.left + absPos.x + window.scrollX;
-        const top  = containerRect.top  + absPos.y + window.scrollY;
+        // Use fixed positioning — coords relative to viewport, no scrollX/Y needed
+        const left = containerRect.left + absPos.x;
+        const top  = containerRect.top  + absPos.y;
 
         const textarea = document.createElement('textarea');
         const editorId = `board-text-editor-${++boardEditorCounter}`;
@@ -698,7 +702,7 @@ window.initBoard = function (showToast) {
             .replace('Нажмите ESC...', '');
 
         Object.assign(textarea.style, {
-            position:        'absolute',
+            position:        'fixed',
             left:            left + 'px',
             top:             top + 'px',
             width:           nodeW + 'px',
@@ -992,7 +996,7 @@ window.openBoard = function(boardId) {
         }
         
         if(!window._boardInitialized) {
-            window.initBoard();
+            window.initBoard(window.showToast);
             window._boardInitialized = true;
         } else {
             document.dispatchEvent(new CustomEvent('loadSpecificBoard'));
