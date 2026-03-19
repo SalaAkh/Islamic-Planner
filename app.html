@@ -275,7 +275,7 @@
                 <i class="fas fa-tasks md:hidden text-[22px] mb-1"></i>
                 <span data-i18n="tab_lists">Списки</span>
             </button>
-            <button data-tab="board" id="tab-board" class="tab-btn tab-board">
+            <button data-tab="boards" id="tab-board" class="tab-btn tab-board">
                 <i class="fas fa-chess-board md:hidden text-[22px] mb-1"></i>
                 <span data-i18n="tab_board">Доска</span>
             </button>
@@ -890,8 +890,77 @@
                 </div>
             </div>
 
+            <!-- СТРАНИЦА 4 Дашборд: СПИСОК ДОСОК (MIRO DASHBOARD) -->
+            <div id="view-boards" class="page-view" style="height: 100%; display: none;">
+                <div class="p-8 h-full max-w-7xl mx-auto">
+                    <!-- Заголовок и поиск -->
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 class="text-3xl font-bold text-slate-900 dark:text-white">Boards</h1>
+                            <p class="text-gray-500 mt-1">Manage your projects and ideas</p>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" placeholder="Search boards..." class="pl-10 pr-4 py-2 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm w-64 focus:border-blue-500 outline-none transition-colors">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Templates Section -->
+                    <div class="mb-10">
+                        <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-widest mb-4">Start from a template</h2>
+                        <div class="flex gap-4 overflow-x-auto pb-4">
+                            <button id="btn-create-board" class="flex-shrink-0 w-48 h-32 border border-dashed border-gray-300 dark:border-slate-600 rounded-xl hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all flex flex-col items-center justify-center gap-2 group bg-white dark:bg-slate-800">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <span class="font-medium text-sm text-slate-800 dark:text-slate-200">New board</span>
+                            </button>
+                            <!-- Fake templates for UI demonstration -->
+                            <div class="flex-shrink-0 w-48 h-32 border border-gray-200 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800/50 flex flex-col cursor-pointer hover:border-blue-400 group overflow-hidden relative">
+                                <div class="h-20 bg-gray-200 dark:bg-slate-700 w-full flex items-center justify-center text-gray-400"><i class="fas fa-brain text-2xl"></i></div>
+                                <div class="p-3 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 h-full border-t border-gray-100 dark:border-slate-700">Mind Map</div>
+                            </div>
+                            <div class="flex-shrink-0 w-48 h-32 border border-gray-200 dark:border-slate-700 rounded-xl bg-gray-50 dark:bg-slate-800/50 flex flex-col cursor-pointer hover:border-blue-400 group overflow-hidden relative">
+                                <div class="h-20 bg-gray-200 dark:bg-slate-700 w-full flex items-center justify-center text-gray-400"><i class="fas fa-columns text-2xl"></i></div>
+                                <div class="p-3 text-xs font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 h-full border-t border-gray-100 dark:border-slate-700">Kanban Framework</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent boards -->
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-widest">Recent boards</h2>
+                            <div class="flex gap-2">
+                                <button class="w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-slate-800 flex items-center justify-center text-gray-500"><i class="fas fa-th"></i></button>
+                                <button class="w-8 h-8 rounded hover:bg-gray-100 dark:hover:bg-slate-800 flex items-center justify-center text-gray-500 bg-gray-100 dark:bg-slate-800"><i class="fas fa-list"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-gray-50/50 dark:bg-slate-800/50 text-xs text-gray-500 uppercase tracking-widest border-b border-gray-200 dark:border-slate-700">
+                                        <th class="font-medium p-4 w-[40%]">Name</th>
+                                        <th class="font-medium p-4">Owner</th>
+                                        <th class="font-medium p-4 cursor-pointer hover:text-blue-500">Last opened <i class="fas fa-caret-down ml-1"></i></th>
+                                        <th class="font-medium p-4 w-16"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="boards-table-body" class="text-sm">
+                                    <!-- Dynamic rows inserted via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- СТРАНИЦА 4: ДОСКА (TAFAKKUR BOARD) -->
-            <div id="view-board" class="page-view" style="height: 100%;">
+            <div id="view-board" class="page-view hidden" style="height: 100%;">
                 <header
                     class="mb-4 border-b-2 border-slate-200 pb-4 flex flex-wrap justify-between items-center relative z-10 bg-paper gap-3">
                     <div class="flex flex-wrap items-center gap-4">
@@ -899,14 +968,17 @@
                             <img id="board-thumbnail-img" src="https://mirostatic.com/board-image-assets/20250610/112x112/board_icon_1.png" class="w-[85%] h-[85%] object-contain">
                             <div class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center text-white backdrop-blur-[1px]"><i class="fas fa-pen text-sm"></i></div>
                         </button>
-                        <div>
-                            <h1 class="text-3xl font-bold text-indigo-900 dark:text-indigo-400 tracking-tight">Tafakkur
-                                Board</h1>
+                            <div class="flex items-center gap-2 group">
+                                <h1 id="board-title-text" class="text-3xl font-bold text-indigo-900 dark:text-indigo-400 tracking-tight outline-none border-b-2 border-transparent hover:border-indigo-200 focus:border-indigo-500 transition-colors cursor-text" contenteditable="true" spellcheck="false" title="Click to rename">Tafakkur Board</h1>
+                                <i class="fas fa-edit text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity text-sm pointer-events-none"></i>
+                            </div>
                             <p class="text-gray-500 mt-1 text-sm"><i class="fas fa-infinity mr-1"></i> <span
                                     data-i18n="board_desc">Бесконечный холст · Pinch-to-zoom на мобильном</span></p>
-                        </div>
                     </div>
                     <div class="flex items-center gap-2">
+                        <button id="btn-back-to-boards" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold transition-colors mr-2 hidden">
+                            <i class="fas fa-arrow-left mr-1"></i> <span>Boards</span>
+                        </button>
                         <button id="reset-board-view"
                             class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold transition-colors">
                             <i class="fas fa-crosshairs mr-1"></i><span data-i18n="center_btn">Центр</span>
@@ -959,9 +1031,6 @@
                         <button id="ctx-delete" class="w-8 h-8 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-red-500 transition-colors flex items-center justify-center" title="Удалить"><i class="fas fa-trash-alt"></i></button>
                     </div>
 
-                <div id="board-container" class="board-container relative overflow-hidden bg-gray-50 rounded-2xl w-full"
-                    style="min-height: 720px;">
-                    <!-- Konva Stage mounts here -->
                 </div>
             </div>
 

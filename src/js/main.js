@@ -142,9 +142,8 @@ function initTabs() {
                 renderCalendar();
             }
 
-            if (viewName === 'board' && !window._boardInitialized) {
-                initBoard(window.showToast);
-                window._boardInitialized = true;
+            if (viewName === 'boards') {
+                if (typeof initBoardsDashboard === 'function') initBoardsDashboard();
             }
 
             // Recalculate heights for textareas in daily view if it becomes active

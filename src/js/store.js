@@ -143,53 +143,73 @@ window.Store = {
         }
     },
 
-    // ── Board State (notes + viewport) ─────────────────────────────
-    getBoardData() {
+    // ── Boards Metadata ─────────────────────────────────────────────
+    getBoardsMeta() {
         try {
-            const board = localStorage.getItem('barakah_board_state');
-            return board ? JSON.parse(board) : {
-                notes: [],
-                viewport: { x: 0, y: 0, zoom: 1 }
-            };
+            const meta = localStorage.getItem('barakah_boards_meta');
+            if (!meta) {
+                const defaultMeta = [{ id: 'main_board', name: 'Доска "Тафаккур"', lastOpened: new Date().toISOString(), thumbnail: localStorage.getItem('barakah_board_thumb') || 1 }];
+                this.saveBoardsMeta(defaultMeta);
+                return defaultMeta;
+            }
+            return JSON.parse(meta);
+        } catch(e) {
+            return [{ id: 'main_board', name: 'Доска "Тафаккур"', lastOpened: new Date().toISOString(), thumbnail: 1 }];
+        }
+    },
+    saveBoardsMeta(metaList) {
+        localStorage.setItem('barakah_boards_meta', JSON.stringify(metaList));
+        if (window.DbSync) window.DbSync.syncToCloud('boards_meta', { boards: metaList });
+    },
+
+    // ── Board State (notes + viewport) ─────────────────────────────
+    getBoardData(boardId = 'main_board') {
+        try {
+            const board = localStorage.getItem(`barakah_board_state_${boardId}`);
+            if (!board && boardId === 'main_board') {
+                const oldBoard = localStorage.getItem('barakah_board_state');
+                if (oldBoard) return JSON.parse(oldBoard);
+            }
+            return board ? JSON.parse(board) : { notes: [], viewport: { x: 0, y: 0, zoom: 1 } };
         } catch (e) {
             return { notes: [], viewport: { x: 0, y: 0, zoom: 1 } };
         }
     },
 
-    saveBoardData(boardData) {
+    saveBoardData(boardData, boardId = 'main_board') {
         try {
-            // Strip drawingData before saving to LocalStorage — it's too heavy!
             const { drawingData, ...lightData } = boardData;
-            localStorage.setItem('barakah_board_state', JSON.stringify(lightData));
-
-            // Sync to cloud
-            if (window.DbSync) window.DbSync.syncToCloud('board_state', lightData);
+            localStorage.setItem(`barakah_board_state_${boardId}`, JSON.stringify(lightData));
+            if (window.DbSync) window.DbSync.syncToCloud(`board_state_${boardId}`, lightData);
         } catch (e) {
             console.error('[Store] Failed to save board data:', e);
         }
     },
 
     // ── Drawing (IndexedDB) ─────────────────────────────────────────
-    getDrawing() {
-        return idbGet('board_drawing');
+    getDrawing(boardId = 'main_board') {
+        return idbGet(`board_drawing_${boardId}`).then(data => {
+            if (!data && boardId === 'main_board') return idbGet('board_drawing');
+            return data;
+        });
     },
 
-    saveDrawing(dataUrl) {
+    saveDrawing(dataUrl, boardId = 'main_board') {
         if (!dataUrl) {
-            if (window.DbSync && !window._isSyncingDrawing) window.DbSync.syncToCloud('board_drawing', { dataUrl: null });
-            return idbDelete('board_drawing');
+            if (window.DbSync && !window._isSyncingDrawing) window.DbSync.syncToCloud(`board_drawing_${boardId}`, { dataUrl: null });
+            return idbDelete(`board_drawing_${boardId}`);
         }
         if (window.DbSync && !window._isSyncingDrawing) {
-            window.DbSync.syncToCloud('board_drawing', { dataUrl });
+            window.DbSync.syncToCloud(`board_drawing_${boardId}`, { dataUrl });
             window.ActivityLog?.log('drawing_saved');
         }
-        return idbSet('board_drawing', dataUrl);
+        return idbSet(`board_drawing_${boardId}`, dataUrl);
     },
 
-    clearDrawing() {
-        if (window.DbSync && !window._isSyncingDrawing) window.DbSync.syncToCloud('board_drawing', { dataUrl: null });
+    clearDrawing(boardId = 'main_board') {
+        if (window.DbSync && !window._isSyncingDrawing) window.DbSync.syncToCloud(`board_drawing_${boardId}`, { dataUrl: null });
         window.ActivityLog?.log('drawing_cleared');
-        return idbDelete('board_drawing');
+        return idbDelete(`board_drawing_${boardId}`);
     },
 
     // ── Events & Reminders ─────────────────────────────────────────

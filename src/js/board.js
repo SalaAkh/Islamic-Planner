@@ -655,7 +655,7 @@ window.initBoard = function (showToast) {
     let pathSaveTimer = null;
     function requestPathSave() {
         if (pathSaveTimer) clearTimeout(pathSaveTimer);
-        pathSaveTimer = setTimeout(() => { window.Store.saveDrawing(pathLayer.toJSON()); }, 1000);
+        pathSaveTimer = setTimeout(() => { window.Store.saveDrawing(pathLayer.toJSON(), window.currentBoardId || 'main_board'); }, 1000);
     }
 
     let boardSaveTimer = null;
@@ -667,13 +667,13 @@ window.initBoard = function (showToast) {
             window.Store.saveBoardData({
                 viewport: { x: stage.x(), y: stage.y(), zoom: stage.scaleX() },
                 konvaNotes: noteLayer.toJSON()
-            });
+            }, window.currentBoardId || 'main_board');
             if (selectedNode) trNode.nodes([selectedNode]); // restore selection
         }, 500);
     }
 
     async function loadData() {
-        const boardData = window.Store.getBoardData();
+        const boardData = window.Store.getBoardData(window.currentBoardId || 'main_board');
         if(boardData) {
             if(boardData.viewport) {
                 stage.x(boardData.viewport.x);
@@ -702,18 +702,226 @@ window.initBoard = function (showToast) {
                     noteLayer.add(node);
                 });
                 tempLayer.destroy();
+            } else {
+                noteLayer.destroyChildren();
+                noteLayer.add(tr);
             }
+        } else {
+            noteLayer.destroyChildren();
+            noteLayer.add(tr);
         }
 
-        const drawingData = await window.Store.getDrawing();
+        const drawingData = await window.Store.getDrawing(window.currentBoardId || 'main_board');
         if(drawingData && drawingData.startsWith('{')) {
             restorePathLayerFromJSON(drawingData);
             saveHistory(); 
+        } else {
+            pathLayer.destroyChildren();
+            saveHistory();
         }
     }
+    document.addEventListener('loadSpecificBoard', loadData);
 
     setMode('pan');
     loadData();
 
     document.addEventListener('cloudDataSynced', () => loadData());
 };
+
+// --- MIRO DASHBOARD LOGIC ---
+window.initBoardsDashboard = function() {
+    const tableBody = document.getElementById('boards-table-body');
+    if (!tableBody) return;
+    
+    const boards = window.Store.getBoardsMeta();
+    tableBody.innerHTML = '';
+    
+    const lang = localStorage.getItem('barakah_lang') || 'en';
+    const rtf = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' });
+    
+    boards.forEach(board => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-gray-100 dark:border-slate-700/50 hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors group';
+        
+        let formattedDate = board.lastOpened;
+        try {
+            const dateObj = new Date(board.lastOpened);
+            const daysDiff = Math.abs(Math.round((dateObj - new Date()) / (1000 * 60 * 60 * 24)));
+            formattedDate = daysDiff < 7 ? rtf.format(-daysDiff, 'day') : dateObj.toLocaleDateString(lang);
+        } catch(e){}
+        
+        const owner = board.owner || 'You';
+        
+        tr.innerHTML = `
+            <td class="p-4">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="openBoard('${board.id}')">
+                    <img src="https://mirostatic.com/board-image-assets/20250610/112x112/board_icon_${board.thumbnail || 1}.png" class="w-8 h-8 object-contain">
+                    <span class="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-blue-600 transition-colors">${board.name}</span>
+                </div>
+            </td>
+            <td class="p-4 text-gray-500">${owner}</td>
+            <td class="p-4 text-gray-500 cursor-pointer" onclick="openBoard('${board.id}')">${formattedDate}</td>
+            <td class="p-4">
+                <button class="w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center justify-center text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-30 disabled:hover:bg-transparent" title="Delete" onclick="deleteBoard('${board.id}')" ${board.id === 'main_board' ? 'disabled' : ''}>
+                    <i class="fas fa-trash-alt hover:text-red-500"></i>
+                </button>
+            </td>
+        `;
+        tableBody.appendChild(tr);
+    });
+}
+
+window.openBoard = function(boardId) {
+    window.currentBoardId = boardId;
+    
+    // Update lastOpened and Title
+    const boards = window.Store.getBoardsMeta();
+    const meta = boards.find(b => b.id === boardId);
+    if(meta) {
+        meta.lastOpened = new Date().toISOString();
+        window.Store.saveBoardsMeta(boards);
+        document.getElementById('board-thumbnail-img').src = `https://mirostatic.com/board-image-assets/20250610/112x112/board_icon_${meta.thumbnail || 1}.png`;
+        const titleEl = document.getElementById('board-title-text');
+        if (titleEl) titleEl.innerText = meta.name;
+    }
+
+    const viewsBoards = document.getElementById('view-boards');
+    const boardView = document.getElementById('view-board');
+    
+    viewsBoards.classList.remove('active', 'page-flip-in');
+    viewsBoards.classList.add('page-flip-out');
+    
+    setTimeout(() => {
+        viewsBoards.classList.add('hidden');
+        viewsBoards.classList.remove('page-flip-out');
+        
+        boardView.classList.remove('hidden');
+        boardView.classList.add('active', 'page-flip-in');
+        
+        document.getElementById('btn-back-to-boards').classList.remove('hidden');
+        
+        if(!window._boardInitialized) {
+            window.initBoard();
+            window._boardInitialized = true;
+        } else {
+            document.dispatchEvent(new CustomEvent('loadSpecificBoard'));
+        }
+    }, 550);
+}
+
+window.deleteBoard = function(boardId) {
+    if(boardId === 'main_board') return;
+    if(confirm((window.t && window.t('delete_board_confirm')) || 'Are you sure you want to delete this board?')) {
+        let boards = window.Store.getBoardsMeta();
+        boards = boards.filter(b => b.id !== boardId);
+        window.Store.saveBoardsMeta(boards);
+        
+        localStorage.removeItem('barakah_board_state_' + boardId);
+        window.Store.clearDrawing(boardId);
+        if (window.DbSync) window.DbSync.syncToCloud('board_state_' + boardId, { deleted: true });
+        
+        initBoardsDashboard();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btn-create-board')?.addEventListener('click', () => {
+        const id = 'board_' + Date.now();
+        const boards = window.Store.getBoardsMeta();
+        boards.unshift({
+            id,
+            name: 'Untitled board',
+            lastOpened: new Date().toISOString(),
+            owner: 'You',
+            thumbnail: Math.floor(Math.random() * 20) + 1
+        });
+        window.Store.saveBoardsMeta(boards);
+        initBoardsDashboard();
+    });
+
+    document.getElementById('btn-back-to-boards')?.addEventListener('click', () => {
+        const boardView = document.getElementById('view-board');
+        const viewsBoards = document.getElementById('view-boards');
+        
+        boardView.classList.remove('active', 'page-flip-in');
+        boardView.classList.add('page-flip-out');
+        
+        setTimeout(() => {
+            boardView.classList.add('hidden');
+            boardView.classList.remove('page-flip-out');
+            
+            viewsBoards.classList.remove('hidden');
+            viewsBoards.classList.add('active', 'page-flip-in');
+            initBoardsDashboard();
+        }, 550);
+    });
+    
+    // Thumbnail change event -> update meta
+    const thumbModal = document.getElementById('miro-thumb-modal');
+    const thumbModalContent = document.getElementById('miro-thumb-modal-content');
+    
+    document.getElementById('btn-miro-thumbnail')?.addEventListener('click', () => {
+        if (!thumbModal) return;
+        const grid = document.getElementById('thumb-grid');
+        grid.innerHTML = '';
+        for(let i=1; i<=20; i++) {
+            grid.innerHTML += `
+                <button data-icon-id="${i}" class="w-16 h-16 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors border-2 border-transparent focus:border-blue-500">
+                    <img src="https://mirostatic.com/board-image-assets/20250610/112x112/board_icon_${i}.png" class="w-10 h-10 object-contain pointer-events-none">
+                </button>
+            `;
+        }
+        
+        thumbModal.classList.remove('hidden');
+        thumbModal.classList.add('flex');
+        setTimeout(() => {
+            thumbModalContent.classList.remove('scale-95', 'opacity-0');
+            thumbModalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    });
+    
+    document.getElementById('close-miro-thumb-modal')?.addEventListener('click', () => {
+        if (!thumbModal) return;
+        thumbModalContent.classList.add('scale-95', 'opacity-0');
+        thumbModalContent.classList.remove('scale-100', 'opacity-100');
+        setTimeout(() => {
+            thumbModal.classList.add('hidden');
+            thumbModal.classList.remove('flex');
+        }, 200);
+    });
+
+    thumbModal?.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-icon-id]');
+        if(btn) {
+            const iconId = btn.getAttribute('data-icon-id');
+            const boards = window.Store.getBoardsMeta();
+            const meta = boards.find(b => b.id === (window.currentBoardId || 'main_board'));
+            if(meta) {
+                meta.thumbnail = iconId;
+                window.Store.saveBoardsMeta(boards);
+                document.getElementById('board-thumbnail-img').src = `https://mirostatic.com/board-image-assets/20250610/112x112/board_icon_${iconId}.png`;
+            }
+            document.getElementById('close-miro-thumb-modal').click();
+        }
+    });
+
+    // Handle board rename
+    document.getElementById('board-title-text')?.addEventListener('blur', (e) => {
+        const newName = e.target.innerText.trim() || 'Untitled board';
+        e.target.innerText = newName;
+        const boards = window.Store.getBoardsMeta();
+        const meta = boards.find(b => b.id === (window.currentBoardId || 'main_board'));
+        if(meta) {
+            meta.name = newName;
+            window.Store.saveBoardsMeta(boards);
+            initBoardsDashboard(); // update the dashboard list if it's there
+        }
+    });
+    
+    document.getElementById('board-title-text')?.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter') {
+            e.preventDefault();
+            e.target.blur();
+        }
+    });
+});
