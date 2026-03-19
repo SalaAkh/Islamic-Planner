@@ -993,7 +993,67 @@
                     <button id="tool-pan" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors tool-active" title="Выделение / Рука (V)"><i class="fas fa-mouse-pointer"></i></button>
                     <button id="tool-text" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Текст (T)"><i class="fas fa-font"></i></button>
                     <button id="tool-sticky" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Стикер (N)"><i class="far fa-sticky-note"></i></button>
-                    <button id="tool-shape" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Фигура (S)"><i class="far fa-square"></i></button>
+                    <!-- Shape Tool with sub-picker -->
+                    <div class="relative" id="shape-tool-wrap">
+                        <button id="tool-shape" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Фигура (S)">
+                            <i id="tool-shape-icon" class="far fa-square"></i>
+                        </button>
+                        <!-- shape picker popup -->
+                        <div id="shape-picker" class="hidden absolute left-12 top-0 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 p-2 grid grid-cols-4 gap-1" style="z-index:10000; min-width:180px;">
+                            <button class="shape-pick-btn w-9 h-9 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 flex items-center justify-center text-sm" data-shape="rect" title="Прямоугольник"><i class="far fa-square"></i></button>
+                            <button class="shape-pick-btn w-9 h-9 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 flex items-center justify-center text-sm" data-shape="circle" title="Круг"><i class="far fa-circle"></i></button>
+                            <button class="shape-pick-btn w-9 h-9 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 flex items-center justify-center text-sm" data-shape="ellipse" title="Эллипс"><i class="fas fa-egg" style="transform:rotate(90deg)"></i></button>
+                            <button class="shape-pick-btn w-9 h-9 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 flex items-center justify-center text-sm" data-shape="triangle" title="Треугольник"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,3 22,21 2,21"/></svg></button>
+                            <button class="shape-pick-btn w-9 h-9 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 flex items-center justify-center text-sm" data-shape="star" title="Звезда"><i class="far fa-star"></i></button>
+                            <button class="shape-pick-btn w-9 h-9 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 flex items-center justify-center text-sm" data-shape="pentagon" title="Пятиугольник"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 22,9 18,21 6,21 2,9"/></svg></button>
+                            <button class="shape-pick-btn w-9 h-9 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 flex items-center justify-center text-sm" data-shape="hexagon" title="Шестиугольник"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 22,7 22,17 12,22 2,17 2,7"/></svg></button>
+                            <button class="shape-pick-btn w-9 h-9 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 flex items-center justify-center text-sm" data-shape="diamond" title="Ромб"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 22,12 12,22 2,12"/></svg></button>
+                        </div>
+                    </div>
+                    <!-- Shape picker JS -->
+                    <script>
+                    (function(){
+                        const shapeIcons = {
+                            rect: 'far fa-square', circle: 'far fa-circle', ellipse: 'fas fa-egg',
+                            triangle: 'far fa-triangle', star: 'far fa-star',
+                            pentagon: 'far fa-pentagon', hexagon: 'far fa-hexagon', diamond: 'far fa-gem'
+                        };
+                        window._activeShapeType = 'rect';
+                        window.addEventListener('load', function() {
+                            const picker = document.getElementById('shape-picker');
+                            const btn = document.getElementById('tool-shape');
+                            const icon = document.getElementById('tool-shape-icon');
+                            if (!picker || !btn) return;
+
+                            // Toggle picker on shape-button click
+                            btn.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                picker.classList.toggle('hidden');
+                            });
+
+                            // Select shape type
+                            document.querySelectorAll('.shape-pick-btn').forEach(function(pb) {
+                                pb.addEventListener('click', function(e) {
+                                    e.stopPropagation();
+                                    window._activeShapeType = pb.dataset.shape;
+                                    // update icon if FontAwesome icon available
+                                    const ic = shapeIcons[pb.dataset.shape];
+                                    if (ic && !ic.includes('triangle') && !ic.includes('pentagon') && !ic.includes('hexagon')) {
+                                        icon.className = ic;
+                                    }
+                                    picker.classList.add('hidden');
+                                    // Активируем режим shape
+                                    if (window.board_setMode) window.board_setMode('shape');
+                                });
+                            });
+
+                            // Close picker on outside click
+                            document.addEventListener('click', function() {
+                                picker.classList.add('hidden');
+                            });
+                        });
+                    })();
+                    </script>
                     <button id="tool-arrow" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Стрелка (A)"><i class="fas fa-long-arrow-alt-right"></i></button>
                     <button id="tool-pencil" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Карандаш (P)"><i class="fas fa-pen"></i></button>
                     <div class="h-px w-full bg-gray-200 dark:bg-slate-700 my-1"></div>

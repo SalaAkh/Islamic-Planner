@@ -380,6 +380,9 @@ window.initBoard = function (showToast) {
     if(btnArrow) btnArrow.addEventListener('click', () => setMode('arrow'));
     if(btnPencil) btnPencil.addEventListener('click', () => setMode('pencil'));
     if(btnEraser) btnEraser.addEventListener('click', () => setMode('eraser'));
+    // Expose setMode globally so shape picker can use it
+    window.board_setMode = setMode;
+
 
     // --- Drawing Events ---
     stage.on('mousedown touchstart', function(e) {
@@ -427,18 +430,57 @@ window.initBoard = function (showToast) {
             });
             noteLayer.add(tempShape);
         } else if (mode === 'shape') {
-            tempShape = new Konva.Rect({
-                x: pos.x,
-                y: pos.y,
-                width: 0,
-                height: 0,
-                fill: 'transparent',
-                stroke: currentColor,
-                strokeWidth: 3,
-                cornerRadius: 8,
-                draggable: true,
-                name: 'RectNode'
-            });
+            const shapeType = window._activeShapeType || 'rect';
+            if (shapeType === 'circle') {
+                tempShape = new Konva.Circle({
+                    x: pos.x, y: pos.y, radius: 0,
+                    fill: 'transparent', stroke: currentColor, strokeWidth: 3,
+                    draggable: true, name: 'CircleNode'
+                });
+            } else if (shapeType === 'ellipse') {
+                tempShape = new Konva.Ellipse({
+                    x: pos.x, y: pos.y, radiusX: 0, radiusY: 0,
+                    fill: 'transparent', stroke: currentColor, strokeWidth: 3,
+                    draggable: true, name: 'EllipseNode'
+                });
+            } else if (shapeType === 'triangle') {
+                tempShape = new Konva.RegularPolygon({
+                    x: pos.x, y: pos.y, sides: 3, radius: 0,
+                    fill: 'transparent', stroke: currentColor, strokeWidth: 3,
+                    draggable: true, name: 'TriangleNode'
+                });
+            } else if (shapeType === 'star') {
+                tempShape = new Konva.Star({
+                    x: pos.x, y: pos.y, numPoints: 5, innerRadius: 0, outerRadius: 0,
+                    fill: 'transparent', stroke: currentColor, strokeWidth: 3,
+                    draggable: true, name: 'StarNode'
+                });
+            } else if (shapeType === 'pentagon') {
+                tempShape = new Konva.RegularPolygon({
+                    x: pos.x, y: pos.y, sides: 5, radius: 0,
+                    fill: 'transparent', stroke: currentColor, strokeWidth: 3,
+                    draggable: true, name: 'PentagonNode'
+                });
+            } else if (shapeType === 'hexagon') {
+                tempShape = new Konva.RegularPolygon({
+                    x: pos.x, y: pos.y, sides: 6, radius: 0,
+                    fill: 'transparent', stroke: currentColor, strokeWidth: 3,
+                    draggable: true, name: 'HexagonNode'
+                });
+            } else if (shapeType === 'diamond') {
+                tempShape = new Konva.RegularPolygon({
+                    x: pos.x, y: pos.y, sides: 4, radius: 0,
+                    fill: 'transparent', stroke: currentColor, strokeWidth: 3,
+                    draggable: true, name: 'DiamondNode',
+                    rotation: 45
+                });
+            } else {
+                tempShape = new Konva.Rect({
+                    x: pos.x, y: pos.y, width: 0, height: 0,
+                    fill: 'transparent', stroke: currentColor, strokeWidth: 3,
+                    cornerRadius: 8, draggable: true, name: 'RectNode'
+                });
+            }
             noteLayer.add(tempShape);
         }
     });
@@ -455,8 +497,24 @@ window.initBoard = function (showToast) {
             const points = tempShape.points();
             tempShape.points([points[0], points[1], pos.x, pos.y]);
         } else if (mode === 'shape') {
-            tempShape.width(pos.x - tempShape.x());
-            tempShape.height(pos.y - tempShape.y());
+            const shapeType = window._activeShapeType || 'rect';
+            if (shapeType === 'circle') {
+                const r = Math.sqrt(Math.pow(pos.x - tempShape.x(),2) + Math.pow(pos.y - tempShape.y(),2));
+                tempShape.radius(r);
+            } else if (shapeType === 'ellipse') {
+                tempShape.radiusX(Math.abs(pos.x - tempShape.x()));
+                tempShape.radiusY(Math.abs(pos.y - tempShape.y()));
+            } else if (['triangle','pentagon','hexagon','diamond'].includes(shapeType)) {
+                const r = Math.sqrt(Math.pow(pos.x - tempShape.x(),2) + Math.pow(pos.y - tempShape.y(),2));
+                tempShape.radius(r);
+            } else if (shapeType === 'star') {
+                const r = Math.sqrt(Math.pow(pos.x - tempShape.x(),2) + Math.pow(pos.y - tempShape.y(),2));
+                tempShape.outerRadius(r);
+                tempShape.innerRadius(r * 0.45);
+            } else {
+                tempShape.width(pos.x - tempShape.x());
+                tempShape.height(pos.y - tempShape.y());
+            }
         }
     });
 
@@ -569,11 +627,11 @@ window.initBoard = function (showToast) {
         textarea.focus();
 
         const saveHandler = () => {
-            if(textarea.parentNode) {
+            if (!textarea.parentNode) return; // Гард от повторного вызова
+            try {
                 if(textarea.value.trim() === '') {
-                    // Empty text - don't destroy if it has a shape background (sticky)
                     if (group.getChildren((n) => n.getClassName() === 'Rect').length === 0) {
-                        group.destroy(); 
+                        group.destroy();
                         selectNode(null);
                     } else {
                         textNode.text('');
@@ -584,9 +642,12 @@ window.initBoard = function (showToast) {
                     textNode.show();
                 }
                 tr.show();
-                document.body.removeChild(textarea);
+                if (textarea.parentNode) textarea.parentNode.removeChild(textarea);
                 saveBoardState();
-                tr.forceUpdate();
+                // Безопасный forceUpdate только если есть активные ноды
+                if (tr.nodes().length > 0) tr.forceUpdate();
+            } catch(e) {
+                console.warn('[Board] saveHandler error:', e.message);
             }
         };
 
