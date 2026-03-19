@@ -12,6 +12,10 @@ service cloud.firestore {
                                document == 'board_state' ||
                                document == 'board_drawing' ||
                                document == 'events' ||
+                               document == 'todo_lists' ||
+                               document == 'boards_meta' ||
+                               document.matches('^board_state_.*') ||
+                               document.matches('^board_drawing_.*') ||
                                document.matches('^day_.*') || 
                                document.matches('^notes_.*')
                              );

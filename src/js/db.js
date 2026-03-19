@@ -17,7 +17,14 @@ window.DbSync = {
                 const uid = window.Auth.user.uid;
                 // Structure: users/UID/data/KEY
                 const docRef = doc(window.firebaseDb, `users/${uid}/data`, key);
-                await setDoc(docRef, data);
+                
+                // Firestore не позволяет сохранять массивы в корне документа
+                let docContent = data;
+                if (Array.isArray(data)) {
+                    docContent = { _isArray: true, items: data };
+                }
+                
+                await setDoc(docRef, docContent);
                 console.log(`[Sync] Cloud saved: ${key} (debounced)`);
             } catch (e) {
                 console.error('[Sync] Error saving to cloud:', e);
@@ -113,7 +120,12 @@ window.DbSync = {
             console.log("[Sync] Downloading cloud data...");
             for (const docSnap of snapshot.docs) {
                 const key = docSnap.id;
-                const data = docSnap.data();
+                let data = docSnap.data();
+                
+                // Unpack array if it was wrapped by db.js
+                if (data && data._isArray) {
+                    data = data.items || [];
+                }
 
                 if (key === 'goals') {
                     localStorage.setItem('barakah_goals', JSON.stringify(data));

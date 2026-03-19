@@ -824,7 +824,7 @@ window.deleteBoard = function(boardId) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function initDashboardEvents() {
     document.getElementById('btn-create-board')?.addEventListener('click', () => {
         const id = 'board_' + Date.now();
         const boards = window.Store.getBoardsMeta();
@@ -924,4 +924,9 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.blur();
         }
     });
-});
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDashboardEvents);
+} else {
+    initDashboardEvents();
+}
