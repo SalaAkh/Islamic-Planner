@@ -986,25 +986,27 @@
                     </div>
                 </header>
 
+                <!-- 🎨 Vertical Creation Bar — вне board-container, позиционируем к view-board -->
+                <div id="miro-creation-bar"
+                    class="fixed left-6 top-1/2 transform -translate-y-1/2 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 flex flex-col p-1.5 space-y-1" 
+                    style="z-index: 9999;">
+                    <button id="tool-pan" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors tool-active" title="Выделение / Рука (V)"><i class="fas fa-mouse-pointer"></i></button>
+                    <button id="tool-text" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Текст (T)"><i class="fas fa-font"></i></button>
+                    <button id="tool-sticky" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Стикер (N)"><i class="far fa-sticky-note"></i></button>
+                    <button id="tool-shape" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Фигура (S)"><i class="far fa-square"></i></button>
+                    <button id="tool-arrow" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Стрелка (A)"><i class="fas fa-long-arrow-alt-right"></i></button>
+                    <button id="tool-pencil" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Карандаш (P)"><i class="fas fa-pen"></i></button>
+                    <div class="h-px w-full bg-gray-200 dark:bg-slate-700 my-1"></div>
+                    <button id="tool-eraser" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Ластик (E)"><i class="fas fa-eraser"></i></button>
+                    <button id="clear-drawing" class="w-10 h-10 rounded-lg flex items-center justify-center text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors" title="Очистить доску"><i class="fas fa-trash-alt"></i></button>
+                    <div class="h-px w-full bg-gray-200 dark:bg-slate-700 my-1"></div>
+                    <button id="tool-undo" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Отменить (Ctrl+Z)"><i class="fas fa-reply"></i></button>
+                    <button id="tool-redo" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Вернуть (Ctrl+Y)"><i class="fas fa-share"></i></button>
+                </div>
+
                 <div id="board-container" class="board-container relative overflow-hidden bg-gray-50 rounded-2xl w-full"
                     style="min-height: 720px;">
                     <!-- Konva Stage mounts here -->
-                    
-                    <!-- Vertical Creation Bar (Miro Style) -->
-                    <div id="miro-creation-bar" class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700 flex flex-col p-1.5 space-y-1 z-40">
-                        <button id="tool-pan" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors tool-active" title="Выделение / Рука (V)"><i class="fas fa-mouse-pointer"></i></button>
-                        <button id="tool-text" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Текст (T)"><i class="fas fa-font"></i></button>
-                        <button id="tool-sticky" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Стикер (N)"><i class="far fa-sticky-note"></i></button>
-                        <button id="tool-shape" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Фигура (S)"><i class="far fa-square"></i></button>
-                        <button id="tool-arrow" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Стрелка (A)"><i class="fas fa-long-arrow-alt-right"></i></button>
-                        <button id="tool-pencil" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Карандаш (P)"><i class="fas fa-pen"></i></button>
-                        <div class="h-px w-full bg-gray-200 dark:bg-slate-700 my-1"></div>
-                        <button id="tool-eraser" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Ластик (E)"><i class="fas fa-eraser"></i></button>
-                        <button id="clear-drawing" class="w-10 h-10 rounded-lg flex items-center justify-center text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors" title="Очистить доску"><i class="fas fa-trash-alt"></i></button>
-                        <div class="h-px w-full bg-gray-200 dark:bg-slate-700 my-1"></div>
-                        <button id="tool-undo" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Отменить (Ctrl+Z)"><i class="fas fa-reply"></i></button>
-                        <button id="tool-redo" class="w-10 h-10 rounded-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" title="Вернуть (Ctrl+Y)"><i class="fas fa-share"></i></button>
-                    </div>
 
                     <!-- Floating Context Menu -->
                     <div id="canvas-context-menu" class="absolute bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 px-2 py-1 flex items-center gap-1 z-50 transition-opacity duration-200 opacity-0 pointer-events-none" style="top: -100px; left: -100px;">
