@@ -71,6 +71,16 @@ window.initBoard = function (showToast) {
     let selectedNode = null;
     let boardEditorCounter = 0;
 
+    // Helper to safely clear noteLayer without destroying the Transformer
+    function clearNoteLayer() {
+        const children = noteLayer.getChildren().slice();
+        children.forEach(child => {
+            if (child.getClassName() !== 'Transformer') {
+                child.destroy();
+            }
+        });
+    }
+
     // Guard: when a node that is being transformed gets destroyed mid-drag
     // Konva fires _drag → _fireAndBubble → setAttrs on a null child → crash.
     // Attaching a safe boundBoxFunc prevents this.
@@ -693,8 +703,7 @@ window.initBoard = function (showToast) {
         } else if (historyStep === 0) {
             // FIX: was decrementing to -1 but never clearing canvas. Now clears and stays at 0.
             pathLayer.destroyChildren();
-            noteLayer.destroyChildren();
-            noteLayer.add(tr);
+            clearNoteLayer();
             requestPathSave();
             saveBoardState();
             stage.draw();
@@ -729,8 +738,7 @@ window.initBoard = function (showToast) {
 
     function restoreNoteLayerFromJSON(jsonStr) {
         selectNode(null);
-        noteLayer.destroyChildren();
-        noteLayer.add(tr);
+        clearNoteLayer();
         if (!jsonStr) return;
         const tempLayer = Konva.Node.create(jsonStr);
         tempLayer.getChildren().forEach(blob => {
@@ -761,9 +769,8 @@ window.initBoard = function (showToast) {
             if(confirm('Очистить весь холст? Внимание, удалятся все фигуры и стикеры!')) {
                 selectNode(null);
                 pathLayer.destroyChildren();
-                noteLayer.destroyChildren();
+                clearNoteLayer();
                 tr.nodes([]);
-                noteLayer.add(tr);
                 saveHistory();
                 requestPathSave();
                 saveBoardState();
@@ -988,8 +995,7 @@ window.initBoard = function (showToast) {
                 drawGrid();
             }
             if(boardData.konvaNotes) {
-                noteLayer.destroyChildren();
-                noteLayer.add(tr); // Re-add transformer
+                clearNoteLayer();
                 const tempLayer = Konva.Node.create(boardData.konvaNotes);
                 
                 tempLayer.getChildren().forEach(blob => {
@@ -997,7 +1003,7 @@ window.initBoard = function (showToast) {
                     const node = blob.clone();
                     
                     if (node.getClassName() === 'Group') {
-                        // FIX #4: Attach dblclick to all text children, not just first
+                        // Re-attach dblclick to all text children, not just first
                         node.getChildren(n => n.getClassName() === 'Text').forEach(textNode => {
                             textNode.on('dblclick dbltap', () => bindTextArea(textNode, node));
                         });
@@ -1012,12 +1018,10 @@ window.initBoard = function (showToast) {
                 });
                 tempLayer.destroy();
             } else {
-                noteLayer.destroyChildren();
-                noteLayer.add(tr);
+                clearNoteLayer();
             }
         } else {
-            noteLayer.destroyChildren();
-            noteLayer.add(tr);
+            clearNoteLayer();
         }
 
         const drawingData = await window.Store.getDrawing(window.currentBoardId || 'main_board');
