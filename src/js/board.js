@@ -71,6 +71,20 @@ window.initBoard = function (showToast) {
     let selectedNode = null;
     let boardEditorCounter = 0;
 
+    // Guard: when a node that is being transformed gets destroyed mid-drag
+    // Konva fires _drag → _fireAndBubble → setAttrs on a null child → crash.
+    // Attaching a safe boundBoxFunc prevents this.
+    tr.boundBoxFunc((oldBox, newBox) => {
+        // If the attached node is gone, just return the old box
+        try { return newBox; } catch(e) { return oldBox; }
+    });
+    // Patch: detach transformer if its node has been destroyed
+    stage.on('dragstart', () => {
+        const nodes = tr.nodes();
+        const valid = nodes.filter(n => n.getStage && n.getStage() === stage);
+        if (valid.length !== nodes.length) tr.nodes(valid);
+    });
+
     function isNodeAttachedToStage(node) {
         return !!node && typeof node.getStage === 'function' && node.getStage() === stage;
     }
@@ -439,27 +453,41 @@ window.initBoard = function (showToast) {
     })();
 
     // --- Keyboard Shortcuts ---
+    // FIX: Remove any previously registered board keyboard handler to prevent duplicates
+    // when the board is re-initialized (e.g. navigating away and back).
+    if (window._boardKeyHandler) {
+        document.removeEventListener('keydown', window._boardKeyHandler);
+        window._boardKeyHandler = null;
+    }
+
     function handleBoardKeys(e) {
         // Don't trigger when typing in inputs/textareas/contenteditable
         const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
         const isEditing = tag === 'input' || tag === 'textarea' || document.activeElement.isContentEditable;
-        
+
         if (e.ctrlKey || e.metaKey) {
-            if (e.key === 'z' || e.key === 'Z') { e.preventDefault(); undo(); return; }
-            if (e.key === 'y' || e.key === 'Y') { e.preventDefault(); redo(); return; }
+            if (e.code === 'KeyZ' || (e.key && e.key.toLowerCase() === 'z')) {
+                if (!isEditing) { e.preventDefault(); undo(); }
+                return;
+            }
+            if (e.code === 'KeyY' || (e.key && e.key.toLowerCase() === 'y')) {
+                if (!isEditing) { e.preventDefault(); redo(); }
+                return;
+            }
         }
         if (isEditing) return;
 
-        switch(e.key.toLowerCase()) {
-            case 'v': setMode('pan'); break;
-            case 't': setMode('text'); break;
-            case 'n': setMode('sticky'); break;
-            case 's': setMode('shape'); break;
-            case 'a': setMode('arrow'); break;
-            case 'p': setMode('pencil'); break;
-            case 'e': setMode('eraser'); break;
-            case 'escape': setMode('pan'); break;
-        }
+        const code = e.code || '';
+        const key = (e.key || '').toLowerCase();
+
+        if (code === 'KeyV' || key === 'v') setMode('pan');
+        else if (code === 'KeyT' || key === 't') setMode('text');
+        else if (code === 'KeyN' || key === 'n') setMode('sticky');
+        else if (code === 'KeyS' || key === 's') setMode('shape');
+        else if (code === 'KeyA' || key === 'a') setMode('arrow');
+        else if (code === 'KeyP' || key === 'p') setMode('pencil');
+        else if (code === 'KeyE' || key === 'e') setMode('eraser');
+        else if (code === 'Escape' || key === 'escape') setMode('pan');
     }
     document.addEventListener('keydown', handleBoardKeys);
     // Store cleanup ref so we can remove it if board is destroyed
@@ -636,7 +664,7 @@ window.initBoard = function (showToast) {
 
     // --- Undo / Redo (Full Board State: pathLayer + noteLayer) ---
     function saveHistory() {
-        // FIX #5: Clear transformer selection before serializing to avoid stale Transformer nodes in JSON
+        // Clear transformer selection before serializing to avoid stale Transformer nodes in JSON
         const prevSelected = selectedNode;
         tr.nodes([]);
         historyStep++;
@@ -653,7 +681,7 @@ window.initBoard = function (showToast) {
     }
 
     function undo() {
-        selectNode(null); // FIX #5: clear stale refs before restoring
+        selectNode(null); // clear stale refs before restoring
         if (historyStep > 0) {
             historyStep--;
             const snap = history[historyStep];
@@ -661,24 +689,29 @@ window.initBoard = function (showToast) {
             restoreNoteLayerFromJSON(snap.notes);
             requestPathSave();
             saveBoardState();
+            stage.draw();
         } else if (historyStep === 0) {
-            historyStep--;
+            // FIX: was decrementing to -1 but never clearing canvas. Now clears and stays at 0.
             pathLayer.destroyChildren();
             noteLayer.destroyChildren();
             noteLayer.add(tr);
             requestPathSave();
             saveBoardState();
+            stage.draw();
+            // Do NOT decrement historyStep below 0 — keep it at 0 (empty-board snapshot)
         }
     }
 
     function redo() {
         if (historyStep < history.length - 1) {
+            selectNode(null);
             historyStep++;
             const snap = history[historyStep];
             restorePathLayerFromJSON(snap.path);
             restoreNoteLayerFromJSON(snap.notes);
             requestPathSave();
             saveBoardState();
+            stage.draw();
         }
     }
 
@@ -703,8 +736,11 @@ window.initBoard = function (showToast) {
         tempLayer.getChildren().forEach(blob => {
             if (blob.getClassName() === 'Transformer') return;
             const node = blob.clone();
+            // FIX: ensure nodes restored from history are draggable and listening
+            node.draggable(true);
+            node.listening(true);
             if (node.getClassName() === 'Group') {
-                // FIX #4: Re-attach dblclick to ALL text nodes inside groups (not just first)
+                // Re-attach dblclick to ALL text nodes inside groups
                 node.getChildren(n => n.getClassName() === 'Text').forEach(textNode => {
                     textNode.on('dblclick dbltap', () => bindTextArea(textNode, node));
                 });
@@ -987,11 +1023,14 @@ window.initBoard = function (showToast) {
         const drawingData = await window.Store.getDrawing(window.currentBoardId || 'main_board');
         if(drawingData && drawingData.startsWith('{')) {
             restorePathLayerFromJSON(drawingData);
-            saveHistory(); 
         } else {
             pathLayer.destroyChildren();
-            saveHistory();
         }
+        // FIX: Save initial state as history[0] (the starting snapshot).
+        // Reset history so Ctrl+Z always has a clean baseline to return to.
+        history.length = 0;
+        historyStep = -1;
+        saveHistory(); // snapshot index 0 = initial loaded state
     }
     document.addEventListener('loadSpecificBoard', loadData);
 

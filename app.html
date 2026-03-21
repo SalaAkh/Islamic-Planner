@@ -333,6 +333,7 @@ import {
 
 const GOOGLE_REDIRECT_PENDING_KEY = 'barakah_google_redirect_pending';
 const GOOGLE_REDIRECT_LOG_KEY = 'barakah_google_redirect_log';
+const GUEST_MODE_KEY = 'barakah_guest';
 
 window.Auth = {
     user: null,
@@ -454,8 +455,11 @@ window.Auth = {
                 document.getElementById('auth-login-view')?.classList.remove('hidden');
                 document.getElementById('auth-profile-view')?.classList.add('hidden');
 
-                // Force modal open, hide close button — no escape! (unless local file:)
-                if (window.location.protocol === 'file:') {
+                // Check if user previously chose guest mode or is on file: protocol
+                const isGuestMode = localStorage.getItem(GUEST_MODE_KEY) === '1';
+
+                // Force modal open, hide close button — no escape! (unless local file: or guest)
+                if (window.location.protocol === 'file:' || isGuestMode) {
                     if (authModal) {
                         authModal.classList.add('hidden');
                         authModal.classList.remove('flex');
@@ -690,6 +694,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 authModal.classList.remove('hidden');
                 authModal.classList.add('flex');
             }
+        });
+    }
+
+    // Guest bypass — continue without account
+    const btnGuest = document.getElementById('btn-guest-auth');
+    if (btnGuest) {
+        btnGuest.addEventListener('click', () => {
+            try { localStorage.setItem(GUEST_MODE_KEY, '1'); } catch(e) {}
+            const authModal = document.getElementById('auth-modal');
+            if (authModal) {
+                authModal.classList.add('hidden');
+                authModal.classList.remove('flex');
+            }
+            console.log('[Auth] Guest mode activated.');
         });
     }
 
@@ -5938,7 +5956,7 @@ initLocalNotifications();
                 <i class="fas fa-bullseye md:hidden text-[22px] mb-1"></i>
                 <span data-i18n="tab_goals">Цели</span>
             </button>
-            <button data-tab="lists" id="tab-lists" class="tab-btn tab-lists">
+            <button data-tab="lists" id="tab-lists" class="tab-btn tab-lists" style="background-color: #8b5cf6 !important; opacity: 1 !important;">
                 <i class="fas fa-tasks md:hidden text-[22px] mb-1"></i>
                 <span data-i18n="tab_lists">Списки</span>
             </button>
