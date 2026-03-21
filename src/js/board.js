@@ -312,6 +312,19 @@ window.initBoard = function (showToast) {
     }
 
     stage.on('click tap', (e) => {
+        const pos = stage.getRelativePointerPosition();
+        
+        if (mode === 'text') {
+            addFreeText(pos.x, pos.y);
+            setMode('pan');
+            return;
+        }
+        if (mode === 'sticky') {
+            addStickyNote('yellow', pos.x, pos.y);
+            setMode('pan');
+            return;
+        }
+
         if (mode !== 'pan') return;
         
         // Click on empty space or grid or path (freehand lines are unselectable individually easily)
@@ -512,17 +525,6 @@ window.initBoard = function (showToast) {
         if(e.target.getClassName() === 'Transformer' || e.target.parent?.getClassName() === 'Transformer') return;
 
         const pos = stage.getRelativePointerPosition();
-
-        if (mode === 'text') {
-            addFreeText(pos.x, pos.y);
-            setMode('pan'); 
-            return;
-        }
-        if (mode === 'sticky') {
-            addStickyNote('yellow', pos.x, pos.y);
-            setMode('pan');
-            return;
-        }
 
         isPaint = true;
         
@@ -831,6 +833,11 @@ window.initBoard = function (showToast) {
         textarea.id = editorId;
         textarea.name = editorId;
         textarea.setAttribute('aria-label', 'Board text editor');
+        // Fix: Disable external extension overlays like Grammarly that cause "updateActuationOverlay" error
+        textarea.setAttribute('data-gramm', 'false');
+        textarea.setAttribute('data-gramm_editor', 'false');
+        textarea.setAttribute('data-enable-grammarly', 'false');
+        textarea.setAttribute('spellcheck', 'false');
         document.body.appendChild(textarea);
 
         const nodeW = Math.max(100, textNode.width()  * scale);
@@ -943,7 +950,8 @@ window.initBoard = function (showToast) {
         group.on('dragend', () => { saveBoardState(); saveHistory(); });
 
         selectNode(group);
-        bindTextArea(textNode, group); // Edit immediately
+        // Fix: Use setTimeout to avoid the mousedown event from immediately blurring the newly created textarea
+        setTimeout(() => bindTextArea(textNode, group), 50);
         saveHistory();
     }
 
