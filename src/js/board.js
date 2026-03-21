@@ -677,12 +677,26 @@ window.initBoard = function (showToast) {
         // Clear transformer selection before serializing to avoid stale Transformer nodes in JSON
         const prevSelected = selectedNode;
         tr.nodes([]);
+        
+        const currentPath = pathLayer.toJSON();
+        const currentNotes = noteLayer.toJSON();
+        
+        // Prevent saving duplicate identical states
+        if (historyStep >= 0 && history[historyStep]) {
+            if (history[historyStep].path === currentPath && history[historyStep].notes === currentNotes) {
+                if (isNodeAttachedToStage(prevSelected)) {
+                    tr.nodes([prevSelected]);
+                    tr.moveToTop();
+                }
+                return; // skip duplicate
+            }
+        }
+        
         historyStep++;
         history.splice(historyStep);
-        history.push({
-            path: pathLayer.toJSON(),
-            notes: noteLayer.toJSON()
-        });
+        history.push({ path: currentPath, notes: currentNotes });
+        console.log(`[Undo Engine] Saved step ${historyStep}. Total steps: ${history.length}`);
+        
         // Restore selection after snapshot
         if (isNodeAttachedToStage(prevSelected)) {
             tr.nodes([prevSelected]);
@@ -692,6 +706,8 @@ window.initBoard = function (showToast) {
 
     function undo() {
         selectNode(null); // clear stale refs before restoring
+        console.log(`[Undo Engine] Undo called. Current step: ${historyStep}. Total history: ${history.length}`);
+        
         if (historyStep > 0) {
             historyStep--;
             const snap = history[historyStep];
@@ -700,6 +716,7 @@ window.initBoard = function (showToast) {
             requestPathSave();
             saveBoardState();
             stage.draw();
+            console.log(`[Undo Engine] Restored step ${historyStep}`);
         } else if (historyStep === 0) {
             // FIX: was decrementing to -1 but never clearing canvas. Now clears and stays at 0.
             pathLayer.destroyChildren();
@@ -707,11 +724,13 @@ window.initBoard = function (showToast) {
             requestPathSave();
             saveBoardState();
             stage.draw();
+            console.log(`[Undo Engine] Reached 0. Cleared canvas.`);
             // Do NOT decrement historyStep below 0 — keep it at 0 (empty-board snapshot)
         }
     }
 
     function redo() {
+        console.log(`[Undo Engine] Redo called. Current step: ${historyStep}`);
         if (historyStep < history.length - 1) {
             selectNode(null);
             historyStep++;
@@ -721,6 +740,7 @@ window.initBoard = function (showToast) {
             requestPathSave();
             saveBoardState();
             stage.draw();
+            console.log(`[Undo Engine] Restored step ${historyStep}`);
         }
     }
 
