@@ -249,9 +249,12 @@ window.initBoard = function (showToast) {
         if (selectedNode === nextNode) return;
         selectedNode = nextNode;
         if (node) {
-            tr.nodes([selectedNode]);
-            tr.moveToTop();
+            // FIX #1: Move the selected node to top of noteLayer first,
+            // then move transformer on top of it — all within noteLayer only.
+            // This prevents z-order conflict between noteLayer and pathLayer.
             selectedNode.moveToTop();
+            tr.nodes([selectedNode]);
+            tr.moveToTop(); // tr is in noteLayer, so this is safe
             
             // Sync selected node color to visually highlight current color
             let nodeColor = '#fef08a';
@@ -274,8 +277,8 @@ window.initBoard = function (showToast) {
             
             // Enable/Disable Font Size buttons based on node type
             const isText = node.getClassName() === 'Group' && node.getChildren((n) => n.getClassName() === 'Text').length > 0;
-            ctxFontUp.style.display = isText ? 'flex' : 'none';
-            ctxFontDown.style.display = isText ? 'flex' : 'none';
+            if (ctxFontUp) ctxFontUp.style.display = isText ? 'flex' : 'none';
+            if (ctxFontDown) ctxFontDown.style.display = isText ? 'flex' : 'none';
 
         } else {
             tr.nodes([]);
@@ -601,6 +604,25 @@ window.initBoard = function (showToast) {
         if(isPaint) {
             isPaint = false;
             if (mode === 'shape' || mode === 'arrow') {
+                // FIX #3: Don't save zero-size shapes to history (accidental click without drag)
+                let isValid = true;
+                if (tempShape) {
+                    const cls = tempShape.getClassName();
+                    if (cls === 'Rect') isValid = Math.abs(tempShape.width()) > 5 || Math.abs(tempShape.height()) > 5;
+                    else if (cls === 'Circle') isValid = tempShape.radius() > 3;
+                    else if (cls === 'Ellipse') isValid = tempShape.radiusX() > 3 || tempShape.radiusY() > 3;
+                    else if (cls === 'RegularPolygon' || cls === 'Star') isValid = (tempShape.radius ? tempShape.radius() : tempShape.outerRadius()) > 5;
+                    else if (cls === 'Arrow') {
+                        const pts = tempShape.points();
+                        const dx = pts[2] - pts[0], dy = pts[3] - pts[1];
+                        isValid = Math.sqrt(dx*dx + dy*dy) > 10;
+                    }
+                }
+                if (!isValid && tempShape) {
+                    tempShape.destroy();
+                    tempShape = null;
+                    return;
+                }
                 selectNode(tempShape);
                 setMode('pan');
                 saveBoardState();
@@ -614,15 +636,24 @@ window.initBoard = function (showToast) {
 
     // --- Undo / Redo (Full Board State: pathLayer + noteLayer) ---
     function saveHistory() {
+        // FIX #5: Clear transformer selection before serializing to avoid stale Transformer nodes in JSON
+        const prevSelected = selectedNode;
+        tr.nodes([]);
         historyStep++;
         history.splice(historyStep);
         history.push({
             path: pathLayer.toJSON(),
             notes: noteLayer.toJSON()
         });
+        // Restore selection after snapshot
+        if (isNodeAttachedToStage(prevSelected)) {
+            tr.nodes([prevSelected]);
+            tr.moveToTop();
+        }
     }
 
     function undo() {
+        selectNode(null); // FIX #5: clear stale refs before restoring
         if (historyStep > 0) {
             historyStep--;
             const snap = history[historyStep];
@@ -673,11 +704,15 @@ window.initBoard = function (showToast) {
             if (blob.getClassName() === 'Transformer') return;
             const node = blob.clone();
             if (node.getClassName() === 'Group') {
-                const textNode = node.getChildren(n => n.getClassName() === 'Text')[0];
-                if (textNode) textNode.on('dblclick dbltap', () => bindTextArea(textNode, node));
-                node.on('dragend', () => saveBoardState());
-            } else if (node.getClassName() === 'Rect' || node.getClassName() === 'Arrow') {
-                node.on('dragend', () => saveBoardState());
+                // FIX #4: Re-attach dblclick to ALL text nodes inside groups (not just first)
+                node.getChildren(n => n.getClassName() === 'Text').forEach(textNode => {
+                    textNode.on('dblclick dbltap', () => bindTextArea(textNode, node));
+                });
+                node.on('dragend', () => { saveBoardState(); saveHistory(); });
+            } else if (node.getClassName() === 'Rect' || node.getClassName() === 'Arrow' ||
+                       node.getClassName() === 'Circle' || node.getClassName() === 'Ellipse' ||
+                       node.getClassName() === 'RegularPolygon' || node.getClassName() === 'Star') {
+                node.on('dragend', () => { saveBoardState(); saveHistory(); });
             }
             noteLayer.add(node);
         });
@@ -712,14 +747,21 @@ window.initBoard = function (showToast) {
         textNode.hide();
         tr.hide();
 
-        // Accurate position: container rect + node's absolute position on stage
-        const containerRect = container.getBoundingClientRect();
+        // FIX #2: Accurate textarea position at any zoom level.
+        // absolutePosition() returns coords in the Konva canvas coordinate space
+        // (already accounting for stage pan & zoom). We convert to viewport pixel
+        // position by adding the canvas element's bounding rect.
+        const stageCanvasEl = stage.content.querySelector('canvas');
+        const canvasRect = stageCanvasEl
+            ? stageCanvasEl.getBoundingClientRect()
+            : container.getBoundingClientRect();
         const absPos = textNode.absolutePosition();
         const scale = stage.scaleX();
 
-        // Use fixed positioning — coords relative to viewport, no scrollX/Y needed
-        const left = containerRect.left + absPos.x;
-        const top  = containerRect.top  + absPos.y;
+        // absolutePosition() is in stage pixel coords (includes pan+zoom transform),
+        // so we just need to add the canvas element's viewport offset.
+        const left = canvasRect.left + absPos.x;
+        const top  = canvasRect.top  + absPos.y;
 
         const textarea = document.createElement('textarea');
         const editorId = `board-text-editor-${++boardEditorCounter}`;
@@ -732,9 +774,11 @@ window.initBoard = function (showToast) {
         const nodeH = Math.max(40,  textNode.height() * scale);
         const fontSize = Math.max(12, textNode.fontSize() * scale);
 
+        // Strip placeholder text
         textarea.value = textNode.text()
             .replace('Дважды кликните...', '')
-            .replace('Нажмите ESC...', '');
+            .replace('Нажмите ESC...', '')
+            .replace('Текст...', '');
 
         Object.assign(textarea.style, {
             position:        'fixed',
@@ -748,7 +792,7 @@ window.initBoard = function (showToast) {
             color:           textNode.fill() === 'transparent' ? '#1e293b' : textNode.fill(),
             border:          '2px dashed #3b82f6',
             borderRadius:    '4px',
-            padding:         Math.round(textNode.padding() * scale || 0) + 'px',
+            padding:         Math.round((textNode.padding() || 0) * scale) + 'px',
             margin:          '0',
             overflow:        'hidden',
             background:      'transparent',
@@ -917,10 +961,14 @@ window.initBoard = function (showToast) {
                     const node = blob.clone();
                     
                     if (node.getClassName() === 'Group') {
-                        const textNode = node.getChildren((n) => n.getClassName() === 'Text')[0] || node.getChildren((n) => n.getClassName() === 'Text')[1];
-                        if(textNode) textNode.on('dblclick dbltap', () => bindTextArea(textNode, node));
+                        // FIX #4: Attach dblclick to all text children, not just first
+                        node.getChildren(n => n.getClassName() === 'Text').forEach(textNode => {
+                            textNode.on('dblclick dbltap', () => bindTextArea(textNode, node));
+                        });
                         node.on('dragend', () => { saveBoardState(); saveHistory(); });
-                    } else if (node.getClassName() === 'Rect' || node.getClassName() === 'Arrow') {
+                    } else if (node.getClassName() === 'Rect' || node.getClassName() === 'Arrow' ||
+                               node.getClassName() === 'Circle' || node.getClassName() === 'Ellipse' ||
+                               node.getClassName() === 'RegularPolygon' || node.getClassName() === 'Star') {
                         node.on('dragend', () => { saveBoardState(); saveHistory(); });
                     }
                     

@@ -27,7 +27,7 @@
     --tab-daily: #64748b;
     --tab-calendar: #10b981;
     --tab-goals: #f59e0b;
-    --tab-lists: #3b82f6;
+    --tab-lists: #8b5cf6;
     --tab-board: #6366f1;
     --tab-home: #94a3b8;
 }
@@ -43,7 +43,7 @@
     --tab-daily: #475569;
     --tab-calendar: #059669;
     --tab-goals: #d97706;
-    --tab-lists: #2563eb;
+    --tab-lists: #7c3aed;
     --tab-board: #4f46e5;
     --tab-home: #334155;
 }
@@ -200,8 +200,11 @@ body {
     background-color: var(--tab-goals);
 }
 
-.tab-lists {
-    background-color: var(--tab-lists);
+.tab-lists { 
+    background-color: var(--tab-lists) !important; 
+    opacity: 1 !important;
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(0,0,0,0.05));
+    border-left: 2px solid rgba(255,255,255,0.2) !important;
 }
 
 .tab-board {
