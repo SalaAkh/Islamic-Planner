@@ -46,11 +46,11 @@
 | Namaz Tracker | ✅ Готов (+ Graceful Fallback) |
 | Hijra Calendar + Events | ✅ Готов |
 | Goals (Akhirat/Dunya) | ✅ Готов |
-| Tafakkur Board (Miro v2) | ✅ Готов (множество досок, Konva.js, 7 цветов, toolbar, shortcuts) |
-| Firebase Auth + Sync | ✅ Готов |
+| Tafakkur Board (Miro v2) | ⚠️ В разработке (базовый функционал готов, но есть известные ограничения/баги) |
+| Firebase Auth + Sync | ✅ Готов (+ Guest Bypass) |
 | AI Planner (Gemini) | ✅ Готов |
 | PWA / Service Worker | ✅ Готов |
-| i18n (4 языка) | ✅ Готов |
+| i18n (4 языка) | ✅ Готов (+ Persistent Routing) |
 | Landing Page | ✅ Готов |
 | Todo Manager | ✅ Готов |
 

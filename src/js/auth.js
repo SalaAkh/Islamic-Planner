@@ -10,6 +10,7 @@ import {
 
 const GOOGLE_REDIRECT_PENDING_KEY = 'barakah_google_redirect_pending';
 const GOOGLE_REDIRECT_LOG_KEY = 'barakah_google_redirect_log';
+const GUEST_MODE_KEY = 'barakah_guest';
 
 window.Auth = {
     user: null,
@@ -131,8 +132,11 @@ window.Auth = {
                 document.getElementById('auth-login-view')?.classList.remove('hidden');
                 document.getElementById('auth-profile-view')?.classList.add('hidden');
 
-                // Force modal open, hide close button — no escape! (unless local file:)
-                if (window.location.protocol === 'file:') {
+                // Check if user previously chose guest mode or is on file: protocol
+                const isGuestMode = localStorage.getItem(GUEST_MODE_KEY) === '1';
+
+                if (window.location.protocol === 'file:' || isGuestMode) {
+                    // Guest mode or local file — keep modal closed, allow close button
                     if (authModal) {
                         authModal.classList.add('hidden');
                         authModal.classList.remove('flex');
@@ -313,7 +317,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (result.error.includes("auth/operation-not-allowed")) errorEl.textContent = (window.t ? window.t('auth_err_not_allowed') : "Глобальная регистрация по Email отключена (Firebase)");
                 else errorEl.textContent = result.error;
             } else {
-                // Success - close modal
+                // Success - clear guest flag and close modal
+                localStorage.removeItem(GUEST_MODE_KEY);
                 document.getElementById('auth-modal').classList.add('hidden');
                 document.getElementById('auth-modal').classList.remove('flex');
                 loginForm.reset();
@@ -349,6 +354,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             btnGoogle.innerHTML = prevHtml;
             btnGoogle.disabled = false;
+        });
+    }
+
+    // Guest bypass — continue without account
+    const btnGuest = document.getElementById('btn-guest-auth');
+    if (btnGuest) {
+        btnGuest.addEventListener('click', () => {
+            try { localStorage.setItem(GUEST_MODE_KEY, '1'); } catch (e) { }
+            const authModal = document.getElementById('auth-modal');
+            if (authModal) {
+                authModal.classList.add('hidden');
+                authModal.classList.remove('flex');
+            }
+            console.log('[Auth] Guest mode activated.');
         });
     }
 

@@ -33,7 +33,7 @@ Islamic-Planner/
 │       ├── main.js           ← Главный контроллер DOM и роутер вкладок
 │       ├── store.js          ← Data Layer (LocalStorage / IndexedDB / JSON export)
 │       ├── i18n.js           ← Система локализации (RU/KK/AR/EN)
-│       ├── auth.js           ← Firebase Auth (Google/Email + Local Mode)
+│       ├── auth.js           ← Firebase Auth (Google + Email) & Guest Mode
 │       ├── db.js             ← Firestore Sync (DbSync)
 │       ├── firebase-init.js  ← Firebase конфиг (API ключ через .env)
 │       ├── namaz-tracker.js  ← Намаз-виджет (muftyat.kz API + fallback)
@@ -136,7 +136,8 @@ JSON Export/Import      ← Универсальный бэкап всего
 ## 🏠 Локальный Режим и Роутинг
 
 - **Firebase Hosting Rewrites:** `firebase.json` перехватывает пути `/ar`, `/en`, `/kk` и проксирует их на физические index.html внутри `dist`. Запрос к `/app` возвращает `/app.html`.
-- **Автодетекция `file://`:** `auth.js` понимает, если юзер открыл скачанный `app.html` прямо с диска, пропускает Firebase, и включает "Local Mode" с PIN-кодом, локальным бэкапом и обходом CORS.
+- **Автодетекция `file://` / Local Mode:** `auth.js` понимает запуск с диска и предлагает оффлайн "Local Mode" с PIN-кодом.
+- **Guest Mode:** Также в модалке аутентификации присутствует кнопка «Продолжить без авторизации», которая устанавливает флаг `barakah_guest` в LocalStorage, позволяя использовать приложение полностью оффлайн без облачной синхронизации.
 
 ---
 
