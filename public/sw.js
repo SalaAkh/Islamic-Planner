@@ -1,7 +1,11 @@
-const CACHE_NAME = 'barakah-planner-v24';
+const CACHE_NAME = 'barakah-planner-v25';
 const ASSETS_TO_CACHE = [
+    './',
+    './index.html',
+    './app.html',
     './manifest.json',
     './favicon.ico',
+    './favicon.png',
     'https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
 ];
