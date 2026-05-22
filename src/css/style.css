@@ -1261,6 +1261,10 @@ body {
     .sunnah-badge {
         display: none;
     }
+
+    #tab-board {
+        display: none !important;
+    }
 }
 
 @media (max-width: 480px) {

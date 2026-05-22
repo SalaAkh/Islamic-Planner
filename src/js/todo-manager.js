@@ -528,6 +528,40 @@ class TodoManager {
         }
     }
 
+    async addAITasks(tasks) {
+        if (this.lists.length === 0) {
+            const newList = {
+                id: 'list_default',
+                title: 'Задачи',
+                tasks: [],
+                createdAt: Date.now()
+            };
+            this.lists.push(newList);
+        }
+        const list = this.lists[0];
+        if (!list.tasks) list.tasks = [];
+
+        const today = this.getTodayDateString();
+        tasks.forEach((t, index) => {
+            const newTask = {
+                id: 't_ai_' + Date.now() + '_' + index,
+                title: t.title,
+                completed: false,
+                createdAt: Date.now(),
+                subtasks: [],
+                parentListId: list.id,
+                myDay: today
+            };
+            if (t.isImportant) {
+                newTask.isImportant = true;
+            }
+            list.tasks.unshift(newTask);
+        });
+
+        this.selectList(this.currentListId || 'smart_my_day');
+        await this.syncList();
+    }
+
     showLoading(show) {
         if (this.loadingOverlay) {
             if (show) this.loadingOverlay.classList.replace('hidden', 'flex');

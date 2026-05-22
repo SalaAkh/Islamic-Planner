@@ -1,6 +1,11 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Allow users to read their own profile/premium status
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+    }
+
     // Make sure users can only read and write their own documents, and only specific allowed data keys
     match /users/{userId}/data/{document} {
       allow read, delete: if request.auth != null && request.auth.uid == userId;

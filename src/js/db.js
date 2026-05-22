@@ -6,6 +6,12 @@ window.DbSync = {
     async syncToCloud(key, data) {
         if (!window.firebaseDb || !window.Auth || !window.Auth.user) return;
 
+        // Gate cloud sync behind premium status
+        if (!window.Auth.isPremium) {
+            console.log(`[Sync] Skip saving ${key}: User is not Premium.`);
+            return;
+        }
+
         // Debounce: Clear existing timer for this key
         if (this._syncTimers[key]) {
             clearTimeout(this._syncTimers[key]);
@@ -34,6 +40,7 @@ window.DbSync = {
 
     async syncReminderToCloud(event, dateString) {
         if (!window.firebaseDb || !window.Auth || !window.Auth.user || !window.Auth.user.email) return;
+        if (!window.Auth.isPremium) return;
 
         // Only set reminders if there is a specific time
         if (event.allDay || !event.time) {
@@ -82,6 +89,7 @@ window.DbSync = {
 
     async deleteReminderFromCloud(eventId) {
         if (!window.firebaseDb || !window.Auth || !window.Auth.user) return;
+        if (!window.Auth.isPremium) return;
 
         try {
             const uid = window.Auth.user.uid;
@@ -96,6 +104,11 @@ window.DbSync = {
 
     async syncFromCloud() {
         if (!window.firebaseDb || !window.Auth || !window.Auth.user) return;
+
+        if (!window.Auth.isPremium) {
+            console.log("[Sync] Skip loading from cloud: User is not Premium.");
+            return;
+        }
 
         try {
             const uid = window.Auth.user.uid;

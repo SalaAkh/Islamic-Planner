@@ -121,7 +121,19 @@ const translations = {
         "city_search_empty": "Начните вводить название...",
         "city_search_loading": "Поиск...",
         "city_search_no_results": "Ничего не найдено",
-        "city_search_error": "Ошибка сети"
+        "city_search_error": "Ошибка сети",
+        "auth_consent_label": "Я даю согласие на трансграничную передачу и обработку моих данных (email, имя, задачи) на облачных серверах Google Cloud для обеспечения синхронизации.",
+        "auth_consent_error": "Необходимо согласие на обработку персональных данных.",
+        "religious_disclaimer_title": "Правовое предупреждение",
+        "religious_disclaimer_text": "Barakah Planner является инструментом личной продуктивности и тайм-менеджмента. Приложение не предоставляет религиозных предписаний, фетв или официального шариатского руководства. Все расчеты времени намазов носят справочно-информационный характер.",
+        "board_desktop_only": "Доска Тафаккур разработана для больших экранов. Пожалуйста, откройте приложение с компьютера.",
+        "board_desktop_only_title": "Доступно только на компьютерах",
+        "premium_status_label": "Статус аккаунта:",
+        "premium_free": "Обычный (Бесплатный)",
+        "premium_active": "Premium (МашаАллах!)",
+        "btn_buy_premium": "Активировать Premium",
+        "premium_features_help": "Premium-статус активирует облачную синхронизацию данных между устройствами.",
+        "profile_gemini_key_label": "Ключ Gemini API (ИИ Ассистент)"
     },
     kk: {
         "seo_title": "Barakah Planner — Исламдық Күнделік және Намаз Жоспарлаушы",
@@ -244,7 +256,19 @@ const translations = {
         "city_search_empty": "Атауды тере бастаңыз...",
         "city_search_loading": "Іздеу...",
         "city_search_no_results": "Ештеңе табылмады",
-        "city_search_error": "Желі қатесі"
+        "city_search_error": "Желі қатесі",
+        "auth_consent_label": "Мен синхрондауды қамтамасыз ету үшін менің деректерімді (email, есім, тапсырмалар) Google Cloud бұлттық серверлерінде трансшекаралық тасымалдауға және өңдеуге келісім беремін.",
+        "auth_consent_error": "Дербес деректерді өңдеуге келісім беру қажет.",
+        "religious_disclaimer_title": "Құқықтық ескерту",
+        "religious_disclaimer_text": "Barakah Planner — жеке өнімділік пен уақытты басқару құралы. Қолданба діни нұсқауларды, пәтуаларды немесе ресми шариғат нұсқауларын бермейді. Намаз уақытының барлық есептеулері тек анықтамалық сипатта болады.",
+        "board_desktop_only": "Тафаккур тақтасы үлкен экрандарға арналған. Қолданбаны компьютерден ашыңыз.",
+        "board_desktop_only_title": "Тек компьютерде қолжетімді",
+        "premium_status_label": "Тіркелгі мәртебесі:",
+        "premium_free": "Қарапайым (Тегін)",
+        "premium_active": "Premium (МәшАллаһ!)",
+        "btn_buy_premium": "Premium-ды белсендіру",
+        "premium_features_help": "Premium мәртебесі құрылғылар арасында бұлттық синхрондауды белсендіреді.",
+        "profile_gemini_key_label": "Gemini API кілті (ЖИ Көмекшісі)"
     },
     ar: {
         "seo_title": "Barakah Planner — يوميات إسلامية ومخطط الصلاة",
@@ -367,7 +391,19 @@ const translations = {
         "city_search_empty": "ابدأ بكتابة اسم المدينة...",
         "city_search_loading": "جارٍ البحث...",
         "city_search_no_results": "لم يتم العثور على نتائج",
-        "city_search_error": "خطأ في الشبكة"
+        "city_search_error": "خطأ في الشبكة",
+        "auth_consent_label": "أوافق على نقل ومعالجة بياناتي (البريد الإلكتروني، الاسم، المهام) عبر الحدود على خوادم Google Cloud لضمان المزامنة السحابية.",
+        "auth_consent_error": "مطلوب الموافقة на معالجة البيانات الشخصية.",
+        "religious_disclaimer_title": "إخلاء مسؤولية قانوني",
+        "religious_disclaimer_text": "Barakah Planner هو أداة للإنتاجية الشخصية وإدارة الوقت. لا يقدم التطبيق فتاوى أو توجيهات شرعية رسمية. جميع حسابات أوقات الصلاة هي لأغراض مرجعية وإعلامية فقط.",
+        "board_desktop_only": "لوحة تفكر مصممة للشاشات الكبيرة. يرجى فتح التطبيق من جهاز الكمبيوتر.",
+        "board_desktop_only_title": "متاح على أجهزة الكمبيوتر فقط",
+        "premium_status_label": "حالة الحساب:",
+        "premium_free": "عادي (مجاني)",
+        "premium_active": "مميز (ما شاء الله!)",
+        "btn_buy_premium": "تفعيل الاشتراك المميز",
+        "premium_features_help": "تتيح الحالة المميزة مزامنة بياناتك سحابيًا عبر الأجهزة.",
+        "profile_gemini_key_label": "مفتاح Gemini API (المساعد الذكي)"
     },
     en: {
         "seo_title": "Barakah Planner — Islamic Daily Planner & Prayer Tracker",
@@ -490,7 +526,19 @@ const translations = {
         "city_search_empty": "Start typing a city name...",
         "city_search_loading": "Searching...",
         "city_search_no_results": "Nothing found",
-        "city_search_error": "Network error"
+        "city_search_error": "Network error",
+        "auth_consent_label": "I consent to the cross-border transfer and processing of my data (email, name, tasks) on Google Cloud servers for cloud synchronization.",
+        "auth_consent_error": "Consent to personal data processing is required.",
+        "religious_disclaimer_title": "Legal Disclaimer",
+        "religious_disclaimer_text": "Barakah Planner is a personal productivity and time management tool. The application does not provide religious rulings, fatwas, or official Sharia guidance. All prayer time calculations are for reference and informational purposes only.",
+        "board_desktop_only": "Tafakkur Board is designed for larger screens. Please open the app on a computer.",
+        "board_desktop_only_title": "Available on Desktop Only",
+        "premium_status_label": "Account Status:",
+        "premium_free": "Standard (Free)",
+        "premium_active": "Premium (Mashallah!)",
+        "btn_buy_premium": "Activate Premium",
+        "premium_features_help": "Premium status enables cloud synchronization of your data across devices.",
+        "profile_gemini_key_label": "Gemini API Key (AI Assistant)"
     }
 };
 

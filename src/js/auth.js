@@ -110,9 +110,62 @@ window.Auth = {
                     authModal.classList.remove('flex');
                 }
 
-                // Sync data from cloud
-                if (window.DbSync && typeof window.DbSync.syncFromCloud === 'function') {
-                    window.DbSync.syncFromCloud();
+                // Fetch premium status from Firestore
+                window.Auth.isPremium = false; // default
+
+                const renderPremiumUI = () => {
+                    const statusTextEl = document.getElementById('premium-status-val');
+                    const buyBtn = document.getElementById('btn-buy-premium-action');
+                    const syncStatusEl = document.getElementById('sync-active-status');
+
+                    if (window.Auth.isPremium) {
+                        if (statusTextEl) {
+                            statusTextEl.textContent = window.t ? window.t('premium_active') : "Premium (МашаАллах!)";
+                            statusTextEl.className = "text-emerald-600 dark:text-emerald-400 font-bold text-xs";
+                        }
+                        if (buyBtn) buyBtn.classList.add('hidden');
+                        if (syncStatusEl) syncStatusEl.classList.remove('hidden');
+                    } else {
+                        if (statusTextEl) {
+                            statusTextEl.textContent = window.t ? window.t('premium_free') : "Обычный (Бесплатный)";
+                            statusTextEl.className = "text-gray-600 dark:text-gray-400 font-medium text-xs";
+                        }
+                        if (buyBtn) {
+                            buyBtn.classList.remove('hidden');
+                            const encodedMsg = encodeURIComponent(`Ассаляму алейкум! Я хочу активировать Premium для Barakah Planner. Мой email: ${user.email}`);
+                            buyBtn.href = `https://wa.me/77071234567?text=${encodedMsg}`;
+                        }
+                        if (syncStatusEl) syncStatusEl.classList.add('hidden');
+                    }
+                };
+
+                renderPremiumUI();
+
+                if (window.firebaseDb) {
+                    const uid = user.uid;
+                    import("https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js").then(({ doc, getDoc }) => {
+                        const docRef = doc(window.firebaseDb, "users", uid);
+                        getDoc(docRef).then((docSnap) => {
+                            if (docSnap.exists()) {
+                                const data = docSnap.data();
+                                window.Auth.isPremium = !!data.isPremium;
+                            } else {
+                                window.Auth.isPremium = false;
+                            }
+                            renderPremiumUI();
+
+                            // Sync data from cloud if user is Premium
+                            if (window.Auth.isPremium && window.DbSync && typeof window.DbSync.syncFromCloud === 'function') {
+                                window.DbSync.syncFromCloud();
+                            }
+                        }).catch(e => {
+                            console.error("[Auth] Error fetching user doc:", e);
+                            renderPremiumUI();
+                        });
+                    }).catch(e => {
+                        console.error("[Auth] Error importing firestore:", e);
+                        renderPremiumUI();
+                    });
                 }
             } else {
                 // --- LOGGED OUT ---
@@ -301,6 +354,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const btnText = document.getElementById('auth-submit-text');
 
             errorEl.textContent = '';
+
+            // Check consent if registering (RK Compliance)
+            if (isRegister) {
+                const consentCheckbox = document.getElementById('auth-consent');
+                if (consentCheckbox && !consentCheckbox.checked) {
+                    errorEl.textContent = window.t ? window.t('auth_consent_error') : 'Необходимо согласие на обработку персональных данных.';
+                    return;
+                }
+            }
+
             btnText.textContent = isRegister ? (window.t ? window.t('auth_registering') : 'Регистрация...') : (window.t ? window.t('auth_logging_in') : 'Вход...');
             if (submitBtn) submitBtn.disabled = true;
             submitBtn.classList.add('opacity-70');
@@ -333,8 +396,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnGoogle = document.getElementById('btn-google-auth');
     if (btnGoogle) {
         btnGoogle.addEventListener('click', async () => {
-            const prevHtml = btnGoogle.innerHTML;
+            const isRegister = document.getElementById('auth-is-register').checked;
             const errorEl = document.getElementById('auth-error');
+            if (errorEl) errorEl.textContent = '';
+
+            // Check consent if Google auth is used for registration (RK Compliance)
+            if (isRegister) {
+                const consentCheckbox = document.getElementById('auth-consent');
+                if (consentCheckbox && !consentCheckbox.checked) {
+                    if (errorEl) errorEl.textContent = window.t ? window.t('auth_consent_error') : 'Необходимо согласие на обработку персональных данных.';
+                    return;
+                }
+            }
+
+            const prevHtml = btnGoogle.innerHTML;
             if (errorEl) errorEl.textContent = '';
             btnGoogle.innerHTML = `<i class="fas fa-circle-notch fa-spin text-gray-500"></i> ${window.t ? window.t('auth_loading') : 'Загрузка...'}`;
             btnGoogle.disabled = true;
@@ -411,15 +486,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Toggle Registration/Login Text
+    // Toggle Registration/Login Text and Consent Checkbox
     const toggleRegCheckbox = document.getElementById('auth-is-register');
     if (toggleRegCheckbox) {
         toggleRegCheckbox.addEventListener('change', (e) => {
             const btnSubmit = document.getElementById('auth-submit-text');
+            const consentContainer = document.getElementById('auth-consent-container');
             if (e.target.checked) {
                 btnSubmit.textContent = window.t ? window.t('auth_register_btn') : "Зарегистрироваться";
+                if (consentContainer) consentContainer.classList.remove('hidden');
             } else {
                 btnSubmit.textContent = window.t ? window.t('auth_login_btn') : "Войти";
+                if (consentContainer) consentContainer.classList.add('hidden');
             }
         });
     }

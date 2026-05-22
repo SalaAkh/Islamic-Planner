@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initDonationToast();
     initEvents();
+    initAIPanner();
 
     // Обновление при смене языка
     document.addEventListener('langChanged', () => {
@@ -1013,6 +1014,291 @@ function initEvents() {
             closeEventsPopup();
         }
     });
+}
+
+function initAIPanner() {
+    const btnAiPlanner = document.getElementById('btn-ai-planner');
+    const modal = document.getElementById('ai-planner-modal');
+    const inner = document.getElementById('ai-modal-content');
+    const closeBtn = document.getElementById('ai-planner-close-btn');
+    const btnGenerate = document.getElementById('btn-generate-ai-plan');
+    const promptInput = document.getElementById('ai-prompt-input');
+    const statusMsg = document.getElementById('ai-status-msg');
+    
+    // API key settings inputs
+    const profileKeyInput = document.getElementById('profile-gemini-key');
+    const btnSaveProfileKey = document.getElementById('btn-save-profile-gemini-key');
+    const profileKeyMsg = document.getElementById('profile-gemini-key-msg');
+    
+    const modalKeyInput = document.getElementById('ai-api-key');
+    const btnSaveModalKey = document.getElementById('btn-save-ai-key');
+    const modalKeySection = document.getElementById('ai-modal-key-section');
+
+    const getMessageText = (key) => {
+        const lang = localStorage.getItem('barakah_lang') || 'ru';
+        const dict = {
+            ru: {
+                ai_key_saved: "Ключ успешно сохранен!",
+                ai_no_key_error: "Пожалуйста, введите API-ключ Gemini.",
+                ai_no_prompt_error: "Пожалуйста, напишите, как вы хотите распланировать день.",
+                ai_generating: "ИИ составляет расписание, подождите...",
+                ai_success: "МашаАллах, задачи добавлены в ваш список!",
+                ai_error: "Произошла ошибка при генерации. Попробуйте еще раз."
+            },
+            kk: {
+                ai_key_saved: "Кілт сәтті сақталды!",
+                ai_no_key_error: "Gemini API кілтін енгізіңіз.",
+                ai_no_prompt_error: "Күнді қалай жоспарлағыңыз келетінін жазыңыз.",
+                ai_generating: "ЖИ жоспар құруда, күте тұрыңыз...",
+                ai_success: "МәшАллаһ, тапсырмалар тізімге қосылды!",
+                ai_error: "Жоспар құру кезінде қате кетті. Қайталап көріңіз."
+            },
+            ar: {
+                ai_key_saved: "تم حفظ المفتاح بنجاح!",
+                ai_no_key_error: "يرجى إدخال مفتاح API لـ Gemini.",
+                ai_no_prompt_error: "يرجى كتابة كيف ترغب في التخطيط ليومك.",
+                ai_generating: "يقوم الذكاء الاصطناعي بإنشاء الجدول، يرجى الانتظار...",
+                ai_success: "ما شاء الله، تم إضافة المهام بنجاح!",
+                ai_error: "حدث خطأ أثناء التوليد. يرجى المحاولة مرة أخرى."
+            },
+            en: {
+                ai_key_saved: "API Key saved successfully!",
+                ai_no_key_error: "Please enter a Gemini API Key.",
+                ai_no_prompt_error: "Please write how you want to plan your day.",
+                ai_generating: "AI is generating your schedule, please wait...",
+                ai_success: "Mashallah, tasks successfully added to your day!",
+                ai_error: "An error occurred during generation. Please try again."
+            }
+        };
+        return dict[lang]?.[key] || dict['ru']?.[key] || '';
+    };
+
+    // Load API Key from localStorage
+    const savedKey = localStorage.getItem('barakah_gemini_api_key') || '';
+    if (profileKeyInput) profileKeyInput.value = savedKey;
+    if (modalKeyInput) modalKeyInput.value = savedKey;
+    
+    const updateKeySectionVisibility = () => {
+        const key = localStorage.getItem('barakah_gemini_api_key') || '';
+        if (modalKeySection) {
+            if (key) {
+                modalKeySection.classList.add('hidden');
+            } else {
+                modalKeySection.classList.remove('hidden');
+            }
+        }
+    };
+    updateKeySectionVisibility();
+
+    // Save key functions
+    const saveKey = (keyVal, msgEl) => {
+        const trimmed = keyVal.trim();
+        localStorage.setItem('barakah_gemini_api_key', trimmed);
+        if (profileKeyInput) profileKeyInput.value = trimmed;
+        if (modalKeyInput) modalKeyInput.value = trimmed;
+        
+        if (msgEl) {
+            msgEl.textContent = getMessageText('ai_key_saved');
+            msgEl.className = "text-xs text-center mt-1 h-4 font-medium text-emerald-600 dark:text-emerald-400";
+            setTimeout(() => {
+                msgEl.textContent = '';
+            }, 3000);
+        }
+        updateKeySectionVisibility();
+    };
+
+    if (btnSaveProfileKey) {
+        btnSaveProfileKey.addEventListener('click', () => {
+            saveKey(profileKeyInput.value, profileKeyMsg);
+        });
+    }
+
+    if (btnSaveModalKey) {
+        btnSaveModalKey.addEventListener('click', () => {
+            saveKey(modalKeyInput.value, statusMsg);
+        });
+    }
+
+    // Modal open/close
+    const openAIModal = () => {
+        if (!modal) return;
+        updateKeySectionVisibility();
+        if (statusMsg) statusMsg.textContent = '';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        requestAnimationFrame(() => {
+            if (inner) {
+                inner.classList.remove('scale-95', 'opacity-0');
+                inner.classList.add('scale-100', 'opacity-100');
+            }
+        });
+    };
+
+    const closeAIModal = () => {
+        if (!modal) return;
+        if (inner) {
+            inner.classList.remove('scale-100', 'opacity-100');
+            inner.classList.add('scale-95', 'opacity-0');
+        }
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }, 300);
+    };
+
+    if (btnAiPlanner) {
+        btnAiPlanner.addEventListener('click', openAIModal);
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeAIModal);
+    }
+
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeAIModal();
+        });
+    }
+
+    // Generate Plan Handler
+    if (btnGenerate) {
+        btnGenerate.addEventListener('click', async () => {
+            const key = localStorage.getItem('barakah_gemini_api_key') || (modalKeyInput ? modalKeyInput.value.trim() : '');
+            if (!key) {
+                if (statusMsg) {
+                    statusMsg.textContent = getMessageText('ai_no_key_error');
+                    statusMsg.className = "text-xs text-center font-medium text-red-500 py-1 rounded-lg";
+                }
+                return;
+            }
+
+            const promptVal = promptInput ? promptInput.value.trim() : '';
+            if (!promptVal) {
+                if (statusMsg) {
+                    statusMsg.textContent = getMessageText('ai_no_prompt_error');
+                    statusMsg.className = "text-xs text-center font-medium text-red-500 py-1 rounded-lg";
+                }
+                return;
+            }
+
+            // Set loading state
+            const originalIconEl = document.getElementById('ai-btn-icon');
+            const originalBtnTextEl = document.getElementById('ai-btn-text');
+            const originalIconClass = originalIconEl ? originalIconEl.className : '';
+            const originalBtnText = originalBtnTextEl ? originalBtnTextEl.textContent : '';
+
+            if (originalIconEl) {
+                originalIconEl.className = 'fas fa-circle-notch fa-spin';
+            }
+            if (originalBtnTextEl) {
+                originalBtnTextEl.textContent = window.t('ai_loading_text') || 'Нейросеть думает...';
+            }
+            btnGenerate.disabled = true;
+            btnGenerate.classList.add('opacity-70');
+
+            if (statusMsg) {
+                statusMsg.textContent = getMessageText('ai_generating');
+                statusMsg.className = "text-xs text-center font-medium text-indigo-600 dark:text-indigo-400 py-1 rounded-lg";
+            }
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [
+                            {
+                                parts: [
+                                    {
+                                        text: `Plan this day as a structured list of tasks based on the following notes: "${promptVal}". Provide the list in JSON format containing an array of task objects with 'title' (string, task name, translated back to the prompt's language) and 'isImportant' (boolean, true if it seems like a priority task).`
+                                    }
+                                ]
+                            }
+                        ],
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: {
+                                type: "OBJECT",
+                                properties: {
+                                    tasks: {
+                                        type: "ARRAY",
+                                        items: {
+                                            type: "OBJECT",
+                                            properties: {
+                                                title: {
+                                                    type: "STRING"
+                                                },
+                                                isImportant: {
+                                                    type: "BOOLEAN"
+                                                }
+                                            },
+                                            required: ["title"]
+                                        }
+                                    }
+                                },
+                                required: ["tasks"]
+                            }
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API returned status ${response.status}`);
+                }
+
+                const resData = await response.json();
+                
+                let textContent = '';
+                if (resData.candidates && resData.candidates[0] && resData.candidates[0].content && resData.candidates[0].content.parts && resData.candidates[0].content.parts[0]) {
+                    textContent = resData.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error("Invalid API response structure");
+                }
+
+                const parsed = JSON.parse(textContent);
+                if (!parsed.tasks || !Array.isArray(parsed.tasks)) {
+                    throw new Error("Missing tasks array in JSON response");
+                }
+
+                if (window.todoManager && typeof window.todoManager.addAITasks === 'function') {
+                    await window.todoManager.addAITasks(parsed.tasks);
+                } else {
+                    throw new Error("TodoManager is not initialized or addAITasks is missing");
+                }
+
+                // Success
+                if (statusMsg) {
+                    statusMsg.textContent = getMessageText('ai_success');
+                    statusMsg.className = "text-xs text-center font-medium text-emerald-600 dark:text-emerald-400 py-1 rounded-lg";
+                }
+                
+                if (promptInput) promptInput.value = '';
+
+                setTimeout(() => {
+                    closeAIModal();
+                }, 1500);
+
+            } catch (error) {
+                console.error("[Gemini AI Error]", error);
+                if (statusMsg) {
+                    statusMsg.textContent = getMessageText('ai_error') + ` (${error.message})`;
+                    statusMsg.className = "text-xs text-center font-medium text-red-500 py-1 rounded-lg";
+                }
+            } finally {
+                // Restore button state
+                if (originalIconEl) {
+                    originalIconEl.className = originalIconClass;
+                }
+                if (originalBtnTextEl) {
+                    originalBtnTextEl.textContent = originalBtnText;
+                }
+                btnGenerate.disabled = false;
+                btnGenerate.classList.remove('opacity-70');
+            }
+        });
+    }
 }
 
 function openEventModal(dateStr, existingEvent = null) {
