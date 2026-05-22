@@ -30,6 +30,7 @@
     --tab-lists: #8b5cf6;
     --tab-board: #6366f1;
     --tab-home: #94a3b8;
+    --tab-wisdom: #059669;
 }
 
 .dark {
@@ -46,6 +47,7 @@
     --tab-lists: #7c3aed;
     --tab-board: #4f46e5;
     --tab-home: #334155;
+    --tab-wisdom: #047857;
 }
 
 html,
@@ -209,6 +211,10 @@ body {
 
 .tab-board {
     background-color: var(--tab-board);
+}
+
+.tab-wisdom {
+    background-color: var(--tab-wisdom);
 }
 
 .tab-home {
@@ -1474,5 +1480,10 @@ body {
     .tab-btn.active.tab-board {
         color: var(--tab-board);
         background-color: rgba(99, 102, 241, 0.1) !important;
+    }
+
+    .tab-btn.active.tab-wisdom {
+        color: var(--tab-wisdom);
+        background-color: rgba(5, 150, 105, 0.1) !important;
     }
 }

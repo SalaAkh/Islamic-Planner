@@ -147,6 +147,11 @@ function initTabs() {
                 if (typeof initBoardsDashboard === 'function') initBoardsDashboard();
             }
 
+            // Render daily wisdom on first visit or tab switch
+            if (viewName === 'wisdom') {
+                if (typeof renderDailyWisdom === 'function') renderDailyWisdom();
+            }
+
             // Recalculate heights for textareas in daily view if it becomes active
             if (viewName === 'daily') {
                 document.querySelectorAll('#view-daily textarea.day-input').forEach(input => {

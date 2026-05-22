@@ -252,6 +252,7 @@
     <script src="./src/js/muftyat-cities.js?v=2"
         onerror="console.warn('muftyat-cities.js not found, falling back to online search')"></script>
     <script defer src="./src/js/namaz-tracker.js"></script>
+    <script defer src="./src/js/daily-wisdom.js"></script>
     <script defer src="./src/js/main.js"></script>
 </head>
 
@@ -273,6 +274,10 @@
             <button data-tab="goals" id="tab-goals" class="tab-btn tab-goals">
                 <i class="fas fa-bullseye md:hidden text-[22px] mb-1"></i>
                 <span data-i18n="tab_goals">Цели</span>
+            </button>
+            <button data-tab="wisdom" id="tab-wisdom" class="tab-btn tab-wisdom">
+                <i class="fas fa-book-quran md:hidden text-[22px] mb-1"></i>
+                <span data-i18n="tab_wisdom">Мудрость</span>
             </button>
             <button data-tab="lists" id="tab-lists" class="tab-btn tab-lists" style="background-color: #8b5cf6 !important; opacity: 1 !important;">
                 <i class="fas fa-tasks md:hidden text-[22px] mb-1"></i>
@@ -846,6 +851,24 @@
                             </button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- СТРАНИЦА 3.6: ЕЖЕДНЕВНАЯ МУДРОСТЬ (АЯТЫ И ХАДИСЫ) -->
+            <div id="view-wisdom" class="page-view pb-28">
+                <header class="mb-6 border-b-2 border-slate-200 dark:border-slate-700 pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center border border-emerald-200 dark:border-emerald-800/50">
+                            <i class="fas fa-book-quran text-2xl text-emerald-600 dark:text-emerald-400"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl font-bold text-emerald-700 dark:text-emerald-400 tracking-tight" data-i18n="wisdom_title">Мудрость дня</h1>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5" data-i18n="wisdom_subtitle">Аят из Корана и хадис из достоверных сборников</p>
+                        </div>
+                    </div>
+                </header>
+                <div id="wisdom-content">
+                    <!-- Dynamically rendered by daily-wisdom.js -->
                 </div>
             </div>
 
