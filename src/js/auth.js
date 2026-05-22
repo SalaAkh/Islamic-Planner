@@ -133,7 +133,7 @@ window.Auth = {
                         if (buyBtn) {
                             buyBtn.classList.remove('hidden');
                             const encodedMsg = encodeURIComponent(`Ассаляму алейкум! Я хочу активировать Premium для Barakah Planner. Мой email: ${user.email}`);
-                            buyBtn.href = `https://wa.me/77071234567?text=${encodedMsg}`;
+                            buyBtn.href = `https://wa.me/77052631205?text=${encodedMsg}`;
                         }
                         if (syncStatusEl) syncStatusEl.classList.add('hidden');
                     }

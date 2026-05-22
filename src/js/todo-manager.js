@@ -224,6 +224,7 @@ class TodoManager {
                                 ${task.title}
                             </span>
                             <div class="flex items-center gap-2 mt-0.5 whitespace-nowrap overflow-x-auto no-scrollbar">
+                                ${task.isAiGenerated ? `<span class="text-[10px] bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 px-1.5 rounded font-bold border border-purple-200/30"><i class="fas fa-magic mr-0.5"></i>✨ ИИ</span>` : ''}
                                 ${isSmartView ? `<span class="text-[10px] text-gray-400 bg-gray-100 dark:bg-slate-700 px-1.5 rounded">${this.lists.find(l=>l.id===parentListId)?.title || 'Список'}</span>` : ''}
                                 ${hasSubtasks ? `<span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 rounded cursor-pointer" onclick="window.todoManager.toggleTaskExpand('${task.id}')"><i class="fas fa-code-branch mr-0.5"></i>${completedSubtasks}/${subtasks.length}</span>` : ''}
                                 ${task.dueDate ? `<span class="text-[10px] bg-red-50 text-red-500 px-1.5 rounded"><i class="far fa-calendar-alt mr-0.5"></i>${task.dueDate}</span>` : ''}
@@ -550,7 +551,8 @@ class TodoManager {
                 createdAt: Date.now(),
                 subtasks: [],
                 parentListId: list.id,
-                myDay: today
+                myDay: today,
+                isAiGenerated: true
             };
             if (t.isImportant) {
                 newTask.isImportant = true;

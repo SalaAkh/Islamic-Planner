@@ -488,6 +488,156 @@ function getDailyWisdom(dateStr) {
     };
 }
 
+// ═══════════════════════════════════════════════════════════════
+// СЛОВАРИ И ФУНКЦИИ ЛОКАЛИЗАЦИИ МЕТАДАННЫХ МУДРОСТИ ДНЯ
+// ═══════════════════════════════════════════════════════════════
+
+const WISDOM_SURAH_MAP = {
+    "Аль-Фатиха": { kk: "Әл-Фатиха", en: "Al-Fatihah", ar: "الفاتحة" },
+    "Аль-Бакара": { kk: "Әл-Бақара", en: "Al-Baqarah", ar: "البقرة" },
+    "Аш-Шарх": { kk: "Әш-Шарх", en: "Ash-Sharh", ar: "الشرح" },
+    "Ат-Таляк": { kk: "Әт-Талақ", en: "At-Talaq", ar: "الطلاق" },
+    "Юсуф": { kk: "Юсуф", en: "Yusuf", ar: "يوسف" },
+    "Аль-Джума": { kk: "Әл-Жұма", en: "Al-Jumu'ah", ar: "الجمعة" },
+    "Та-Ха": { kk: "Та-Ха", en: "Ta-Ha", ar: "طه" },
+    "Гафир": { kk: "Ғафир", en: "Ghafir", ar: "غافر" },
+    "Аль-Камар": { kk: "Әл-Қамар", en: "Al-Qamar", ar: "القمر" },
+    "Ат-Тауба": { kk: "Әт-Тәубе", en: "At-Tawbah", ar: "التوبة" },
+    "Ан-Нахль": { kk: "Ән-Нахл", en: "An-Nahl", ar: "النحل" },
+    "Аль-Исра": { kk: "Әл-Исра", en: "Al-Isra", ar: "الإسراء" },
+    "Ар-Рахман": { kk: "Әр-Рахман", en: "Ar-Rahman", ar: "الرحمن" },
+    "Аз-Зумар": { kk: "Әз-Зүмер", en: "Az-Zumar", ar: "الزمر" },
+    "Аз-Зарият": { kk: "Әз-Зәрият", en: "Adh-Dhariyat", ar: "الذاريات" },
+    "Ад-Духа": { kk: "Әд-Духа", en: "Ad-Duha", ar: "الضحы" },
+    "Ар-Раад": { kk: "Әр-Рағыд", en: "Ar-Ra'd", ar: "الرعد" },
+    "Аль-Имран": { kk: "Әли Имран", en: "Ali 'Imran", ar: "آل عمران" },
+    "Аль-Хашр": { kk: "Әл-Хашр", en: "Al-Hashr", ar: "الحشر" },
+    "Аль-Маида": { kk: "Әл-Мәида", en: "Al-Ma'idah", ar: "المائدة" }
+};
+
+const WISDOM_BOOK_MAP = {
+    "Сахих аль-Бухари": { kk: "Сахих әл-Бұхари", en: "Sahih al-Bukhari", ar: "صحيح البخاري" },
+    "Сахих Муслим": { kk: "Сахих Муслим", en: "Sahih Muslim", ar: "صحيح مسلم" },
+    "Сунан ат-Тирмизи": { kk: "Сунан әт-Тирмизи", en: "Sunan at-Tirmidhi", ar: "سنن الترمذي" },
+    "Сунан Ибн Маджа": { kk: "Сунан Ибн Маджа", en: "Sunan Ibn Majah", ar: "سنن ابن ماجه" },
+    "Муснад Ахмад": { kk: "Муснад Ахмад", en: "Musnad Ahmad", ar: "مسند أحمد" },
+    "Сунан ад-Дарими": { kk: "Сунан ад-Дарими", en: "Sunan ad-Darimi", ar: "سنن الدارمي" }
+};
+
+const WISDOM_NARRATOR_MAP = {
+    "Умар ибн аль-Хаттаб": { kk: "Омар ибн әл-Хаттаб", en: "Umar ibn al-Khattab", ar: "عمر بن الخطاب", gender: "m" },
+    "Абдуллах ибн Амр": { kk: "Абдуллах ибн Амр", en: "Abdullah ibn Amr", ar: "عبد الله بن عمرو", gender: "m" },
+    "Анас ибн Малик": { kk: "Әнас ибн Мәлік", en: "Anas ibn Malik", ar: "أنس بن مالك", gender: "m" },
+    "Абу Хурайра": { kk: "Әбу Хурайра", en: "Abu Hurairah", ar: "أبو هريرة", gender: "m" },
+    "Абу Малик аль-Ашари": { kk: "Әбу Мәлік әл-Ашари", en: "Abu Malik al-Ash'ari", ar: "أبو مالك الأشعري", gender: "m" },
+    "Усман ибн Аффан": { kk: "Осман ибн Аффан", en: "Uthman ibn Affan", ar: "عثمان بن عفان", gender: "m" },
+    "Абу Зарр": { kk: "Әбу Зәр", en: "Abu Dharr", ar: "أبو ذر", gender: "m" },
+    "Аиша": { kk: "Айша", en: "Aisha", ar: "عائشة", gender: "f" },
+    "Аль-Миқдам ибн Мадикариб": { kk: "Әл-Миқдам ибн Мәдикариб", en: "Al-Miqdam ibn Ma'dikarib", ar: "المقدام بن معديكرب", gender: "m" },
+    "Абу Саид аль-Худри": { kk: "Әбу Саид әл-Худри", en: "Abu Sa'id al-Khudri", ar: "أبو سعيد الخدري", gender: "m" },
+    "Абдуллах ибн Умар": { kk: "Абдуллах ибн Омар", en: "Abdullah ibn Umar", ar: "عبد الله بن عمر", gender: "m" },
+    "Джарир ибн Абдуллах": { kk: "Жарир ибн Абдуллах", en: "Jarir ibn Abdullah", ar: "جرير بن عبد الله", gender: "m" },
+    "Абу Муса аль-Ашари": { kk: "Әбу Мұса әл-Ашари", en: "Abu Musa al-Ash'ari", ar: "أبو موسى الأشعري", gender: "m" },
+    "Вабиса ибн Мабад": { kk: "Уабиса ибн Мағбад", en: "Wabisah ibn Ma'bad", ar: "وابصة بن معبد", gender: "m" },
+    "Абу Зарр и Муаз ибн Джабаль": { kk: "Әбу Зәр және Муаз ибн Жәбәл", en: "Abu Dharr and Mu'adh ibn Jabal", ar: "أبو ذر ومعاذ بن جبل", gender: "dual" }
+};
+
+/**
+ * Локализация ссылок на Коран (например: "Сура Аль-Фатиха (1:1-3)" -> "Surah Al-Fatihah (1:1-3)")
+ */
+function translateQuranRef(ref, lang) {
+    if (lang === 'ru') return ref;
+
+    if (ref.includes('Принцип из Хадиса')) {
+        if (lang === 'kk') return 'Әл-Бақара сүресі — Аяттармен расталған хадистен алынған принцип';
+        if (lang === 'en') return 'Surah Al-Baqarah — Hadith principle confirmed by verses';
+        if (lang === 'ar') return 'سورة البقرة — مبدأ من الحديث تؤكده الآيات';
+        return ref;
+    }
+
+    let matchedName = null;
+    for (const ruName of Object.keys(WISDOM_SURAH_MAP)) {
+        if (ref.includes(ruName)) {
+            matchedName = ruName;
+            break;
+        }
+    }
+
+    if (!matchedName) return ref;
+
+    const translation = WISDOM_SURAH_MAP[matchedName][lang] || matchedName;
+    const verses = (ref.match(/\([^)]+\)/) || [''])[0];
+
+    let suffix = '';
+    if (ref.includes('Аят аль-Курси')) {
+        if (lang === 'kk') suffix = ' — Аят әл-Күрси';
+        else if (lang === 'en') suffix = ' — Ayat al-Kursi';
+        else if (lang === 'ar') suffix = ' — آية الكرسي';
+        else suffix = ' — Аят аль-Курси';
+    }
+
+    if (lang === 'ar') {
+        return `سورة ${translation} ${verses}${suffix}`;
+    } else if (lang === 'en') {
+        return `Surah ${translation} ${verses}${suffix}`;
+    } else if (lang === 'kk') {
+        return `${translation} сүресі ${verses}${suffix}`;
+    }
+
+    return ref;
+}
+
+/**
+ * Локализация источников хадисов (например: "Сахих аль-Бухари, 13; Сахих Муслим, 45")
+ */
+function translateHadithSource(source, lang) {
+    if (lang === 'ru') return source;
+
+    return source.split(';').map(part => {
+        let trimmed = part.trim();
+        let matchedBook = null;
+        for (const ruBook of Object.keys(WISDOM_BOOK_MAP)) {
+            if (trimmed.startsWith(ruBook)) {
+                matchedBook = ruBook;
+                break;
+            }
+        }
+
+        if (!matchedBook) return trimmed;
+
+        const translatedBook = WISDOM_BOOK_MAP[matchedBook][lang] || matchedBook;
+        const rest = trimmed.slice(matchedBook.length);
+        return translatedBook + rest;
+    }).join(lang === 'ar' ? '؛ ' : '; ');
+}
+
+/**
+ * Локализация имен передатчиков хадисов (с учетом арабского этикета/окончаний)
+ */
+function translateNarrator(narrator, lang) {
+    if (lang === 'ru') return narrator;
+
+    let cleanName = narrator.replace(/\s*\(р\.а\.\)/g, '').trim();
+
+    const matched = WISDOM_NARRATOR_MAP[cleanName];
+    if (!matched) return narrator;
+
+    const translatedName = matched[lang] || cleanName;
+
+    if (lang === 'ar') {
+        let suffix = 'رضي الله عنه';
+        if (matched.gender === 'f') suffix = 'رضي الله عنها';
+        else if (matched.gender === 'dual') suffix = 'رضي الله عنهما';
+        return `${translatedName} ${suffix}`;
+    } else if (lang === 'en') {
+        return `${translatedName} (ra)`;
+    } else if (lang === 'kk') {
+        return `${translatedName} (р.а.)`;
+    }
+
+    return narrator;
+}
+
 /**
  * Render the Daily Wisdom tab content
  */
@@ -550,6 +700,10 @@ function renderDailyWisdom() {
 
     const L = labels[lang] || labels['ru'];
 
+    const translatedQuranRef = translateQuranRef(ayat.ref, lang);
+    const translatedHadithSource = translateHadithSource(hadith.source, lang);
+    const translatedNarrator = translateNarrator(hadith.narrator, lang);
+
     container.innerHTML = `
         <!-- Date badge -->
         <div class="flex items-center justify-center gap-2 mb-6">
@@ -559,7 +713,7 @@ function renderDailyWisdom() {
         </div>
 
         <!-- Quran Ayat Card -->
-        <div class="bg-gradient-to-br from-emerald-50/80 to-teal-50/80 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-[1.5rem] p-6 md:p-8 border border-emerald-200/60 dark:border-emerald-800/40 shadow-sm mb-6 relative overflow-hidden">
+        <div class="wisdom-card quran-card bg-gradient-to-br from-emerald-50/80 to-teal-50/80 dark:from-slate-900/90 dark:to-emerald-950/80 rounded-[1.5rem] p-6 md:p-8 border border-emerald-200/60 dark:border-emerald-800/60 shadow-sm mb-6 relative overflow-hidden">
             <div class="absolute top-3 end-4 text-emerald-200 dark:text-emerald-900/40 text-5xl opacity-50 pointer-events-none" style="font-family: 'Amiri', serif;">﴿﴾</div>
             <div class="flex items-center gap-2 mb-4">
                 <div class="w-8 h-8 rounded-full bg-emerald-500/10 dark:bg-emerald-400/10 flex items-center justify-center">
@@ -569,11 +723,11 @@ function renderDailyWisdom() {
             </div>
             <p class="arabic text-[1.5rem] md:text-[1.75rem] leading-[2.2] text-gray-800 dark:text-gray-100 text-center mb-5 font-bold" dir="rtl" style="font-family: 'Amiri', serif; text-shadow: 0 1px 3px rgba(0,0,0,0.05);">${ayat.ar}</p>
             <p class="text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed text-center italic mb-4">${getT(ayat, lang)}</p>
-            <p class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold text-center">📖 ${ayat.ref}</p>
+            <p class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold text-center">📖 ${translatedQuranRef}</p>
         </div>
 
         <!-- Hadith Card -->
-        <div class="bg-gradient-to-br from-amber-50/80 to-yellow-50/80 dark:from-amber-950/30 dark:to-yellow-950/30 rounded-[1.5rem] p-6 md:p-8 border border-amber-200/60 dark:border-amber-800/40 shadow-sm mb-6 relative overflow-hidden">
+        <div class="wisdom-card hadith-card bg-gradient-to-br from-amber-50/80 to-yellow-50/80 dark:from-slate-900/90 dark:to-amber-950/80 rounded-[1.5rem] p-6 md:p-8 border border-amber-200/60 dark:border-amber-800/60 shadow-sm mb-6 relative overflow-hidden">
             <div class="absolute top-3 end-4 text-amber-200 dark:text-amber-900/40 text-4xl opacity-40 pointer-events-none"><i class="fas fa-star-and-crescent"></i></div>
             <div class="flex items-center gap-2 mb-4">
                 <div class="w-8 h-8 rounded-full bg-amber-500/10 dark:bg-amber-400/10 flex items-center justify-center">
@@ -584,8 +738,8 @@ function renderDailyWisdom() {
             <p class="arabic text-[1.3rem] md:text-[1.5rem] leading-[2.2] text-gray-800 dark:text-gray-100 text-center mb-5 font-bold" dir="rtl" style="font-family: 'Amiri', serif; text-shadow: 0 1px 3px rgba(0,0,0,0.05);">${hadith.ar}</p>
             <p class="text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed text-center italic mb-4">${getT(hadith, lang)}</p>
             <div class="flex flex-col items-center gap-1">
-                <p class="text-xs text-amber-700 dark:text-amber-400 font-semibold">📚 ${L.source}: ${hadith.source}</p>
-                <p class="text-[11px] text-gray-500 dark:text-gray-400">${L.narrator}: ${hadith.narrator}</p>
+                <p class="text-xs text-amber-700 dark:text-amber-400 font-semibold">📚 ${L.source}: ${translatedHadithSource}</p>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400">${L.narrator}: ${translatedNarrator}</p>
             </div>
         </div>
 
@@ -607,7 +761,7 @@ function renderDailyWisdom() {
     const shareBtn = document.getElementById('btn-share-wisdom');
     if (shareBtn) {
         shareBtn.addEventListener('click', () => {
-            const shareText = `📖 ${ayat.ref}\n${ayat.ar}\n${getT(ayat, lang)}\n\n📚 ${hadith.source}\n${hadith.ar}\n${getT(hadith, lang)}\n\n— Barakah Planner`;
+            const shareText = `📖 ${translatedQuranRef}\n${ayat.ar}\n${getT(ayat, lang)}\n\n📚 ${translatedHadithSource}\n${hadith.ar}\n${getT(hadith, lang)}\n\n— Barakah Planner`;
 
             if (navigator.share) {
                 navigator.share({ title: L.dateLabel, text: shareText }).catch(() => {});
@@ -629,6 +783,13 @@ function renderDailyWisdom() {
         });
     }
 }
+
+// Слушатель события смены языка для мгновенной перерисовки без перезагрузки страницы
+document.addEventListener('langChanged', () => {
+    if (document.getElementById('wisdom-content')) {
+        renderDailyWisdom();
+    }
+});
 
 // Export for use in main.js
 window.renderDailyWisdom = renderDailyWisdom;

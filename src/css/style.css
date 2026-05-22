@@ -203,10 +203,7 @@ body {
 }
 
 .tab-lists { 
-    background-color: var(--tab-lists) !important; 
-    opacity: 1 !important;
-    background-image: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(0,0,0,0.05));
-    border-left: 2px solid rgba(255,255,255,0.2) !important;
+    background-color: var(--tab-lists);
 }
 
 .tab-board {
@@ -616,7 +613,7 @@ body {
 
 .sunnah-badge {
     position: absolute;
-    top: 5px;
+    top: 22px;
     right: 5px;
     font-size: 0.6rem;
     background: #d4af37;
@@ -629,7 +626,7 @@ body {
 
 .jumuah-badge {
     position: absolute;
-    top: 5px;
+    top: 22px;
     right: 5px;
     font-size: 0.6rem;
     background: #10b981;
@@ -638,6 +635,40 @@ body {
     border-radius: 10px;
     font-weight: bold;
     box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.calendar-cell.ramadan-day {
+    background-color: rgba(245, 158, 11, 0.05);
+    border-color: rgba(245, 158, 11, 0.22);
+}
+
+.dark .calendar-cell.ramadan-day {
+    background-color: rgba(245, 158, 11, 0.08);
+    border-color: rgba(245, 158, 11, 0.32);
+}
+
+@keyframes gold-emerald-glow {
+    0% {
+        box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.12), 0 2px 4px rgba(212, 175, 55, 0.03);
+    }
+    50% {
+        box-shadow: inset 0 0 25px rgba(212, 175, 55, 0.22), 0 4px 8px rgba(16, 185, 129, 0.12);
+        border-color: rgba(212, 175, 55, 0.55);
+    }
+    100% {
+        box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.12), 0 2px 4px rgba(212, 175, 55, 0.03);
+    }
+}
+
+.calendar-cell.islamic-holiday {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(212, 175, 55, 0.12) 100%);
+    border-color: rgba(212, 175, 55, 0.4);
+    animation: gold-emerald-glow 4s infinite ease-in-out;
+}
+
+.dark .calendar-cell.islamic-holiday {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(212, 175, 55, 0.18) 100%);
+    border-color: rgba(212, 175, 55, 0.55);
 }
 
 /* Nav styles for days */
@@ -1395,18 +1426,28 @@ body {
         right: 0;
         top: auto;
         flex-direction: row;
-        justify-content: space-around;
+        justify-content: flex-start;
         background-color: var(--paper);
         z-index: 100;
-        padding: 0.5rem 0.5rem;
+        padding: 0.5rem 1rem;
         padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
         box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.08);
         border-top: 1px solid var(--lines);
         border-radius: 24px 24px 0 0;
-        gap: 0;
+        gap: 8px;
         width: 100%;
         max-width: 100vw;
         box-sizing: border-box;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none;  /* IE/Edge */
+        -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
+        scroll-behavior: smooth;
+    }
+
+    .planner-tabs::-webkit-scrollbar {
+        display: none; /* Safari and Chrome */
     }
 
     .dark .planner-tabs {
@@ -1419,22 +1460,28 @@ body {
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 1;
-        padding: 0.5rem 0;
-        border-radius: 16px;
-        font-size: 0.70rem;
+        flex: 1 1 auto;
+        min-width: 70px;
+        max-width: 90px;
+        padding: 0.4rem 0.25rem;
+        border-radius: 18px;
+        font-size: 0.65rem;
         box-shadow: none !important;
         border: none !important;
         border-left: none !important;
-        color: #94a3b8;
-        /* slate-400 */
-        font-weight: 700;
+        color: #64748b; /* slate-500 */
+        font-weight: 600;
         background-color: transparent !important;
         transform: none !important;
         right: auto !important;
         appearance: none;
         -webkit-appearance: none;
-        transition: color 0.2s, background-color 0.2s;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        gap: 0.15rem;
+    }
+
+    .dark .tab-btn {
+        color: #94a3b8;
     }
 
     .tab-btn:hover {
@@ -1442,48 +1489,81 @@ body {
     }
 
     .tab-btn.active {
-        padding: 0.5rem 0 !important;
+        padding: 0.4rem 0.25rem !important;
         /* Force reset from desktop */
         right: auto !important;
-        transform: none !important;
-        box-shadow: none !important;
+        transform: translateY(-2px) scale(1.02) !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
         border: none !important;
         border-left: none !important;
         outline: none !important;
         filter: none !important;
-        border-radius: 16px !important;
-        flex: 1 !important;
-        /* Ensure it stays flex: 1 and doesn't expand */
+        border-radius: 18px !important;
+        flex: 1 1 auto !important;
+        min-width: 70px !important;
+        max-width: 90px !important;
+    }
+    
+    .dark .tab-btn.active {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3) !important;
     }
 
-    /* Active states for mobile bottom nav */
+    /* Active states for mobile bottom nav - Vibrant premium look */
     .tab-btn.active.tab-daily {
-        color: var(--tab-daily);
-        background-color: rgba(100, 116, 139, 0.1) !important;
+        color: #ffffff;
+        background: linear-gradient(135deg, #0ea5e9, #3b82f6) !important;
     }
 
     .tab-btn.active.tab-calendar {
-        color: var(--tab-calendar);
-        background-color: rgba(16, 185, 129, 0.1) !important;
+        color: #ffffff;
+        background: linear-gradient(135deg, #10b981, #059669) !important;
     }
 
     .tab-btn.active.tab-goals {
-        color: var(--tab-goals);
-        background-color: rgba(245, 158, 11, 0.1) !important;
+        color: #ffffff;
+        background: linear-gradient(135deg, #f59e0b, #d97706) !important;
     }
 
     .tab-btn.active.tab-lists {
-        color: var(--tab-lists);
-        background-color: rgba(59, 130, 246, 0.1) !important;
+        color: #ffffff;
+        background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
     }
 
     .tab-btn.active.tab-board {
-        color: var(--tab-board);
-        background-color: rgba(99, 102, 241, 0.1) !important;
+        color: #ffffff;
+        background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
     }
 
     .tab-btn.active.tab-wisdom {
-        color: var(--tab-wisdom);
-        background-color: rgba(5, 150, 105, 0.1) !important;
+        color: #ffffff;
+        background: linear-gradient(135deg, #10b981, #047857) !important;
     }
 }
+
+/* ==========================================================================
+   DAILY WISDOM PREMIUM STYLING & ANIMATIONS
+   ========================================================================== */
+@keyframes wisdomFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.99);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.wisdom-card {
+    opacity: 0;
+    animation: wisdomFadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.quran-card {
+    animation-delay: 0.12s;
+}
+
+.hadith-card {
+    animation-delay: 0.28s;
+}
+

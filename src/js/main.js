@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initDonationToast();
     initEvents();
     initAIPanner();
+    initConsentBanner();
 
     // Обновление при смене языка
     document.addEventListener('langChanged', () => {
@@ -96,6 +97,21 @@ function initDonationToast() {
 }
 
 // --- TABS LOGIC ---
+function centerActiveTab() {
+    const activeTab = document.querySelector('.tab-btn.active') || document.querySelector('.planner-tabs .active');
+    const tabsContainer = document.querySelector('.planner-tabs');
+    if (activeTab && tabsContainer) {
+        const containerRect = tabsContainer.getBoundingClientRect();
+        const tabRect = activeTab.getBoundingClientRect();
+        const scrollLeft = tabsContainer.scrollLeft;
+        const tabLeftRelative = tabRect.left - containerRect.left + scrollLeft;
+        tabsContainer.scrollTo({
+            left: tabLeftRelative - (containerRect.width / 2) + (tabRect.width / 2),
+            behavior: 'smooth'
+        });
+    }
+}
+
 function initTabs() {
     const tabs = document.querySelectorAll('.planner-tabs button');
 
@@ -112,11 +128,15 @@ function initTabs() {
             const targetPage = document.getElementById('view-' + viewName);
 
             // Если кликаем на ту же активную вкладку - ничего не делаем
-            if (currentActivePage === targetPage) return;
+            if (currentActivePage === targetPage) {
+                centerActiveTab();
+                return;
+            }
 
             // Обновляем состояние вкладок
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             tab.classList.add('active');
+            centerActiveTab();
 
             if (currentActivePage) {
                 // Запускаем анимацию ухода
@@ -163,10 +183,17 @@ function initTabs() {
             }
         });
     });
+
+    // Центрируем активную вкладку при загрузке страницы и ресайзе
+    setTimeout(centerActiveTab, 150);
+    window.addEventListener('resize', centerActiveTab);
 }
 
 function switchToTab(viewName) {
-    document.querySelector(`button[data-tab="${viewName}"]`).click();
+    const tabEl = document.querySelector(`button[data-tab="${viewName}"]`);
+    if (tabEl) {
+        tabEl.click();
+    }
 }
 
 // --- DAILY PLANNER LOGIC ---
@@ -214,6 +241,29 @@ function animateDateChange(direction, updateCallback) {
 }
 
 function initDailyPlanner() {
+    const rukhsaBtn = document.getElementById('btn-rukhsa-toggle');
+    if (rukhsaBtn) {
+        rukhsaBtn.addEventListener('click', () => {
+            const dateStr = formatDate(currentDate);
+            const data = Store.getDayData(dateStr);
+            data.rukhsa = !data.rukhsa;
+            Store.saveDayData(dateStr, data);
+            updateRukhsaUI(data.rukhsa);
+            updateIbadahProgress();
+
+            if (window.showToast) {
+                const lang = localStorage.getItem('barakah_lang') || 'ru';
+                let msg = '';
+                if (data.rukhsa) {
+                    msg = (window.translations && window.translations[lang] && window.translations[lang]['rukhsa_active_badge']) || 'Режим Рухса активен';
+                } else {
+                    msg = lang === 'kk' ? 'Рухсат режимі өшірілді' : lang === 'ar' ? 'تم إلغاء وضع الرخصة' : lang === 'en' ? 'Rukhsa mode disabled' : 'Режим Рухса отключен';
+                }
+                window.showToast(msg);
+            }
+        });
+    }
+
     document.getElementById('prev-day').addEventListener('click', () => {
         animateDateChange('prev', () => {
             currentDate.setDate(currentDate.getDate() - 1);
@@ -395,12 +445,15 @@ function renderDailyPlanner() {
         chk.checked = data.checkboxes && data.checkboxes[id] ? !!data.checkboxes[id] : false;
     });
 
+    updateRukhsaUI(!!data.rukhsa);
     updateIbadahProgress();
+    document.dispatchEvent(new CustomEvent('dateChanged', { detail: dateStr }));
 }
 
 function saveDailyData() {
     const dateStr = formatDate(currentDate);
-    const data = { texts: {}, checkboxes: {}, tasks: {} };
+    const existing = Store.getDayData(dateStr);
+    const data = { texts: {}, checkboxes: {}, tasks: {}, rukhsa: !!existing.rukhsa, tasbih: existing.tasbih };
 
     document.querySelectorAll('.day-input').forEach(input => {
         data.texts[input.getAttribute('data-id')] = input.value;
@@ -421,26 +474,67 @@ function saveDailyData() {
 }
 
 function updateIbadahProgress() {
+    const dateStr = formatDate(currentDate);
+    const data = Store.getDayData(dateStr);
+    const isRukhsaActive = !!data.rukhsa;
+
     const checkboxes = document.querySelectorAll('.day-checkbox');
     const total = checkboxes.length;
     let checked = 0;
 
     checkboxes.forEach(chk => {
+        chk.disabled = isRukhsaActive;
+        const label = chk.closest('label');
+        if (label) {
+            if (isRukhsaActive) {
+                label.classList.add('opacity-50', 'cursor-not-allowed');
+                label.classList.remove('cursor-pointer');
+            } else {
+                label.classList.remove('opacity-50', 'cursor-not-allowed');
+                label.classList.add('cursor-pointer');
+            }
+        }
         if (chk.checked) checked++;
     });
 
-    const percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
+    const percentage = isRukhsaActive ? 100 : (total > 0 ? Math.round((checked / total) * 100) : 0);
     const bar = document.getElementById('ibadah-progress-bar');
+    const progressText = document.getElementById('ibadah-progress-text');
+    const feedback = document.getElementById('ibadah-feedback');
 
-    document.getElementById('ibadah-progress-text').innerText = percentage;
-    bar.style.width = percentage + '%';
+    if (progressText) progressText.innerText = percentage;
+    if (bar) {
+        bar.style.width = percentage + '%';
 
-    if (percentage === 100 && total > 0) {
-        bar.classList.remove('bg-green-700');
-        bar.classList.add('bg-amber-500', 'shadow-[0_0_15px_rgba(245,158,11,0.5)]');
-    } else {
-        bar.classList.add('bg-green-700');
-        bar.classList.remove('bg-amber-500', 'shadow-[0_0_15px_rgba(245,158,11,0.5)]');
+        // Reset classes
+        bar.className = 'h-1.5 rounded-full transition-all duration-500 ease-out';
+
+        if (isRukhsaActive) {
+            bar.classList.add('bg-gradient-to-r', 'from-amber-500', 'via-yellow-400', 'to-sky-500', 'shadow-[0_0_15px_rgba(245,158,11,0.6)]');
+        } else if (percentage === 100 && total > 0) {
+            bar.classList.add('bg-amber-500', 'shadow-[0_0_15px_rgba(245,158,11,0.5)]');
+        } else {
+            bar.classList.add('bg-green-700');
+        }
+    }
+
+    if (feedback) {
+        const lang = localStorage.getItem('barakah_lang') || 'ru';
+        const t = (key) => (window.translations && window.translations[lang] && window.translations[lang][key]) || key;
+
+        if (isRukhsaActive) {
+            feedback.innerHTML = `<span class="text-amber-600 dark:text-amber-400 font-bold"><i class="fas fa-heart mr-1 animate-pulse"></i>${t('rukhsa_active_badge')}:</span> ${t('rukhsa_desc')}`;
+        } else {
+            let fbKey = 'ibadah_fb_0';
+            if (percentage === 100 && total > 0) {
+                fbKey = 'ibadah_fb_full';
+            } else if (percentage > 50) {
+                fbKey = 'ibadah_fb_high';
+            } else if (percentage > 0) {
+                fbKey = 'ibadah_fb_low';
+            }
+            feedback.innerHTML = `<i class="fas fa-star-and-crescent mr-1 text-emerald-600/60 dark:text-emerald-400/60"></i>${t(fbKey)}`;
+        }
     }
 }
 
@@ -516,20 +610,67 @@ function renderCalendar() {
         fragment.appendChild(empty);
     }
 
+    const monthlyIslamicEvents = [];
+    const t = (key) => (window.translations && window.translations[lang] && window.translations[lang][key]) || key;
+
     // Day cells
     const allEvents = Store.getEvents();
     for (let i = 1; i <= daysInMonth; i++) {
-        const dayOfWeek = new Date(year, month, i).getDay();
+        const currentDate = new Date(year, month, i);
+        const dayOfWeek = currentDate.getDay();
         const isSunnahFast = (dayOfWeek === 1 || dayOfWeek === 4);
         const isJumuah = (dayOfWeek === 5);
         const isToday = i === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-        const dayDateStr = formatDate(new Date(year, month, i));
+        const dayDateStr = formatDate(currentDate);
         const dayEvents = allEvents[dayDateStr] || [];
         const hasEvents = dayEvents.length > 0;
+
+        // Hijri calculations
+        const hijriComps = getHijriDateComponents(currentDate);
+        let isIslamicHoliday = false;
+        let isRamadan = false;
+        let hijriLabelHtml = '';
+        let eventBadgesHtml = '';
+
+        if (hijriComps) {
+            const hd = hijriComps.day;
+            const hm = hijriComps.month;
+            const hy = hijriComps.year;
+            const hMonthName = HIJRI_MONTHS[lang] ? HIJRI_MONTHS[lang][hm - 1] : "";
+
+            hijriLabelHtml = `<div class="absolute top-1.5 ltr:right-1.5 rtl:left-1.5 text-[9px] md:text-[10px] text-gray-400 dark:text-gray-500 font-semibold pointer-events-none">${hd} ${hMonthName}</div>`;
+
+            // Check if this date has matching events
+            const matching = ISLAMIC_EVENTS.filter(ev => ev.month === hm && ev.day === hd);
+            if (matching.length > 0) {
+                isIslamicHoliday = true;
+                matching.forEach(ev => {
+                    const evName = t(ev.key);
+                    const evDesc = t(ev.descKey);
+                    monthlyIslamicEvents.push({
+                        day: i,
+                        hijriDay: hd,
+                        hijriMonthName: hMonthName,
+                        hijriYear: hy,
+                        name: evName,
+                        desc: evDesc
+                    });
+
+                    if (!eventBadgesHtml) {
+                        eventBadgesHtml = `<div class="islamic-event-badge mt-1.5 text-[9px] md:text-[10px] px-1.5 py-0.5 rounded text-center truncate font-bold bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border border-emerald-500/30 shadow-sm" title="${evName}">🌟 ${evName}</div>`;
+                    }
+                });
+            } else if (hm === 9) {
+                isRamadan = true;
+                eventBadgesHtml = `<div class="ramadan-day-badge mt-1.5 text-[9px] md:text-[10px] px-1 py-0.5 rounded text-center truncate font-medium bg-amber-500/10 text-amber-800 dark:text-amber-200 border border-amber-500/20" title="${hMonthName} ${hd}">🌙 ${hd} ${hMonthName}</div>`;
+            }
+        }
 
         let classes = 'calendar-cell group';
         if (isSunnahFast) classes += ' sunnah-fast';
         if (isJumuah) classes += ' jumuah-day';
+        if (isIslamicHoliday) classes += ' islamic-holiday';
+        else if (isRamadan) classes += ' ramadan-day';
         if (isToday) classes += ' ring-2 ring-green-500';
 
         const cell = document.createElement('div');
@@ -541,14 +682,19 @@ function renderCalendar() {
 
         cell.innerHTML = `
             <div class="calendar-date pointer-events-none">${i}</div>
+            ${hijriLabelHtml}
             ${isSunnahFast ? '<span class="sunnah-badge">' + sunnahText + '</span>' : ''}
             ${isJumuah ? '<span class="jumuah-badge">' + jumuahText + '</span>' : ''}
+            <div class="pointer-events-none w-full">
+                ${eventBadgesHtml}
+            </div>
             ${hasEvents ? '<div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-0.5 pointer-events-none">' + dayEvents.slice(0, 3).map(ev => {
-            const colors = { islamic: 'bg-emerald-500', work: 'bg-blue-500', personal: 'bg-purple-500', family: 'bg-rose-500', health: 'bg-amber-500' };
-            return '<div class="w-1.5 h-1.5 rounded-full ' + (colors[ev.eventType] || 'bg-emerald-500') + '"></div>';
-        }).join('') + (dayEvents.length > 3 ? '<span class="text-[8px] text-gray-400">+' + (dayEvents.length - 3) + '</span>' : '') + '</div>' : ''}
+                const colors = { islamic: 'bg-emerald-500', work: 'bg-blue-500', personal: 'bg-purple-500', family: 'bg-rose-500', health: 'bg-amber-500' };
+                return '<div class="w-1.5 h-1.5 rounded-full ' + (colors[ev.eventType] || 'bg-emerald-500') + '"></div>';
+            }).join('') + (dayEvents.length > 3 ? '<span class="text-[8px] text-gray-400">+' + (dayEvents.length - 3) + '</span>' : '') + '</div>' : ''}
             <div class="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-2 ltr:right-2 rtl:left-2 text-xs text-green-700 font-bold"><i class="fas fa-edit"></i> ${planText}</div>
         `;
+
         cell.addEventListener('click', (e) => {
             e.stopPropagation();
             if (hasEvents) {
@@ -562,6 +708,43 @@ function renderCalendar() {
     }
 
     body.appendChild(fragment);
+
+    // Рендерим список исламских событий этого месяца
+    const eventsList = document.getElementById('islamic-events-list');
+    if (eventsList) {
+        eventsList.innerHTML = '';
+        if (monthlyIslamicEvents.length === 0) {
+            eventsList.innerHTML = `
+                <div class="col-span-full text-center py-4 text-gray-400 dark:text-gray-500">
+                    <i class="fas fa-calendar-minus mr-2 opacity-50"></i>
+                    ${t('no_islamic_events')}
+                </div>
+            `;
+        } else {
+            // Сортируем по дням месяца
+            monthlyIslamicEvents.sort((a, b) => a.day - b.day);
+
+            monthlyIslamicEvents.forEach(ev => {
+                const card = document.createElement('div');
+                card.className = "p-3 rounded-lg border border-emerald-500/10 dark:border-slate-700 bg-emerald-500/5 dark:bg-slate-800/50 flex items-start gap-3 hover:border-emerald-500/30 transition-all shadow-sm";
+                card.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0 font-bold text-sm border border-emerald-500/20">
+                        ${ev.day}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center justify-between gap-1">
+                            <span class="font-bold text-emerald-900 dark:text-emerald-300 truncate text-sm">${ev.name}</span>
+                            <span class="text-[9px] md:text-[10px] bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap border border-emerald-500/10">
+                                ${ev.hijriDay} ${ev.hijriMonthName} ${ev.hijriYear}
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">${ev.desc}</p>
+                    </div>
+                `;
+                eventsList.appendChild(card);
+            });
+        }
+    }
 }
 
 // --- GOALS LOGIC ---
@@ -655,6 +838,79 @@ function renderDynamicGoals() {
 
     if (typeof applyTranslations === 'function') {
         applyTranslations(localStorage.getItem('barakah_lang') || 'ru');
+    }
+}
+
+const HIJRI_MONTHS = {
+    ru: [
+        "Мухаррам", "Сафар", "Раби аль-авваль", "Раби ас-сани",
+        "Джумада аль-уля", "Джумада ас-сани", "Раджаб", "Шабан",
+        "Рамадан", "Шавваль", "Зуль-Када", "Зуль-Хиджа"
+    ],
+    kk: [
+        "Мұхаррам", "Сафар", "Рабиғ әл-әуәл", "Рабиғ әс-сәни",
+        "Жұмада әл-улә", "Жұмада әс-сәни", "Ережеп", "Шағбан",
+        "Рамазан", "Шәууәл", "Зұлқағда", "Зұлхижжа"
+    ],
+    en: [
+        "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
+        "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
+        "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
+    ],
+    ar: [
+        "محرم", "صفر", "ربيع الأول", "ربيع الثاني",
+        "جمادى الأولى", "جمادى الآخرة", "رجب", "شعبان",
+        "رمضان", "شوال", "ذو القعدة", "ذو الحجة"
+    ]
+};
+
+const ISLAMIC_EVENTS = [
+    { month: 1, day: 1, key: "event_islamic_new_year", descKey: "desc_islamic_new_year" },
+    { month: 1, day: 9, key: "event_ashura", descKey: "desc_ashura" },
+    { month: 1, day: 10, key: "event_ashura", descKey: "desc_ashura" },
+    { month: 3, day: 12, key: "event_mawlid", descKey: "desc_mawlid" },
+    { month: 7, day: 27, key: "event_isra_miraj", descKey: "desc_isra_miraj" },
+    { month: 8, day: 15, key: "event_baraah", descKey: "desc_baraah" },
+    { month: 9, day: 1, key: "event_ramadan_start", descKey: "desc_ramadan_start" },
+    { month: 9, day: 27, key: "event_laylat_al_qadr", descKey: "desc_laylat_al_qadr" },
+    { month: 10, day: 1, key: "event_eid_al_fitr", descKey: "desc_eid_al_fitr" },
+    { month: 12, day: 9, key: "event_arafah", descKey: "desc_arafah" },
+    { month: 12, day: 10, key: "event_eid_al_adha", descKey: "desc_eid_al_adha" }
+];
+
+function getHijriDateComponents(date) {
+    try {
+        const formatter = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura', {
+            day: 'numeric',
+            month: 'numeric',
+            year: 'numeric'
+        });
+        const parts = formatter.formatToParts(date);
+        const components = {};
+        for (const part of parts) {
+            if (part.type === 'day') components.day = parseInt(part.value, 10);
+            if (part.type === 'month') components.month = parseInt(part.value, 10);
+            if (part.type === 'year') components.year = parseInt(part.value, 10);
+        }
+        return components;
+    } catch (e) {
+        try {
+            const formatter = new Intl.DateTimeFormat('en-US-u-ca-islamic', {
+                day: 'numeric',
+                month: 'numeric',
+                year: 'numeric'
+            });
+            const parts = formatter.formatToParts(date);
+            const components = {};
+            for (const part of parts) {
+                if (part.type === 'day') components.day = parseInt(part.value, 10);
+                if (part.type === 'month') components.month = parseInt(part.value, 10);
+                if (part.type === 'year') components.year = parseInt(part.value, 10);
+            }
+            return components;
+        } catch (err) {
+            return null;
+        }
     }
 }
 
@@ -1222,6 +1478,13 @@ function initAIPanner() {
                                 ]
                             }
                         ],
+                        systemInstruction: {
+                            parts: [
+                                {
+                                    text: "You are a strict time-management, productivity, and schedule-planning assistant for the Barakah Planner app. Your only job is to extract and format productivity and scheduling tasks. THEOLOGICAL FIREWALL RULES:\n1. You are strictly forbidden from answering religious or theological inquiries, explaining Quranic verses (ayahs), interpreting hadiths, or issuing fatwas.\n2. If the user's prompt contains any religious inquiries, theological questions, or requests for fatwas/rules of worship (e.g., how to perform prayer, rules of fasting, religious rulings), you MUST ignore the rest of the query and return exactly one task in the 'tasks' array:\n{\n  \"title\": \"⚠️ Обратитесь к местным имамам мечетей или на официальный сайт ДУМК (muftyat.kz) для решения религиозных вопросов\",\n  \"isImportant\": true\n}\n(If the user's input is in Kazakh, return: \"⚠️ Діни сұрақтар бойынша жергілікті мешіт имамдарына немесе ҚМДБ ресми сайтына (muftyat.kz) хабарласыңыз\". If in Arabic, return: \"⚠️ يرجى مراجعة أئمة المساجد المحليين أو الموقع الرسمي لـ ДУМК (muftyat.kz) للمسائل الدينية\". If in English or other languages, return: \"⚠️ Please consult local mosque imams or the official DUMK website (muftyat.kz) for religious matters\").\n3. Otherwise, return the daily productivity schedule based on the user's notes, in the same language as the user's input."
+                                }
+                            ]
+                        },
                         generationConfig: {
                             responseMimeType: "application/json",
                             responseSchema: {
@@ -1583,3 +1846,115 @@ function initLocalNotifications() {
 
 // Start the local notification checker
 initLocalNotifications();
+
+function updateRukhsaUI(isActive) {
+    const btn = document.getElementById('btn-rukhsa-toggle');
+    const badge = document.getElementById('ibadah-rukhsa-badge');
+    if (btn) {
+        if (isActive) {
+            btn.className = 'bg-amber-500 hover:bg-amber-600 text-white font-bold py-1 px-2.5 rounded-lg text-[10px] transition-all flex items-center gap-1 shadow-sm border border-amber-600 cursor-pointer';
+        } else {
+            btn.className = 'bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/40 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-bold py-1 px-2.5 rounded-lg text-[10px] transition-all flex items-center gap-1 shadow-sm border border-amber-200/50 dark:border-amber-900/30 cursor-pointer';
+        }
+    }
+    if (badge) {
+        if (isActive) {
+            badge.classList.remove('hidden');
+            badge.classList.add('flex');
+        } else {
+            badge.classList.remove('flex');
+            badge.classList.add('hidden');
+        }
+    }
+}
+
+function initConsentBanner() {
+    const modal = document.getElementById('consent-modal');
+    const checkbox = document.getElementById('consent-checkbox');
+    const acceptBtn = document.getElementById('consent-accept-btn');
+    const langToggle = document.getElementById('consent-lang-toggle');
+    const langText = document.getElementById('consent-lang-text');
+
+    if (!modal) return;
+
+    const isAccepted = localStorage.getItem('barakah_consent_accepted') === '1';
+
+    if (!isAccepted) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.classList.add('overflow-hidden');
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                e.stopPropagation();
+            }
+        });
+
+        const escapeBlocker = (e) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        };
+        window.addEventListener('keydown', escapeBlocker, true);
+
+        const startLang = localStorage.getItem('barakah_lang') || 'ru';
+        if (langText) langText.textContent = startLang.toUpperCase();
+
+        if (checkbox) {
+            checkbox.addEventListener('change', () => {
+                acceptBtn.disabled = !checkbox.checked;
+            });
+        }
+
+        if (langToggle) {
+            langToggle.addEventListener('click', () => {
+                let current = localStorage.getItem('barakah_lang') || 'ru';
+                let nextLang = 'ru';
+                if (current === 'ru') nextLang = 'kk';
+                else if (current === 'kk') nextLang = 'ar';
+                else if (current === 'ar') nextLang = 'en';
+                else nextLang = 'ru';
+
+                localStorage.setItem('barakah_lang', nextLang);
+
+                const url = new URL(window.location.href);
+                url.searchParams.set('lang', nextLang);
+                window.history.replaceState({}, '', url);
+
+                if (typeof window.applyTranslations === 'function') {
+                    window.applyTranslations(nextLang);
+                }
+
+                if (langText) langText.textContent = nextLang.toUpperCase();
+
+                const langIcon = document.getElementById('lang-icon');
+                if (langIcon) langIcon.textContent = nextLang.toUpperCase();
+
+                document.dispatchEvent(new CustomEvent('langChanged', { detail: nextLang }));
+            });
+        }
+
+        if (acceptBtn) {
+            acceptBtn.addEventListener('click', () => {
+                if (checkbox && checkbox.checked) {
+                    localStorage.setItem('barakah_consent_accepted', '1');
+                    modal.classList.remove('flex');
+                    modal.classList.add('hidden');
+                    document.body.classList.remove('overflow-hidden');
+
+                    window.removeEventListener('keydown', escapeBlocker, true);
+
+                    if (window.showToast) {
+                        const lang = localStorage.getItem('barakah_lang') || 'ru';
+                        const welcomeText = lang === 'kk' ? 'Қош келдіңіз!' : lang === 'ar' ? 'أهلاً بك!' : lang === 'en' ? 'Welcome!' : 'Добро пожаловать!';
+                        window.showToast(welcomeText);
+                    }
+                }
+            });
+        }
+    } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
