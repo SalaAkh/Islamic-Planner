@@ -265,6 +265,7 @@
     <script defer src="./src/js/tasbih.js"></script>
     <script defer src="./src/js/mindmap.js"></script>
     <script defer src="./src/js/main.js"></script>
+    <script type="module" src="./src/js/native.js"></script>
 </head>
 
 <body>
@@ -379,7 +380,7 @@
             
             <!-- Standard round items -->
             <button id="lang-toggle" class="header-circle-btn w-9 h-9 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-center hover:scale-105 transition-transform cursor-pointer" aria-label="Смена языка" data-i18n="tooltip_lang" data-i18n-target="aria-label">
-                <span id="lang-icon" class="text-xs font-bold font-sans text-slate-700 dark:text-slate-300">RU</span>
+                <span id="lang-icon" class="text-xs font-bold font-sans text-slate-700 dark:text-slate-300">KK</span>
             </button>
             
             <button id="theme-toggle" class="header-circle-btn w-9 h-9 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-center hover:scale-105 transition-transform cursor-pointer" aria-label="Смена темы" data-i18n="tooltip_theme" data-i18n-target="aria-label">
@@ -872,6 +873,25 @@
                                     class="add-task-btn text-xs text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium flex items-center gap-1">
                                     <i class="fas fa-plus"></i> <span data-i18n="add_task">Добавить задачу</span>
                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- Блок 6: Мухасаба (Рефлексия) -->
+                        <div
+                            class="relative bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md mt-6">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-heart text-rose-500 mr-2"></i>
+                                <h3 class="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest text-sm"
+                                    data-i18n="muhasabah_title">Мухасаба (Итоги дня)</h3>
+                                <div class="flex-grow border-b border-slate-300 dark:border-slate-600 ml-4"></div>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mb-3 ml-6" data-i18n="muhasabah_desc">Отчет перед собой и Всевышним за прошедший день.</p>
+                            <div class="flex flex-col gap-3 pl-6">
+                                <textarea data-id="muhasabah" id="muhasabah" name="muhasabah" rows="3"
+                                    style="resize:none;" placeholder="Что я сделал ради Аллаха сегодня? За что благодарен? В чем нужно покаяться?"
+                                    autocomplete="off" aria-label="Мухасаба" data-i18n-target="placeholder"
+                                    data-i18n="muhasabah_ph"
+                                    class="ruled-textarea handwriting w-full day-input placeholder-slate-400 dark:placeholder-slate-500 h-24"></textarea>
                             </div>
                         </div>
                     </div>
@@ -1839,9 +1859,9 @@
                         <a href="mailto:salaahlion@gmail.com"
                             class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
                                 class="fas fa-envelope text-indigo-500"></i> salaahlion@gmail.com</a>
-                        <a href="https://t.me/sala_akh" target="_blank"
+                        <a href="https://t.me/salaah_dev" target="_blank"
                             class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
-                                class="fab fa-telegram text-blue-500"></i> @sala_akh</a>
+                                class="fab fa-telegram text-blue-500"></i> @salaah_dev</a>
                         <a href="https://www.linkedin.com/in/s-akh09/" target="_blank"
                             class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
                                 class="fab fa-linkedin text-blue-700"></i> LinkedIn</a>
@@ -1854,11 +1874,10 @@
                         <a href="https://salamat.vffatop.workers.dev" target="_blank"
                             class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
                                 class="fas fa-globe text-teal-500"></i> Salamat</a>
-                        <span
-                            class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold flex items-center gap-2"><i
-                                class="fas fa-map-marker-alt text-red-500"></i> <span
-                                data-i18n="contacts_city">Караганда,
-                                Казахстан</span></span>
+                        <a href="https://salamat.vffatop.workers.dev" target="_blank"
+                            class="px-3 py-1.5 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2"><i
+                                class="fas fa-user text-purple-500"></i> <span
+                                data-i18n="contacts_about_me">Обо мне</span></a>
                     </div>
 
                     <form class="flex flex-col gap-4" id="contactForm" action="https://formspree.io/f/mpqjebol"
@@ -2438,6 +2457,8 @@
         </div>
     </div>
 
+</div> <!-- Close page wrapper -->
+
 <!-- Premium Redesigned Footer -->
     <footer class="main-footer pointer-events-auto">
         <!-- Top gradient divider -->
@@ -2454,13 +2475,13 @@
                     <p class="footer-tagline-ref">— Коран 53:39</p>
                     <!-- Social links -->
                     <div class="footer-socials">
-                        <a href="https://t.me/barakahplanner" target="_blank" rel="noopener" class="footer-social-btn" title="Telegram">
+                        <a href="https://t.me/salaah_dev" target="_blank" rel="noopener" class="footer-social-btn" title="Telegram">
                             <i class="fab fa-telegram"></i>
                         </a>
                         <a href="https://github.com/SalaAkh/Islamic-Planner" target="_blank" rel="noopener" class="footer-social-btn" title="GitHub">
                             <i class="fab fa-github"></i>
                         </a>
-                        <a href="mailto:support@barakahplanner.com" class="footer-social-btn" title="Email">
+                        <a href="mailto:salaahlion@gmail.com" class="footer-social-btn" title="Email">
                             <i class="fas fa-envelope"></i>
                         </a>
                     </div>
@@ -2470,14 +2491,14 @@
                 <div class="footer-section footer-contact">
                     <h4 class="footer-title"><i class="fas fa-address-card footer-title-icon"></i> <span data-i18n="section_contacts">Контакты</span></h4>
                     <div class="footer-contact-list">
-                        <a href="mailto:support@barakahplanner.com" class="footer-contact-item">
+                        <a href="mailto:salaahlion@gmail.com" class="footer-contact-item">
                             <span class="footer-contact-icon"><i class="fas fa-envelope"></i></span>
-                            <span>support@barakahplanner.com</span>
+                            <span>salaahlion@gmail.com</span>
                         </a>
-                        <div class="footer-contact-item">
-                            <span class="footer-contact-icon"><i class="fas fa-map-marker-alt"></i></span>
-                            <span data-i18n="contacts_city">Караганда, Казахстан</span>
-                        </div>
+                        <a href="https://salamat.vffatop.workers.dev" target="_blank" class="footer-contact-item">
+                            <span class="footer-contact-icon"><i class="fas fa-user"></i></span>
+                            <span data-i18n="contacts_about_me">Обо мне</span>
+                        </a>
                         <a href="https://islamic-planer.web.app" class="footer-contact-item">
                             <span class="footer-contact-icon"><i class="fas fa-globe"></i></span>
                             <span>islamic-planer.web.app</span>
@@ -2498,17 +2519,13 @@
             </div>
 
             <!-- Bottom bar -->
-            <div class="footer-bottom">
-                <div class="footer-bottom-left">
-                    <span class="footer-basmala">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
-                </div>
+            <div class="footer-bottom" style="justify-content: center;">
                 <div class="footer-bottom-right">
-                    <p>&copy; 2026 Barakah Planner &mdash; Все права защищены. <span class="footer-alhamdulillah">Альхамдулиллях 🌙</span></p>
+                    <p>&copy; 2026 Barakah Planner &mdash; Все права защищены.</p>
                 </div>
             </div>
         </div>
     </footer>
-    </div>
 </body>
 
 </html>

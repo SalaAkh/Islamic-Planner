@@ -32,7 +32,7 @@ const translations = {
         "goals_title": "Глобальные Цели", "ahirat_title": "Ахират (Вечное)", "dunya_title": "Дунья (Мирское)",
         "board_title": "Tafakkur Board", "board_info": "Бесконечный холст · Pinch-to-zoom на мобильном", "center_btn": "Центр",
         "donate_title": "Поддержать проект", "donate_text": "Ваша поддержка помогает развивать проект и приносить больше пользы Умме. Джазакаллаху Хайран!",
-        "section_contacts": "Контакты", "contacts_desc": "Давайте превратим вашу идею в стабильный бизнес. Пишите!", "contacts_city": "Караганда, Казахстан",
+        "section_contacts": "Контакты", "contacts_desc": "Давайте превратим вашу идею в стабильный бизнес. Пишите!", "contacts_about_me": "Обо мне",
         "label_name": "Ваше имя", "placeholder_name": "Ваше имя", "label_contact": "Email", "placeholder_contact": "Email", "label_message": "Сообщение", "placeholder_message": "Расскажите о вашем проекте", "btn_send": "Отправить",
         "goal_religion_title": "Изучение Религии", "goal_religion_ph": "Выучить Джуз Амма, прочитать Сиру...",
         "goal_habits_title": "Характер и Привычки", "goal_habits_ph": "Перестать гневаться, совершать тахаджуд...",
@@ -300,7 +300,7 @@ const translations = {
         "goals_title": "Ауқымды Мақсаттар", "ahirat_title": "Ақырет (Мәңгілік)", "dunya_title": "Дүние (Өткінші)",
         "board_title": "Тафаккур Тақтасы", "board_info": "Шексіз кенеп · Мобильдік құрылғыда Pinch-to-zoom", "center_btn": "Ортасы",
         "donate_title": "Жобаға қолдау көрсету", "donate_text": "Сіздің қолдауыңыз жобаның дамуына және Үмбетке көбірек пайда әкелуіне көмектеседі. Жазакаллаһу Хайран!",
-        "section_contacts": "Байланыс", "contacts_desc": "Идеяңызды тұрақты бизнеске айналдырайық. Жазыңыз!", "contacts_city": "Қарағанды, Қазақстан",
+        "section_contacts": "Байланыс", "contacts_desc": "Идеяңызды тұрақты бизнеске айналдырайық. Жазыңыз!", "contacts_about_me": "Мен туралы",
         "label_name": "Атыңыз", "placeholder_name": "Атыңыз", "label_contact": "Email", "placeholder_contact": "Email", "label_message": "Хабарлама", "placeholder_message": "Жобаңыз туралы айтып беріңіз", "btn_send": "Жіберу",
         "goal_religion_title": "Дінді Үйрену", "goal_religion_ph": "Амма парасын жаттау, Сираны оқу...",
         "goal_habits_title": "Мінез бен Әдеттер", "goal_habits_ph": "Ашуланбау, тәһәжжүд оқу...",
@@ -568,7 +568,7 @@ const translations = {
         "goals_title": "الأهداف الكبرى", "ahirat_title": "الآخرة", "dunya_title": "الدنيا",
         "board_title": "لوحة التفكر", "board_info": "مساحة غير محدودة", "center_btn": "المركز",
         "donate_title": "دعم المشروع", "donate_text": "دعمكم يساعد في تطوير المشروع وتقديم المزيد من النفع للأمة. جزاكم الله خيراً!",
-        "section_contacts": "جهات الاتصال", "contacts_desc": "دعونا نحول فكرتك إلى عمل مستقر. تواصل معنا!", "contacts_city": "قراغندي، كازاخستان",
+        "section_contacts": "جهات الاتصال", "contacts_desc": "دعونا نحول فكرتك إلى عمل مستقر. تواصل معنا!", "contacts_about_me": "عني",
         "label_name": "اسمك", "placeholder_name": "اسمك", "label_contact": "البريد الإلكتروني", "placeholder_contact": "البريد الإلكتروني", "label_message": "رسالة", "placeholder_message": "أخبرنا عن مشروعك", "btn_send": "إرسال",
         "goal_religion_title": "دراسة الدين", "goal_religion_ph": "حفظ جزء عم، قراءة السيرة...",
         "goal_habits_title": "الشخصية والعادات", "goal_habits_ph": "تجنب الغضب، قيام الليل...",
@@ -836,7 +836,7 @@ const translations = {
         "goals_title": "Global Goals", "ahirat_title": "Akhirah (Eternal)", "dunya_title": "Dunya (Worldly)",
         "board_title": "Tafakkur Board", "board_info": "Infinite canvas · Pinch-to-zoom on mobile", "center_btn": "Center",
         "donate_title": "Support the Project", "donate_text": "Your support helps develop the project and bring more benefit to the Ummah. Jazakallahu Khairan!",
-        "section_contacts": "Contacts", "contacts_desc": "Let's turn your idea into a stable business. Contact us!", "contacts_city": "Karaganda, Kazakhstan",
+        "section_contacts": "Contacts", "contacts_desc": "Let's turn your idea into a stable business. Contact us!", "contacts_about_me": "About me",
         "label_name": "Your name", "placeholder_name": "Your name", "label_contact": "Email", "placeholder_contact": "Email", "label_message": "Message", "placeholder_message": "Tell us about your project", "btn_send": "Send",
         "goal_religion_title": "Studying Religion", "goal_religion_ph": "Memorize Juz Amma, read Seerah...",
         "goal_habits_title": "Character and Habits", "goal_habits_ph": "Stop getting angry, pray Tahajjud...",
@@ -1070,7 +1070,10 @@ const translations = {
         "pricing_feature_audit": "Activity history and audit logs for kids/students",
         "pricing_btn_activate": "Unlock Now",
         "premium_active_pro": "Premium Pro (Mashallah!)",
-        "premium_active_org": "Organization (Madrasah!)"
+        "premium_active_org": "Organization (Madrasah!)",
+        "muhasabah_title": "Muhasabah (Daily Reflection)",
+        "muhasabah_desc": "Self-accountability before the Almighty for the day passed.",
+        "muhasabah_ph": "What did I do for the sake of Allah today? What am I grateful for? What do I need to repent for?"
     }
 };
 
@@ -1087,13 +1090,13 @@ function getInitialLanguage() {
     } catch (e) {
         console.error("URL parsing error for lang", e);
     }
-    return localStorage.getItem('barakah_lang') || 'ru';
+    return localStorage.getItem('barakah_lang') || 'kk';
 }
 
 let currentLang = getInitialLanguage();
 
 function applyTranslations(lang) {
-    const dict = translations[lang] || translations['ru'];
+    const dict = translations[lang] || translations['kk'];
 
     // Update Language and SEO Metadata
     document.documentElement.lang = lang;
@@ -1184,10 +1187,10 @@ function initI18n() {
 
     if (langToggleBtn) {
         langToggleBtn.addEventListener('click', () => {
-            if (currentLang === 'ru') currentLang = 'kk';
-            else if (currentLang === 'kk') currentLang = 'ar';
+            if (currentLang === 'kk') currentLang = 'ru';
+            else if (currentLang === 'ru') currentLang = 'ar';
             else if (currentLang === 'ar') currentLang = 'en';
-            else currentLang = 'ru';
+            else currentLang = 'kk';
 
             localStorage.setItem('barakah_lang', currentLang);
 

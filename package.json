@@ -20,10 +20,19 @@
   },
   "homepage": "https://github.com/SalaAkh/Islamic-Planner#readme",
   "devDependencies": {
+    "@capacitor/cli": "^8.3.4",
     "@tailwindcss/cli": "^4.2.1",
     "tailwindcss": "^4.2.1"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/ios": "^8.3.4",
+    "@capacitor/keyboard": "^8.0.3",
+    "@capacitor/push-notifications": "^8.1.1",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "dotenv": "^17.3.1",
     "firebase": "^12.10.0",
     "jsdom": "^29.0.1",
