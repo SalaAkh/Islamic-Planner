@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 import 'dotenv/config';
+import * as esbuild from 'esbuild';
 
 console.log('[Barakah Builder] Starting monolithic build...');
 
@@ -43,6 +44,20 @@ function inlineScripts(html) {
                 const isDefer = /\bdefer\b/.test(attrs);
 
                 let finalJs = js;
+                if (script === 'native.js') {
+                    const result = esbuild.buildSync({
+                        stdin: {
+                            contents: js,
+                            resolveDir: path.resolve('./src/js'),
+                            loader: 'js',
+                        },
+                        bundle: true,
+                        format: 'esm',
+                        write: false,
+                        minify: true
+                    });
+                    finalJs = result.outputFiles[0].text;
+                }
                 if (script === 'firebase-init.js') {
                     const apiKey = process.env.FIREBASE_API_KEY || '';
                     finalJs = finalJs.replace(/__FIREBASE_API_KEY__/g, apiKey);
