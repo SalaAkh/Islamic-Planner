@@ -1,3 +1,4 @@
+var escapeHtml = escapeHtml || ((str) => (window.escapeHtml || ((s) => { if (typeof s !== 'string') return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }))(str));
 // State
 let currentDate = new Date(); // День, который открыт в планировщике
 let calendarDate = new Date(); // Месяц, который открыт в календаре
@@ -31,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initEvents();
     initAIPanner();
     initConsentBanner();
+    initSidebarDrawer();
 
     // Обновление при смене языка
     document.addEventListener('langChanged', () => {
@@ -46,6 +48,46 @@ document.addEventListener('DOMContentLoaded', () => {
         const appWrapper = document.getElementById('app-wrapper');
         if (appWrapper) {
             appWrapper.classList.remove('animate-pulse', 'pointer-events-none');
+        }
+    });
+
+    // Collaborative and workspace updates
+    document.addEventListener('groupEventsUpdated', () => {
+        renderCalendar();
+    });
+
+    document.addEventListener('groupTodoListsUpdated', () => {
+        if (window.todoManager && typeof window.todoManager.loadTodoLists === 'function') {
+            window.todoManager.loadTodoLists();
+        }
+    });
+
+    document.addEventListener('groupDayUpdated', (e) => {
+        const { dateString } = e.detail;
+        if (dateString === formatDate(currentDate)) {
+            renderDailyPlanner();
+        }
+    });
+
+    document.addEventListener('workspaceChanged', (e) => {
+        renderCalendar();
+        if (window.todoManager && typeof window.todoManager.loadTodoLists === 'function') {
+            window.todoManager.loadTodoLists();
+        }
+        renderDailyPlanner();
+        
+        if (window.Groups && typeof window.Groups.renderGroupsUI === 'function') {
+            window.Groups.renderGroupsUI();
+            window.Groups.renderWorkspaceSwitcher();
+        }
+
+        const notebook = document.querySelector('.notebook-page');
+        if (notebook) {
+            if (window.currentGroupId) {
+                notebook.classList.add('ring-4', 'ring-emerald-500/20');
+            } else {
+                notebook.classList.remove('ring-4', 'ring-emerald-500/20');
+            }
         }
     });
 
@@ -167,6 +209,19 @@ function initTabs() {
                 if (typeof initBoardsDashboard === 'function') initBoardsDashboard();
             }
 
+            if (viewName === 'mindmap') {
+                if (typeof initMindMap === 'function' && !window._mindMapInitialized) {
+                    initMindMap();
+                    window._mindMapInitialized = true;
+                }
+            }
+
+            if (viewName === 'groups') {
+                if (window.Groups && typeof window.Groups.renderGroupsUI === 'function') {
+                    window.Groups.renderGroupsUI();
+                }
+            }
+
             // Render daily wisdom on first visit or tab switch
             if (viewName === 'wisdom') {
                 if (typeof renderDailyWisdom === 'function') renderDailyWisdom();
@@ -241,28 +296,6 @@ function animateDateChange(direction, updateCallback) {
 }
 
 function initDailyPlanner() {
-    const rukhsaBtn = document.getElementById('btn-rukhsa-toggle');
-    if (rukhsaBtn) {
-        rukhsaBtn.addEventListener('click', () => {
-            const dateStr = formatDate(currentDate);
-            const data = Store.getDayData(dateStr);
-            data.rukhsa = !data.rukhsa;
-            Store.saveDayData(dateStr, data);
-            updateRukhsaUI(data.rukhsa);
-            updateIbadahProgress();
-
-            if (window.showToast) {
-                const lang = localStorage.getItem('barakah_lang') || 'ru';
-                let msg = '';
-                if (data.rukhsa) {
-                    msg = (window.translations && window.translations[lang] && window.translations[lang]['rukhsa_active_badge']) || 'Режим Рухса активен';
-                } else {
-                    msg = lang === 'kk' ? 'Рухсат режимі өшірілді' : lang === 'ar' ? 'تم إلغاء وضع الرخصة' : lang === 'en' ? 'Rukhsa mode disabled' : 'Режим Рухса отключен';
-                }
-                window.showToast(msg);
-            }
-        });
-    }
 
     document.getElementById('prev-day').addEventListener('click', () => {
         animateDateChange('prev', () => {
@@ -294,6 +327,11 @@ function initDailyPlanner() {
     plannerContainer.addEventListener('change', (e) => {
         if (e.target.classList.contains('day-checkbox')) {
             saveDailyData();
+            
+            // GA4 Event: Activation tracking
+            if (e.target.checked && typeof gtag === 'function') {
+                gtag('event', 'ibadah_checked', { namaz: e.target.getAttribute('data-id') });
+            }
         }
     });
 
@@ -349,6 +387,9 @@ function initDailyPlanner() {
 
 function renderDailyPlanner() {
     const dateStr = formatDate(currentDate);
+    if (window.Groups && typeof window.Groups.syncActiveDay === 'function') {
+        window.Groups.syncActiveDay(dateStr);
+    }
     const data = Store.getDayData(dateStr);
 
     // Update header
@@ -445,7 +486,6 @@ function renderDailyPlanner() {
         chk.checked = data.checkboxes && data.checkboxes[id] ? !!data.checkboxes[id] : false;
     });
 
-    updateRukhsaUI(!!data.rukhsa);
     updateIbadahProgress();
     document.dispatchEvent(new CustomEvent('dateChanged', { detail: dateStr }));
 }
@@ -453,7 +493,7 @@ function renderDailyPlanner() {
 function saveDailyData() {
     const dateStr = formatDate(currentDate);
     const existing = Store.getDayData(dateStr);
-    const data = { texts: {}, checkboxes: {}, tasks: {}, rukhsa: !!existing.rukhsa, tasbih: existing.tasbih };
+    const data = { texts: {}, checkboxes: {}, tasks: {}, tasbih: existing.tasbih };
 
     document.querySelectorAll('.day-input').forEach(input => {
         data.texts[input.getAttribute('data-id')] = input.value;
@@ -476,28 +516,22 @@ function saveDailyData() {
 function updateIbadahProgress() {
     const dateStr = formatDate(currentDate);
     const data = Store.getDayData(dateStr);
-    const isRukhsaActive = !!data.rukhsa;
 
     const checkboxes = document.querySelectorAll('.day-checkbox');
     const total = checkboxes.length;
     let checked = 0;
 
     checkboxes.forEach(chk => {
-        chk.disabled = isRukhsaActive;
+        chk.disabled = false;
         const label = chk.closest('label');
         if (label) {
-            if (isRukhsaActive) {
-                label.classList.add('opacity-50', 'cursor-not-allowed');
-                label.classList.remove('cursor-pointer');
-            } else {
-                label.classList.remove('opacity-50', 'cursor-not-allowed');
-                label.classList.add('cursor-pointer');
-            }
+            label.classList.remove('opacity-50', 'cursor-not-allowed');
+            label.classList.add('cursor-pointer');
         }
         if (chk.checked) checked++;
     });
 
-    const percentage = isRukhsaActive ? 100 : (total > 0 ? Math.round((checked / total) * 100) : 0);
+    const percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
     const bar = document.getElementById('ibadah-progress-bar');
     const progressText = document.getElementById('ibadah-progress-text');
     const feedback = document.getElementById('ibadah-feedback');
@@ -509,9 +543,7 @@ function updateIbadahProgress() {
         // Reset classes
         bar.className = 'h-1.5 rounded-full transition-all duration-500 ease-out';
 
-        if (isRukhsaActive) {
-            bar.classList.add('bg-gradient-to-r', 'from-amber-500', 'via-yellow-400', 'to-sky-500', 'shadow-[0_0_15px_rgba(245,158,11,0.6)]');
-        } else if (percentage === 100 && total > 0) {
+        if (percentage === 100 && total > 0) {
             bar.classList.add('bg-amber-500', 'shadow-[0_0_15px_rgba(245,158,11,0.5)]');
         } else {
             bar.classList.add('bg-green-700');
@@ -522,19 +554,15 @@ function updateIbadahProgress() {
         const lang = localStorage.getItem('barakah_lang') || 'ru';
         const t = (key) => (window.translations && window.translations[lang] && window.translations[lang][key]) || key;
 
-        if (isRukhsaActive) {
-            feedback.innerHTML = `<span class="text-amber-600 dark:text-amber-400 font-bold"><i class="fas fa-heart mr-1 animate-pulse"></i>${t('rukhsa_active_badge')}:</span> ${t('rukhsa_desc')}`;
-        } else {
-            let fbKey = 'ibadah_fb_0';
-            if (percentage === 100 && total > 0) {
-                fbKey = 'ibadah_fb_full';
-            } else if (percentage > 50) {
-                fbKey = 'ibadah_fb_high';
-            } else if (percentage > 0) {
-                fbKey = 'ibadah_fb_low';
-            }
-            feedback.innerHTML = `<i class="fas fa-star-and-crescent mr-1 text-emerald-600/60 dark:text-emerald-400/60"></i>${t(fbKey)}`;
+        let fbKey = 'ibadah_fb_0';
+        if (percentage === 100 && total > 0) {
+            fbKey = 'ibadah_fb_full';
+        } else if (percentage > 50) {
+            fbKey = 'ibadah_fb_high';
+        } else if (percentage > 0) {
+            fbKey = 'ibadah_fb_low';
         }
+        feedback.innerHTML = `<i class="fas fa-star-and-crescent mr-1 text-emerald-600/60 dark:text-emerald-400/60"></i>${t(fbKey)}`;
     }
 }
 
@@ -657,7 +685,7 @@ function renderCalendar() {
                     });
 
                     if (!eventBadgesHtml) {
-                        eventBadgesHtml = `<div class="islamic-event-badge mt-1.5 text-[9px] md:text-[10px] px-1.5 py-0.5 rounded text-center truncate font-bold bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border border-emerald-500/30 shadow-sm" title="${evName}">🌟 ${evName}</div>`;
+                        eventBadgesHtml = `<div class="islamic-event-badge mt-1.5 text-[9px] md:text-[10px] px-1.5 py-0.5 rounded text-center truncate font-bold bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border border-emerald-500/30 shadow-sm" title="${escapeHtml(evName)}">🌟 ${escapeHtml(evName)}</div>`;
                     }
                 });
             } else if (hm === 9) {
@@ -676,9 +704,9 @@ function renderCalendar() {
         const cell = document.createElement('div');
         cell.className = classes;
 
-        const sunnahText = lang === 'en' ? 'Sunnah' : lang === 'kk' ? 'Сүннет' : lang === 'ar' ? 'سنة' : 'Сунна';
-        const jumuahText = lang === 'en' ? "Jumu'ah" : lang === 'kk' ? 'Жұма' : lang === 'ar' ? 'جمعة' : 'Джума';
-        const planText = lang === 'en' ? 'Plan' : lang === 'kk' ? 'Жоспар' : lang === 'ar' ? 'خطة' : 'План';
+        const sunnahText = t('calendar_sunnah_badge');
+        const jumuahText = t('calendar_jumuah_badge');
+        const planText = t('calendar_plan_tooltip');
 
         cell.innerHTML = `
             <div class="calendar-date pointer-events-none">${i}</div>
@@ -733,12 +761,12 @@ function renderCalendar() {
                     </div>
                     <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center justify-between gap-1">
-                            <span class="font-bold text-emerald-900 dark:text-emerald-300 truncate text-sm">${ev.name}</span>
+                            <span class="font-bold text-emerald-900 dark:text-emerald-300 truncate text-sm">${escapeHtml(ev.name)}</span>
                             <span class="text-[9px] md:text-[10px] bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 px-1.5 py-0.5 rounded font-semibold whitespace-nowrap border border-emerald-500/10">
                                 ${ev.hijriDay} ${ev.hijriMonthName} ${ev.hijriYear}
                             </span>
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">${ev.desc}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">${escapeHtml(ev.desc)}</p>
                     </div>
                 `;
                 eventsList.appendChild(card);
@@ -800,10 +828,10 @@ function renderDynamicGoals() {
         const deleteTitle = (window.t && window.t('btn_delete_goal')) || 'Удалить';
         div.innerHTML = `
             <div class="flex items-center justify-between mb-2">
-                <input type="text" id="dyn-goal-title-${goal.id}" name="dyn-goal-title-${goal.id}" aria-label="${goalCustomTitle}" class="dyn-goal-title bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide w-[85%] placeholder-slate-400" placeholder="${goalCustomTitle}" value="${goal.title || ''}">
+                <input type="text" id="dyn-goal-title-${goal.id}" name="dyn-goal-title-${goal.id}" aria-label="${goalCustomTitle}" class="dyn-goal-title bg-transparent border-none p-0 focus:ring-0 text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide w-[85%] placeholder-slate-400" placeholder="${goalCustomTitle}" value="${escapeHtml(goal.title || '')}">
                 <button type="button" class="delete-dyn-goal text-red-500 opacity-30 hover:opacity-100 transition-all p-2 shrink-0 cursor-pointer relative z-50" title="${deleteTitle}"><i class="fas fa-trash pointer-events-none"></i></button>
             </div>
-            <textarea id="dyn-goal-content-${goal.id}" name="dyn-goal-content-${goal.id}" aria-label="${goalCustomPh}" class="dyn-goal-content ruled-textarea handwriting h-24 placeholder-slate-400 dark:placeholder-slate-500 w-full" placeholder="${goalCustomPh}">${goal.content || ''}</textarea>
+            <textarea id="dyn-goal-content-${goal.id}" name="dyn-goal-content-${goal.id}" aria-label="${goalCustomPh}" class="dyn-goal-content ruled-textarea handwriting h-24 placeholder-slate-400 dark:placeholder-slate-500 w-full" placeholder="${goalCustomPh}">${escapeHtml(goal.content || '')}</textarea>
         `;
 
         const titleInput = div.querySelector('.dyn-goal-title');
@@ -1195,7 +1223,7 @@ function initEvents() {
         };
 
         // Request notification permission if alert is enabled
-        if (event.alert !== 'none') {
+        if (event.alert !== 'none' && typeof Notification !== 'undefined') {
             if (Notification.permission === 'denied') {
                 const lang = localStorage.getItem('barakah_lang') || 'ru';
                 const msg = lang === 'ru' ? '⚠️ Уведомления заблокированы браузером. Разрешите их в настройках (иконка замочка).' : '⚠️ Notifications are blocked in browser settings. Enable them manually.';
@@ -1424,13 +1452,37 @@ function initAIPanner() {
     // Generate Plan Handler
     if (btnGenerate) {
         btnGenerate.addEventListener('click', async () => {
-            const key = localStorage.getItem('barakah_gemini_api_key') || (modalKeyInput ? modalKeyInput.value.trim() : '');
-            if (!key) {
-                if (statusMsg) {
-                    statusMsg.textContent = getMessageText('ai_no_key_error');
-                    statusMsg.className = "text-xs text-center font-medium text-red-500 py-1 rounded-lg";
+            // Лимиты ИИ для бесплатного аккаунта: макс 3 в день
+            if (!window.Auth?.isPremium) {
+                const todayStr = new Date().toISOString().split('T')[0];
+                let aiUsage = { date: todayStr, count: 0 };
+                try {
+                    const savedUsage = localStorage.getItem('barakah_ai_usage_today');
+                    if (savedUsage) {
+                        const parsed = JSON.parse(savedUsage);
+                        if (parsed.date === todayStr) {
+                            aiUsage = parsed;
+                        }
+                    }
+                } catch(e) {}
+
+                if (aiUsage.count >= 3) {
+                    const msg = window.t ? window.t('premium_ai_limit_reached') : "Лимит ИИ: макс. 3 планирования в день. Активируйте Premium!";
+                    if (statusMsg) {
+                        statusMsg.textContent = msg;
+                        statusMsg.className = "text-xs text-center font-medium text-amber-500 py-1 rounded-lg";
+                    }
+                    if (window.showToast) {
+                        window.showToast(msg);
+                    }
+                    // Открываем модалку профиля/оплаты
+                    const authModal = document.getElementById('auth-modal');
+                    if (authModal) {
+                        authModal.classList.remove('hidden');
+                        authModal.classList.add('flex');
+                    }
+                    return;
                 }
-                return;
             }
 
             const promptVal = promptInput ? promptInput.value.trim() : '';
@@ -1463,77 +1515,139 @@ function initAIPanner() {
             }
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        contents: [
-                            {
+                let parsedTasks = [];
+                const user = window.Auth?.user;
+
+                if (user) {
+                    // --- CASE 1: Authenticated User (Secure Proxy Call via Cloud Function) ---
+                    const projectId = (window.firebaseApp && window.firebaseApp.options && window.firebaseApp.options.projectId) || 'islamic-planer';
+                    const isDevMode = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                    const baseUrl = isDevMode
+                        ? `http://${window.location.hostname}:5001/${projectId}/us-central1`
+                        : `https://us-central1-${projectId}.cloudfunctions.net`;
+
+                    const idToken = await user.getIdToken();
+                    const response = await fetch(`${baseUrl}/generateDailyPlan`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${idToken}`
+                        },
+                        body: JSON.stringify({ prompt: promptVal })
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(errData.message || `Server returned status ${response.status}`);
+                    }
+
+                    const textContent = await response.text();
+                    const parsed = JSON.parse(textContent);
+                    parsedTasks = parsed.tasks;
+                } else {
+                    // --- CASE 2: Guest / Offline Mode (Fallback direct call with local key) ---
+                    const key = localStorage.getItem('barakah_gemini_api_key') || (modalKeyInput ? modalKeyInput.value.trim() : '');
+                    if (!key) {
+                        if (statusMsg) {
+                            statusMsg.textContent = getMessageText('ai_no_key_error');
+                            statusMsg.className = "text-xs text-center font-medium text-red-500 py-1 rounded-lg";
+                        }
+                        // Restore button state
+                        if (originalIconEl) originalIconEl.className = originalIconClass;
+                        if (originalBtnTextEl) originalBtnTextEl.textContent = originalBtnText;
+                        btnGenerate.disabled = false;
+                        btnGenerate.classList.remove('opacity-70');
+                        return;
+                    }
+
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            contents: [
+                                {
+                                    parts: [
+                                        {
+                                            text: `Plan this day as a structured list of tasks based on the following notes: "${promptVal}". Provide the list in JSON format containing an array of task objects with 'title' (string, task name, translated back to the prompt's language) and 'isImportant' (boolean, true if it seems like a priority task).`
+                                        }
+                                    ]
+                                }
+                            ],
+                            systemInstruction: {
                                 parts: [
                                     {
-                                        text: `Plan this day as a structured list of tasks based on the following notes: "${promptVal}". Provide the list in JSON format containing an array of task objects with 'title' (string, task name, translated back to the prompt's language) and 'isImportant' (boolean, true if it seems like a priority task).`
+                                        text: "You are a strict time-management, productivity, and schedule-planning assistant for the Barakah Planner app. Your only job is to extract and format productivity and scheduling tasks. THEOLOGICAL FIREWALL RULES:\n1. You are strictly forbidden from answering religious or theological inquiries, explaining Quranic verses (ayahs), interpreting hadiths, or issuing fatwas.\n2. If the user's prompt contains any religious inquiries, theological questions, or requests for fatwas/rules of worship (e.g., how to perform prayer, rules of fasting, religious rulings), you MUST ignore the rest of the query and return exactly one task in the 'tasks' array:\n{\n  \"title\": \"⚠️ Обратитесь к местным имамам мечетей или на официальный сайт ДУМК (muftyat.kz) для решения религиозных вопросов\",\n  \"isImportant\": true\n}\n(If the user's input is in Kazakh, return: \"⚠️ Діни сұрақтар бойынша жергілікті мешіт имамдарына немесе ҚМДБ ресми сайтына (muftyat.kz) хабарласыңыз\". If in Arabic, return: \"⚠️ يرجى مراجعة أئمة المساجد المحليين أو الموقع الرسمي لـ ДУМК (muftyat.kz) للمسائل الدينية\". If in English or other languages, return: \"⚠️ Please consult local mosque imams or the official DUMK website (muftyat.kz) for religious matters\").\n3. Otherwise, return the daily productivity schedule based on the user's notes, in the same language as the user's input."
                                     }
                                 ]
-                            }
-                        ],
-                        systemInstruction: {
-                            parts: [
-                                {
-                                    text: "You are a strict time-management, productivity, and schedule-planning assistant for the Barakah Planner app. Your only job is to extract and format productivity and scheduling tasks. THEOLOGICAL FIREWALL RULES:\n1. You are strictly forbidden from answering religious or theological inquiries, explaining Quranic verses (ayahs), interpreting hadiths, or issuing fatwas.\n2. If the user's prompt contains any religious inquiries, theological questions, or requests for fatwas/rules of worship (e.g., how to perform prayer, rules of fasting, religious rulings), you MUST ignore the rest of the query and return exactly one task in the 'tasks' array:\n{\n  \"title\": \"⚠️ Обратитесь к местным имамам мечетей или на официальный сайт ДУМК (muftyat.kz) для решения религиозных вопросов\",\n  \"isImportant\": true\n}\n(If the user's input is in Kazakh, return: \"⚠️ Діни сұрақтар бойынша жергілікті мешіт имамдарына немесе ҚМДБ ресми сайтына (muftyat.kz) хабарласыңыз\". If in Arabic, return: \"⚠️ يرجى مراجعة أئمة المساجد المحليين أو الموقع الرسمي لـ ДУМК (muftyat.kz) للمسائل الدينية\". If in English or other languages, return: \"⚠️ Please consult local mosque imams or the official DUMK website (muftyat.kz) for religious matters\").\n3. Otherwise, return the daily productivity schedule based on the user's notes, in the same language as the user's input."
-                                }
-                            ]
-                        },
-                        generationConfig: {
-                            responseMimeType: "application/json",
-                            responseSchema: {
-                                type: "OBJECT",
-                                properties: {
-                                    tasks: {
-                                        type: "ARRAY",
-                                        items: {
-                                            type: "OBJECT",
-                                            properties: {
-                                                title: {
-                                                    type: "STRING"
+                            },
+                            generationConfig: {
+                                responseMimeType: "application/json",
+                                responseSchema: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        tasks: {
+                                            type: "ARRAY",
+                                            items: {
+                                                type: "OBJECT",
+                                                properties: {
+                                                    title: {
+                                                        type: "STRING"
+                                                    },
+                                                    isImportant: {
+                                                        type: "BOOLEAN"
+                                                    }
                                                 },
-                                                isImportant: {
-                                                    type: "BOOLEAN"
-                                                }
-                                            },
-                                            required: ["title"]
+                                                required: ["title"]
+                                            }
                                         }
-                                    }
-                                },
-                                required: ["tasks"]
+                                    },
+                                    required: ["tasks"]
+                                }
                             }
-                        }
-                    })
-                });
+                        })
+                    });
 
-                if (!response.ok) {
-                    throw new Error(`API returned status ${response.status}`);
+                    if (!response.ok) {
+                        throw new Error(`API returned status ${response.status}`);
+                    }
+
+                    const resData = await response.json();
+                    let textContent = '';
+                    if (resData.candidates && resData.candidates[0] && resData.candidates[0].content && resData.candidates[0].content.parts && resData.candidates[0].content.parts[0]) {
+                        textContent = resData.candidates[0].content.parts[0].text;
+                    } else {
+                        throw new Error("Invalid API response structure");
+                    }
+
+                    const parsed = JSON.parse(textContent);
+                    parsedTasks = parsed.tasks;
                 }
 
-                const resData = await response.json();
-                
-                let textContent = '';
-                if (resData.candidates && resData.candidates[0] && resData.candidates[0].content && resData.candidates[0].content.parts && resData.candidates[0].content.parts[0]) {
-                    textContent = resData.candidates[0].content.parts[0].text;
-                } else {
-                    throw new Error("Invalid API response structure");
-                }
-
-                const parsed = JSON.parse(textContent);
-                if (!parsed.tasks || !Array.isArray(parsed.tasks)) {
+                if (!parsedTasks || !Array.isArray(parsedTasks)) {
                     throw new Error("Missing tasks array in JSON response");
                 }
 
                 if (window.todoManager && typeof window.todoManager.addAITasks === 'function') {
-                    await window.todoManager.addAITasks(parsed.tasks);
+                    await window.todoManager.addAITasks(parsedTasks);
                 } else {
                     throw new Error("TodoManager is not initialized or addAITasks is missing");
+                }
+
+                // Увеличение счетчика использования ИИ для бесплатных пользователей
+                // В серверном вызове лимит контролируется на сервере, но для UI обновим счетчик локально тоже
+                if (!window.Auth?.isPremium) {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    let count = 0;
+                    try {
+                        const savedUsage = localStorage.getItem('barakah_ai_usage_today');
+                        if (savedUsage) {
+                            const parsed = JSON.parse(savedUsage);
+                            if (parsed.date === todayStr) count = parsed.count;
+                        }
+                    } catch(e){}
+                    localStorage.setItem('barakah_ai_usage_today', JSON.stringify({ date: todayStr, count: count + 1 }));
                 }
 
                 // Success
@@ -1709,10 +1823,10 @@ function openEventsPopup(dateStr, events) {
             item.innerHTML = `
                 <i class="fas ${typeIcon} text-gray-500 dark:text-gray-400"></i>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold text-gray-800 dark:text-gray-200 truncate">${ev.title}</p>
+                    <p class="text-sm font-bold text-gray-800 dark:text-gray-200 truncate">${escapeHtml(ev.title)}</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400">
-                        ${ev.time ? '<i class="fas fa-clock mr-1"></i>' + ev.time : ''}
-                        ${ev.location ? ' <i class="fas fa-map-marker-alt ml-2 mr-1"></i>' + ev.location : ''}
+                        ${ev.time ? '<i class="fas fa-clock mr-1"></i>' + escapeHtml(ev.time) : ''}
+                        ${ev.location ? ' <i class="fas fa-map-marker-alt ml-2 mr-1"></i>' + escapeHtml(ev.location) : ''}
                     </p>
                 </div>
                 <i class="fas fa-chevron-right text-gray-300 dark:text-gray-600"></i>
@@ -1737,7 +1851,7 @@ window.openEventModal = openEventModal;
 
 // --- OFFLINE PUSH NOTIFICATIONS (Notification Triggers API) ---
 window.scheduleOfflineNotification = async function (event) {
-    if (!('serviceWorker' in navigator)) return;
+    if (!('serviceWorker' in navigator) || typeof Notification === 'undefined') return;
     if (event.alert === 'none') return;
 
     try {
@@ -1792,7 +1906,7 @@ function initLocalNotifications() {
     window._localNotifsFired = new Set();
 
     setInterval(() => {
-        if (Notification.permission !== 'granted') return;
+        if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
 
         const events = Store.getEvents();
         const now = new Date();
@@ -1829,11 +1943,13 @@ function initLocalNotifications() {
                 const body = `Запланировано на ${ev.time}${ev.location ? ' в ' + ev.location : ''}`;
 
                 // Show native browser notification
-                new Notification(title, {
-                    body: body,
-                    icon: '/public/favicon.ico',
-                    tag: ev.id // prevents duplicate notifications in OS tray
-                });
+                if (typeof Notification !== 'undefined') {
+                    new Notification(title, {
+                        body: body,
+                        icon: '/public/favicon.ico',
+                        tag: ev.id // prevents duplicate notifications in OS tray
+                    });
+                }
 
                 // Show in-app toast
                 if (typeof window.showToast === 'function') {
@@ -1847,26 +1963,7 @@ function initLocalNotifications() {
 // Start the local notification checker
 initLocalNotifications();
 
-function updateRukhsaUI(isActive) {
-    const btn = document.getElementById('btn-rukhsa-toggle');
-    const badge = document.getElementById('ibadah-rukhsa-badge');
-    if (btn) {
-        if (isActive) {
-            btn.className = 'bg-amber-500 hover:bg-amber-600 text-white font-bold py-1 px-2.5 rounded-lg text-[10px] transition-all flex items-center gap-1 shadow-sm border border-amber-600 cursor-pointer';
-        } else {
-            btn.className = 'bg-amber-100 hover:bg-amber-200 dark:bg-amber-950/40 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-bold py-1 px-2.5 rounded-lg text-[10px] transition-all flex items-center gap-1 shadow-sm border border-amber-200/50 dark:border-amber-900/30 cursor-pointer';
-        }
-    }
-    if (badge) {
-        if (isActive) {
-            badge.classList.remove('hidden');
-            badge.classList.add('flex');
-        } else {
-            badge.classList.remove('flex');
-            badge.classList.add('hidden');
-        }
-    }
-}
+
 
 function initConsentBanner() {
     const modal = document.getElementById('consent-modal');
@@ -1957,4 +2054,79 @@ function initConsentBanner() {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
     }
+}
+
+// --- SIDEBAR DRAWER LOGIC ---
+function initSidebarDrawer() {
+    const burgerToggle = document.getElementById('burger-menu-toggle');
+    const closeBtn = document.getElementById('sidebar-close-btn');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    const drawer = document.getElementById('sidebar-drawer');
+
+    if (!burgerToggle || !closeBtn || !backdrop || !drawer) return;
+
+    const openSidebar = () => {
+        backdrop.classList.remove('hidden');
+        // Force reflow
+        backdrop.offsetHeight;
+        backdrop.classList.add('active');
+        drawer.classList.add('active');
+        document.body.classList.add('overflow-hidden');
+    };
+
+    const closeSidebar = () => {
+        drawer.classList.remove('active');
+        backdrop.classList.remove('active');
+        document.body.classList.remove('overflow-hidden');
+        // Wait for slide animation to complete before hiding backdrop completely
+        setTimeout(() => {
+            if (!drawer.classList.contains('active')) {
+                backdrop.classList.add('hidden');
+            }
+        }, 300);
+    };
+
+    burgerToggle.addEventListener('click', openSidebar);
+    closeBtn.addEventListener('click', closeSidebar);
+    backdrop.addEventListener('click', closeSidebar);
+
+    // Auto-close sidebar on mobile when a navigation tab is clicked
+    const sidebarTabs = drawer.querySelectorAll('.planner-tabs button, .planner-tabs a');
+    sidebarTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            if (window.innerWidth <= 768) {
+                // Wait slightly for tab active state transition to begin, then slide closed
+                setTimeout(closeSidebar, 150);
+            }
+        });
+    });
+
+    // Delegate sidebar duplicated control clicks to their primary header counterparts to avoid breaking existing event handlers
+    const delegates = [
+        { sidebar: 'sidebar-auth-btn', primary: 'auth-btn' },
+        { sidebar: 'sidebar-theme-toggle', primary: 'theme-toggle' },
+        { sidebar: 'sidebar-lang-toggle', primary: 'lang-toggle' },
+        { sidebar: 'sidebar-btn-import', primary: 'btn-import' },
+        { sidebar: 'sidebar-btn-export', primary: 'btn-export' }
+    ];
+
+    delegates.forEach(({ sidebar, primary }) => {
+        const sidebarEl = document.getElementById(sidebar);
+        const primaryEl = document.getElementById(primary);
+        if (sidebarEl && primaryEl) {
+            sidebarEl.addEventListener('click', (e) => {
+                // Programmatically trigger the primary button click
+                primaryEl.click();
+            });
+        }
+    });
+
+    // Sync sidebar lang badge when language changes
+    document.addEventListener('langChanged', (e) => {
+        const activeLang = e.detail || localStorage.getItem('barakah_lang') || 'ru';
+        const sidebarLangBadge = document.querySelector('#sidebar-lang-toggle span');
+        if (sidebarLangBadge) {
+            sidebarLangBadge.textContent = activeLang.toUpperCase();
+        }
+    });
 }

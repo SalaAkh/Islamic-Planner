@@ -3,6 +3,26 @@ import { doc, setDoc, collection, getDocs } from "https://www.gstatic.com/fireba
 window.DbSync = {
     _syncTimers: {},
 
+    _cleanUndefined(obj) {
+        if (obj === null || obj === undefined) return null;
+        if (Array.isArray(obj)) {
+            return obj.map(item => this._cleanUndefined(item));
+        }
+        if (typeof obj === 'object') {
+            if (Object.prototype.toString.call(obj) !== '[object Object]') {
+                return obj;
+            }
+            const cleaned = {};
+            for (const [k, v] of Object.entries(obj)) {
+                if (v !== undefined) {
+                    cleaned[k] = this._cleanUndefined(v);
+                }
+            }
+            return cleaned;
+        }
+        return obj;
+    },
+
     async syncToCloud(key, data) {
         if (!window.firebaseDb || !window.Auth || !window.Auth.user) return;
 
@@ -29,6 +49,8 @@ window.DbSync = {
                 if (Array.isArray(data)) {
                     docContent = { _isArray: true, items: data };
                 }
+                
+                docContent = this._cleanUndefined(docContent);
                 
                 await setDoc(docRef, docContent);
                 console.log(`[Sync] Cloud saved: ${key} (debounced)`);
@@ -155,6 +177,8 @@ window.DbSync = {
                     localStorage.setItem('barakah_events', JSON.stringify(data));
                 } else if (key === 'todo_lists') {
                     localStorage.setItem('barakah_todo_lists', JSON.stringify(data));
+                } else if (key === 'mindmap') {
+                    localStorage.setItem('barakah_mindmap', JSON.stringify(data));
                 } else if (key.startsWith('day_')) {
                     localStorage.setItem(`barakah_${key}`, JSON.stringify(data));
                 }
@@ -185,6 +209,9 @@ window.DbSync = {
 
             const todoLists = localStorage.getItem('barakah_todo_lists');
             if (todoLists) await this.syncToCloud('todo_lists', JSON.parse(todoLists));
+
+            const mindmap = localStorage.getItem('barakah_mindmap');
+            if (mindmap) await this.syncToCloud('mindmap', JSON.parse(mindmap));
 
             if (window.Store && typeof window.Store.getDrawing === 'function') {
                 const drawing = await window.Store.getDrawing();

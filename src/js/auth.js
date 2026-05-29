@@ -5,7 +5,8 @@ import {
     getRedirectResult,
     signOut,
     onAuthStateChanged,
-    updateProfile
+    updateProfile,
+    signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
 const GOOGLE_REDIRECT_PENDING_KEY = 'barakah_google_redirect_pending';
@@ -112,6 +113,7 @@ window.Auth = {
 
                 // Fetch premium status from Firestore
                 window.Auth.isPremium = false; // default
+                window.Auth.premiumPlan = "free"; // default
 
                 const renderPremiumUI = () => {
                     const statusTextEl = document.getElementById('premium-status-val');
@@ -120,8 +122,13 @@ window.Auth = {
 
                     if (window.Auth.isPremium) {
                         if (statusTextEl) {
-                            statusTextEl.textContent = window.t ? window.t('premium_active') : "Premium (МашаАллах!)";
-                            statusTextEl.className = "text-emerald-600 dark:text-emerald-400 font-bold text-xs";
+                            if (window.Auth.premiumPlan === 'org') {
+                                statusTextEl.textContent = window.t ? window.t('premium_active_org') : "Organization (Медресе!)";
+                                statusTextEl.className = "text-indigo-600 dark:text-indigo-400 font-extrabold text-xs";
+                            } else {
+                                statusTextEl.textContent = window.t ? window.t('premium_active_pro') : "Premium Pro (МашаАллах!)";
+                                statusTextEl.className = "text-emerald-600 dark:text-emerald-400 font-bold text-xs";
+                            }
                         }
                         if (buyBtn) buyBtn.classList.add('hidden');
                         if (syncStatusEl) syncStatusEl.classList.remove('hidden');
@@ -132,8 +139,6 @@ window.Auth = {
                         }
                         if (buyBtn) {
                             buyBtn.classList.remove('hidden');
-                            const encodedMsg = encodeURIComponent(`Ассаляму алейкум! Я хочу активировать Premium для Barakah Planner. Мой email: ${user.email}`);
-                            buyBtn.href = `https://wa.me/77052631205?text=${encodedMsg}`;
                         }
                         if (syncStatusEl) syncStatusEl.classList.add('hidden');
                     }
@@ -148,9 +153,13 @@ window.Auth = {
                         getDoc(docRef).then((docSnap) => {
                             if (docSnap.exists()) {
                                 const data = docSnap.data();
+                                console.log("[Auth] Fetched user doc for isPremium:", data);
                                 window.Auth.isPremium = !!data.isPremium;
+                                window.Auth.premiumPlan = data.premiumPlan || (data.isPremium ? "pro" : "free");
                             } else {
+                                console.warn("[Auth] User doc does not exist, setting isPremium false");
                                 window.Auth.isPremium = false;
+                                window.Auth.premiumPlan = "free";
                             }
                             renderPremiumUI();
 
@@ -285,15 +294,36 @@ window.Auth = {
     async signInWithGoogle() {
         if (!window.firebaseAuth) return { error: "Firebase not configured" };
         try {
-            sessionStorage.setItem(GOOGLE_REDIRECT_PENDING_KEY, '1');
-            sessionStorage.setItem(GOOGLE_REDIRECT_LOG_KEY, '1');
-            await signInWithRedirect(window.firebaseAuth, window.googleProvider);
-            return { pending: true };
-        } catch (error) {
-            // Redirect init failed before the browser navigated away.
+            console.log("[Auth] Attempting Google popup sign-in...");
+            const result = await signInWithPopup(window.firebaseAuth, window.googleProvider);
+            console.log("[Auth] Google popup sign-in success:", result.user.email);
+            
+            // Clear redirect states since popup succeeded
             this.clearGoogleRedirectState();
-            console.error("[Auth] Google redirect start error:", error);
-            return { error: error.message };
+            
+            // Log activity
+            await window.ActivityLog?.log('user_login', { method: 'google_popup' });
+            
+            // Trigger storage sync manually on success if premium
+            if (window.Store && typeof window.Store.sync === 'function') {
+                window.Store.sync();
+            }
+            
+            return { user: result.user };
+        } catch (popupError) {
+            console.warn("[Auth] Google popup sign-in blocked or failed, trying redirect fallback:", popupError);
+            
+            // If popup is blocked (common on some mobile browsers/strict blockers), fallback to redirect
+            try {
+                sessionStorage.setItem(GOOGLE_REDIRECT_PENDING_KEY, '1');
+                sessionStorage.setItem(GOOGLE_REDIRECT_LOG_KEY, '1');
+                await signInWithRedirect(window.firebaseAuth, window.googleProvider);
+                return { pending: true };
+            } catch (redirectError) {
+                this.clearGoogleRedirectState();
+                console.error("[Auth] Google redirect start error:", redirectError);
+                return { error: redirectError.message };
+            }
         }
     },
 
@@ -520,5 +550,280 @@ document.addEventListener('DOMContentLoaded', () => {
                 togglePasswordIcon.classList.add('fa-eye');
             }
         });
+    }
+
+    // ===== PAYMENT / CHECKOUT MODAL LOGIC =====
+    const payModal = document.getElementById('payment-modal');
+    const payModalInner = document.getElementById('payment-modal-inner');
+    const btnBuyPremium = document.getElementById('btn-buy-premium-action');
+    const payModalClose = document.getElementById('payment-modal-close');
+    const btnPayCrypto = document.getElementById('btn-pay-crypto');
+    const btnPayCard = document.getElementById('btn-pay-card');
+    const btnPaySimulate = document.getElementById('btn-pay-simulate');
+    const payStatusMsg = document.getElementById('payment-status-msg');
+
+    const openPayModal = () => {
+        if (!payModal) return;
+        if (payStatusMsg) {
+            payStatusMsg.textContent = '';
+            payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all';
+        }
+        payModal.classList.remove('hidden');
+        payModal.classList.add('flex');
+        requestAnimationFrame(() => {
+            if (payModalInner) {
+                payModalInner.classList.remove('scale-95', 'opacity-0');
+                payModalInner.classList.add('scale-100', 'opacity-100');
+            }
+        });
+    };
+
+    const closePayModal = () => {
+        if (!payModal) return;
+        if (payModalInner) {
+            payModalInner.classList.remove('scale-100', 'opacity-100');
+            payModalInner.classList.add('scale-95', 'opacity-0');
+        }
+        setTimeout(() => {
+            payModal.classList.add('hidden');
+            payModal.classList.remove('flex');
+        }, 300);
+    };
+
+    let selectedPlan = "pro"; // default
+
+    const updatePricingUI = (plan) => {
+        selectedPlan = plan;
+        const tabPro = document.getElementById('tab-plan-pro');
+        const tabOrg = document.getElementById('tab-plan-org');
+        const badge = document.getElementById('payment-plan-badge');
+        const title = document.getElementById('payment-plan-title');
+        const price = document.getElementById('payment-plan-price');
+        const period = document.getElementById('payment-plan-period');
+        const list = document.getElementById('payment-features-list');
+
+        const activeClasses = ['bg-white', 'dark:bg-slate-700', 'text-slate-800', 'dark:text-white', 'shadow-sm', 'border', 'border-slate-200/10'];
+        const inactiveClasses = ['text-slate-500', 'dark:text-slate-400', 'hover:text-slate-800', 'dark:hover:text-white'];
+
+        if (plan === 'pro') {
+            tabPro.className = "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm border border-slate-200/10";
+            tabOrg.className = "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white cursor-pointer flex items-center justify-center gap-1.5";
+            
+            if (badge) badge.innerText = "B2C Pro";
+            if (title) title.innerText = window.t ? window.t('pricing_tab_pro') : "Barakah Pro";
+            if (price) price.innerText = "$4.99";
+            if (period) period.innerText = window.t ? window.t('pricing_price_pro').split('/')[1] || " / мес" : " / мес";
+            
+            if (list) {
+                list.innerHTML = `
+                    <li class="flex items-start gap-2.5">
+                        <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
+                        <span>${window.t ? window.t('pricing_feature_cloud') : 'Облачная синхронизация данных'}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
+                        <span>${window.t ? window.t('pricing_feature_boards') : 'Безлимитные доски Тафаккур'}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
+                        <span>${window.t ? window.t('pricing_feature_ai') : 'Безлимитное Gemini AI планирование'}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
+                        <span>${window.t ? window.t('pricing_feature_groups') : 'Совместные семейные группы (до 6 человек)'}</span>
+                    </li>
+                `;
+            }
+        } else {
+            tabPro.className = "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white cursor-pointer flex items-center justify-center gap-1.5";
+            tabOrg.className = "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm border border-slate-200/10";
+            
+            if (badge) badge.innerText = "B2B Org";
+            if (title) title.innerText = window.t ? window.t('pricing_tab_org') : "Медресе / Орг";
+            if (price) price.innerText = "$29.99";
+            if (period) period.innerText = window.t ? window.t('pricing_price_org').split('/')[1] || " / мес" : " / мес";
+            
+            if (list) {
+                list.innerHTML = `
+                    <li class="flex items-start gap-2.5">
+                        <i class="fas fa-check-circle text-indigo-500 mt-0.5"></i>
+                        <span>${window.t ? window.t('pricing_feature_students') : 'До 100 учеников / участников'}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fas fa-check-circle text-indigo-500 mt-0.5"></i>
+                        <span>${window.t ? window.t('pricing_feature_hifz') : 'Трекер заучивания Корана (Hifz)'}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fas fa-check-circle text-indigo-500 mt-0.5"></i>
+                        <span>${window.t ? window.t('pricing_feature_audit') : 'История активности и аудит для детей/учеников'}</span>
+                    </li>
+                    <li class="flex items-start gap-2.5">
+                        <i class="fas fa-check-circle text-indigo-500 mt-0.5"></i>
+                        <span>${window.t ? window.t('pricing_feature_cloud') : 'Облачная синхронизация данных'}</span>
+                    </li>
+                `;
+            }
+        }
+    };
+
+    if (btnBuyPremium) {
+        btnBuyPremium.addEventListener('click', () => {
+            openPayModal();
+            updatePricingUI("pro");
+        });
+    }
+
+    const tabProBtn = document.getElementById('tab-plan-pro');
+    const tabOrgBtn = document.getElementById('tab-plan-org');
+
+    if (tabProBtn && tabOrgBtn) {
+        tabProBtn.addEventListener('click', () => updatePricingUI("pro"));
+        tabOrgBtn.addEventListener('click', () => updatePricingUI("org"));
+    }
+
+    if (payModalClose) {
+        payModalClose.addEventListener('click', closePayModal);
+    }
+    if (payModal) {
+        payModal.addEventListener('click', (e) => {
+            if (e.target === payModal) closePayModal();
+        });
+    }
+
+    // Настройка ссылок для оплаты (Crypto / Card)
+    if (btnPayCrypto) {
+        btnPayCrypto.addEventListener('click', (e) => {
+            e.preventDefault();
+            const user = window.Auth?.user;
+            if (!user) {
+                if (payStatusMsg) {
+                    payStatusMsg.textContent = 'Пожалуйста, авторизуйтесь перед оплатой.';
+                    payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-red-500';
+                }
+                return;
+            }
+            const cryptoPayUrl = `https://nowpayments.io/payment/?user_id=${user.uid}&email=${encodeURIComponent(user.email)}&plan=${selectedPlan}`;
+            window.open(cryptoPayUrl, '_blank');
+            if (payStatusMsg) {
+                payStatusMsg.textContent = 'Окно оплаты криптовалютой открыто. После оплаты Premium активируется автоматически.';
+                payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-indigo-500';
+            }
+        });
+    }
+
+    if (btnPayCard) {
+        btnPayCard.addEventListener('click', (e) => {
+            e.preventDefault();
+            const user = window.Auth?.user;
+            if (!user) {
+                if (payStatusMsg) {
+                    payStatusMsg.textContent = 'Пожалуйста, авторизуйтесь перед оплатой.';
+                    payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-red-500';
+                }
+                return;
+            }
+            const sum = selectedPlan === 'org' ? 29.99 : 4.99;
+            const cardPayUrl = `https://robokassa.ru/merchant/test?user_id=${user.uid}&email=${encodeURIComponent(user.email)}&sum=${sum}&plan=${selectedPlan}`;
+            window.open(cardPayUrl, '_blank');
+            if (payStatusMsg) {
+                payStatusMsg.textContent = 'Окно оплаты картой открыто. После оплаты Premium активируется автоматически.';
+                payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-indigo-500';
+            }
+        });
+    }
+
+    // Симуляция оплаты — ТОЛЬКО для dev/localhost окружения!
+    // В production кнопка скрыта и код не выполняется.
+    if (btnPaySimulate) {
+        const isDevMode = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
+        if (!isDevMode) {
+            // В production — полностью скрываем кнопку симуляции
+            btnPaySimulate.style.display = 'none';
+        } else {
+            btnPaySimulate.addEventListener('click', async () => {
+                const user = window.Auth?.user;
+                if (!user) {
+                    if (payStatusMsg) {
+                        payStatusMsg.textContent = 'Пожалуйста, войдите в аккаунт для симуляции оплаты.';
+                        payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-red-500';
+                    }
+                    return;
+                }
+
+                if (payStatusMsg) {
+                    payStatusMsg.textContent = '[DEV] Вызов вебхука Cloud Function...';
+                    payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-indigo-500';
+                }
+                btnPaySimulate.disabled = true;
+                btnPaySimulate.classList.add('opacity-70');
+
+                try {
+                    // В dev-режиме используем локальный эмулятор
+                    const emulatorPort = window.location.port && window.location.port !== '80' && window.location.port !== '443'
+                        ? 5001
+                        : 5001;
+                    const baseUrl = `http://${window.location.hostname}:${emulatorPort}/islamic-planer/us-central1`;
+
+                    // Получаем auth token для серверной верификации (вместо hardcoded secret)
+                    const idToken = await user.getIdToken();
+
+                    const response = await fetch(`${baseUrl}/handlePaymentWebhook`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${idToken}`
+                        },
+                        body: JSON.stringify({
+                            userId: user.uid,
+                            email: user.email,
+                            status: 'success',
+                            paymentMethod: 'simulated_dev',
+                            premiumPlan: selectedPlan,
+                            isPremium: true
+                        })
+                    });
+
+                    const resData = await response.json();
+                    if (response.ok && resData.success) {
+                        if (payStatusMsg) {
+                            payStatusMsg.textContent = 'МашаАллах! Оплата прошла. Лицензия активирована!';
+                            payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-emerald-600 dark:text-emerald-400';
+                        }
+                        if (window.showToast) {
+                            window.showToast('Premium активирован! МашаАллах! 🎉');
+                        }
+                        
+                        // Запуск конфетти!
+                        const script = document.createElement('script');
+                        script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js';
+                        script.onload = () => {
+                            window.confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                        };
+                        document.head.appendChild(script);
+
+                        setTimeout(() => {
+                            closePayModal();
+                            const authModal = document.getElementById('auth-modal');
+                            if (authModal) {
+                                authModal.classList.add('hidden');
+                                authModal.classList.remove('flex');
+                            }
+                        }, 2000);
+                    } else {
+                        throw new Error(resData.error || 'Ошибка вызова функции');
+                    }
+                } catch(error) {
+                    console.error('[DEV Simulate Payment Error]', error);
+                    if (payStatusMsg) {
+                        payStatusMsg.textContent = `Ошибка: ${error.message}. Убедитесь, что эмулятор запущен.`;
+                        payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-red-500';
+                    }
+                } finally {
+                    btnPaySimulate.disabled = false;
+                    btnPaySimulate.classList.remove('opacity-70');
+                }
+            });
+        }
     }
 });

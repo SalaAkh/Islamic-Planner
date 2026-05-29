@@ -21,6 +21,19 @@ const firebaseConfig = {
     measurementId: "G-SHJEPJDL0J"
 };
 
+// One-time IndexedDB cache rescue to purge old corrupted target queries (like arrayContains)
+try {
+    const RESCUE_KEY = 'barakah_db_rescue_v3';
+    if (localStorage.getItem(RESCUE_KEY) !== '1') {
+        console.warn('[Firebase Init] Performing one-time IndexedDB cache rescue to clear corrupt queries...');
+        // Delete Firestore IndexedDB cache database
+        window.indexedDB.deleteDatabase("firestore_[projects/islamic-planer/databases/(default)]");
+        localStorage.setItem(RESCUE_KEY, '1');
+    }
+} catch (e) {
+    console.error('[Firebase Init] Rescue failed:', e);
+}
+
 try {
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -45,6 +58,7 @@ try {
 
             window.requestNotificationPermission = async () => {
                 try {
+                    if (typeof Notification === 'undefined') return;
                     const permission = await Notification.requestPermission();
                     if (permission === 'granted') {
                         if (!window.Auth || !window.Auth.user) return; // Only save token if logged in

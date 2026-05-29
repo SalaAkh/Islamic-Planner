@@ -1,0 +1,28 @@
+project_name: "Islamic Planner"
+tech_stack:
+  frontend:
+    - HTML5
+    - CSS3 (Vanilla CSS)
+    - Tailwind CSS (Utility classes)
+    - JavaScript (Vanilla JS, ES Modules)
+  libraries:
+    - Konva.js (Canvas Drawing)
+    - Firebase SDK (Auth, Firestore)
+  build:
+    - Custom Node.js scripts (build-monolith.js, patch-tailwind-css.js)
+features:
+  - "Daily Planner & Prayer (Ibadah) Tracker"
+  - "PWA offline support, manifest, and service worker"
+  - "RK/GDPR-compliant consent banner with dynamic multi-language support (RU, KK, AR, EN)"
+  - "Theological AI firewall for Gemini API (prevents religious questions, redirects to muftyat.kz)"
+  - "AI-generated tasks badge (✨ ИИ) and metadata marking"
+  - "Official Hanafi/DUMK calculation footnotes on Namaz widget and City Selector"
+  - "Rukhsa (Exemption) mode with a golden-blue progress bar and disabled checkboxes"
+  - "Monthly goals tracking (Akhira and Dunya)"
+  - "Interactive canvas board using Konva.js"
+entry_points:
+  - app.html
+  - index.html
+source_directories:
+  - src/js
+  - src/css

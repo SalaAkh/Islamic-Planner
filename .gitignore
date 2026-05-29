@@ -1,8 +1,8 @@
 # Dependencies
 node_modules
 
-# Environment & Secrets
-.env
+# Environment & Secrets (covers root, functions/, and any nested .env)
+**/.env
 *.json
 !package.json
 !package-lock.json
@@ -19,6 +19,10 @@ dist/
 # Logs
 *.log
 build-error.log
+
+# Sensitive data directories
+data/
+backups/
 
 # OS
 .DS_Store

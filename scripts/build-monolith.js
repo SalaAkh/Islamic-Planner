@@ -13,7 +13,7 @@ if (!fs.existsSync(DIST_DIR)) {
 // ─── Helper: inline CSS into any HTML ───
 function inlineCSS(html) {
     if (fs.existsSync('./src/css/tailwind.css')) {
-        const css = fs.readFileSync('./src/css/tailwind.css', 'utf8');
+        const css = fs.readFileSync('./src/css/tailwind.css', { encoding: 'utf8' });
         return html.replace(
             /<link\s+rel="stylesheet"\s+href="\.\/src\/css\/tailwind\.css\?v=\d+">/g,
             `<style>\n${css}\n</style>`
@@ -23,18 +23,17 @@ function inlineCSS(html) {
     return html;
 }
 
-// ─── Helper: inline JS scripts into any HTML ───
 const scriptsToInline = [
-    'i18n.js', 'store.js',
+    'utils/sanitize.js', 'i18n.js', 'store.js',
     'board.js', 'namaz-tracker.js', 'daily-wisdom.js', 'main.js', 'activity-log.js', 'auth.js',
-    'db.js', 'firebase-init.js', 'todo-manager.js', 'tasbih.js'
+    'db.js', 'firebase-init.js', 'todo-manager.js', 'tasbih.js', 'groups.js', 'mindmap.js'
 ];
 
 function inlineScripts(html) {
     scriptsToInline.forEach(script => {
         console.log(`Inlining ${script}...`);
         if (fs.existsSync(`./src/js/${script}`)) {
-            const js = fs.readFileSync(`./src/js/${script}`, 'utf8');
+            const js = fs.readFileSync(`./src/js/${script}`, { encoding: 'utf8' });
             const escapedName = script.replace('.', '\\.');
             const regex = new RegExp(`<script([^>]*)src="\\.\\/src\\/js\\/${escapedName}(?:\\?[^"]*)?\"([^>]*)><\\/script>`, 'g');
 
@@ -63,7 +62,7 @@ function inlineScripts(html) {
 
 // ─── 1. Build app.html (main PWA) ───
 console.log('\n[1/2] Building app.html (main PWA)...');
-let appHtml = fs.readFileSync('./app.html', 'utf8');
+let appHtml = fs.readFileSync('./app.html', { encoding: 'utf8' });
 appHtml = inlineCSS(appHtml);
 appHtml = inlineScripts(appHtml);
 
@@ -72,17 +71,17 @@ appHtml = appHtml.replace(/\.\/public\/favicon\.ico/g, './favicon.ico');
 appHtml = appHtml.replace(/\.\/public\/sw\.js/g, './sw.js');
 appHtml = appHtml.replace(/\.\/public\/manifest\.json/g, './manifest.json');
 
-fs.writeFileSync(path.join(DIST_DIR, 'app.html'), appHtml);
+fs.writeFileSync(path.join(DIST_DIR, 'app.html'), appHtml, { encoding: 'utf8' });
 console.log('✅ app.html built!');
 
 // ─── 2. Build index.html (Landing Page) ───
 console.log('\n[2/2] Building index.html (Landing Page)...');
-let landingHtml = fs.readFileSync('./index.html', 'utf8');
+let landingHtml = fs.readFileSync('./index.html', { encoding: 'utf8' });
 // Fix public paths in landing too
 landingHtml = landingHtml.replace(/\.\/public\/favicon\.ico/g, './favicon.ico');
 landingHtml = landingHtml.replace(/\.\/public\/manifest\.json/g, './manifest.json');
 
-fs.writeFileSync(path.join(DIST_DIR, 'index.html'), landingHtml);
+fs.writeFileSync(path.join(DIST_DIR, 'index.html'), landingHtml, { encoding: 'utf8' });
 console.log('✅ index.html (landing) built!');
 
 // ─── 3. Copy assets from public/ to dist/ root ───

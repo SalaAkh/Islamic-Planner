@@ -1,3 +1,6 @@
+const escapeHtml = (str) => (window.escapeHtml || ((s) => { if (typeof s !== 'string') return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }))(str);
+const t = (key, fallback) => (window.t ? window.t(key) : fallback);
+
 class TodoManager {
     constructor() {
         this.lists = [];
@@ -90,8 +93,8 @@ class TodoManager {
         });
 
         const smartLists = [
-            { id: 'smart_my_day', title: 'Мой день', icon: 'fa-sun text-yellow-500', count: myDayCount },
-            { id: 'smart_important', title: 'Важное', icon: 'fa-star text-red-500', count: importantCount }
+            { id: 'smart_my_day', title: t('lists_smart_my_day', 'Мой день'), icon: 'fa-sun text-yellow-500', count: myDayCount },
+            { id: 'smart_important', title: t('lists_smart_important', 'Важное'), icon: 'fa-star text-red-500', count: importantCount }
         ];
 
         smartLists.forEach(sl => {
@@ -125,7 +128,7 @@ class TodoManager {
             const completedTasks = list.tasks ? list.tasks.filter(t => t.completed).length : 0;
             
             li.innerHTML = `
-                <span class="truncate pr-2 flex items-center gap-2"><i class="fas fa-list-ul w-5 text-center text-gray-400"></i> ${list.title}</span>
+                <span class="truncate pr-2 flex items-center gap-2"><i class="fas fa-list-ul w-5 text-center text-gray-400"></i> ${escapeHtml(list.title)}</span>
                 <span class="${isActive ? 'bg-blue-200 dark:bg-blue-800' : 'bg-gray-200 dark:bg-slate-600'} text-xs font-mono px-2 py-0.5 rounded-full whitespace-nowrap">${completedTasks}/${totalTasks}</span>
             `;
             
@@ -138,7 +141,7 @@ class TodoManager {
         this.currentListId = listId;
 
         if (listId === 'smart_my_day' || listId === 'smart_important') {
-            const title = listId === 'smart_my_day' ? 'Мой день' : 'Важное';
+            const title = listId === 'smart_my_day' ? t('lists_smart_my_day', 'Мой день') : t('lists_smart_important', 'Важное');
             if(this.currentListTitle) this.currentListTitle.textContent = title;
             if(this.deleteListBtn) this.deleteListBtn.classList.add('hidden');
             if(this.newTaskWrapper) this.newTaskWrapper.classList.remove('opacity-50', 'pointer-events-none');
@@ -174,7 +177,7 @@ class TodoManager {
         
         if (tasks.length === 0) {
             if(this.emptyTasksMsg) {
-                this.emptyTasksMsg.textContent = isSmartView ? "Отдыхайте, тут пока пусто." : "В этом списке пока нет задач.";
+                this.emptyTasksMsg.textContent = isSmartView ? t('lists_empty_smart_tasks', 'Отдыхайте, тут пока пусто.') : t('lists_empty_regular_tasks', 'В этом списке пока нет задач.');
                 this.tasksContainer.appendChild(this.emptyTasksMsg);
             }
             if(this.mainSortable) this.mainSortable.destroy();
@@ -221,27 +224,27 @@ class TodoManager {
                         <!-- Title & Meta -->
                         <div class="flex flex-col flex-grow min-w-0">
                             <span class="${task.completed ? 'line-through text-gray-400 dark:text-gray-500' : 'text-slate-700 dark:text-gray-200'} font-medium truncate cursor-pointer" onclick="window.todoManager.toggleTaskExpand('${task.id}')">
-                                ${task.title}
+                                ${escapeHtml(task.title)}
                             </span>
                             <div class="flex items-center gap-2 mt-0.5 whitespace-nowrap overflow-x-auto no-scrollbar">
-                                ${task.isAiGenerated ? `<span class="text-[10px] bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 px-1.5 rounded font-bold border border-purple-200/30"><i class="fas fa-magic mr-0.5"></i>✨ ИИ</span>` : ''}
-                                ${isSmartView ? `<span class="text-[10px] text-gray-400 bg-gray-100 dark:bg-slate-700 px-1.5 rounded">${this.lists.find(l=>l.id===parentListId)?.title || 'Список'}</span>` : ''}
+                                ${task.isAiGenerated ? `<span class="text-[10px] bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 px-1.5 rounded font-bold border border-purple-200/30"><i class="fas fa-magic mr-0.5"></i>${t('lists_meta_ai', '✨ ИИ')}</span>` : ''}
+                                ${isSmartView ? `<span class="text-[10px] text-gray-400 bg-gray-100 dark:bg-slate-700 px-1.5 rounded">${escapeHtml(this.lists.find(l=>l.id===parentListId)?.title || t('lists_fallback_list_title', 'Список'))}</span>` : ''}
                                 ${hasSubtasks ? `<span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 rounded cursor-pointer" onclick="window.todoManager.toggleTaskExpand('${task.id}')"><i class="fas fa-code-branch mr-0.5"></i>${completedSubtasks}/${subtasks.length}</span>` : ''}
                                 ${task.dueDate ? `<span class="text-[10px] bg-red-50 text-red-500 px-1.5 rounded"><i class="far fa-calendar-alt mr-0.5"></i>${task.dueDate}</span>` : ''}
-                                ${task.note ? `<span class="text-[10px] bg-yellow-50 text-yellow-600 px-1.5 rounded cursor-pointer" onclick="window.todoManager.toggleTaskExpand('${task.id}')"><i class="far fa-sticky-note mr-0.5"></i>Заметка</span>` : ''}
+                                ${task.note ? `<span class="text-[10px] bg-yellow-50 text-yellow-600 px-1.5 rounded cursor-pointer" onclick="window.todoManager.toggleTaskExpand('${task.id}')"><i class="far fa-sticky-note mr-0.5"></i>${t('lists_meta_note', 'Заметка')}</span>` : ''}
                             </div>
                         </div>
                     </div>
                     
                     <div class="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         <!-- Smart Actions -->
-                        <button onclick="window.todoManager.toggleMyDay('${task.id}', '${parentListId}')" class="p-1 transition-colors ${isMyDay ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-500'}" title="В Мой день">
+                        <button onclick="window.todoManager.toggleMyDay('${task.id}', '${parentListId}')" class="p-1 transition-colors ${isMyDay ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-500'}" title="${t('lists_btn_my_day_title', 'В Мой день')}">
                             <i class="${isMyDay ? 'fas text-yellow-500' : 'far'} fa-sun"></i>
                         </button>
-                        <button onclick="window.todoManager.toggleImportant('${task.id}', '${parentListId}')" class="p-1 transition-colors ${task.isImportant ? 'text-red-500' : 'text-gray-300 hover:text-red-500'}" title="Важное">
+                        <button onclick="window.todoManager.toggleImportant('${task.id}', '${parentListId}')" class="p-1 transition-colors ${task.isImportant ? 'text-red-500' : 'text-gray-300 hover:text-red-500'}" title="${t('lists_btn_important_title', 'Важное')}">
                             <i class="${task.isImportant ? 'fas text-red-500' : 'far'} fa-star"></i>
                         </button>
-                        <button onclick="window.todoManager.removeTask('${task.id}', '${parentListId}')" class="text-gray-300 hover:text-red-500 transition-colors p-1" title="Удалить">
+                        <button onclick="window.todoManager.removeTask('${task.id}', '${parentListId}')" class="text-gray-300 hover:text-red-500 transition-colors p-1" title="${t('lists_btn_delete_title', 'Удалить')}">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -252,11 +255,11 @@ class TodoManager {
                     
                     <!-- Advanced Metadata -->
                     <div class="flex gap-2 mb-2 text-xs">
-                        <button onclick="window.todoManager.setDueDate('${task.id}', '${parentListId}')" class="bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 px-2 py-1 rounded text-gray-600 dark:text-gray-300 transition"><i class="far fa-calendar-alt mr-1"></i> Срок</button>
-                        <button onclick="window.todoManager.editNote('${task.id}', '${parentListId}')" class="bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 px-2 py-1 rounded text-gray-600 dark:text-gray-300 transition"><i class="far fa-sticky-note mr-1"></i> Заметка</button>
+                        <button onclick="window.todoManager.setDueDate('${task.id}', '${parentListId}')" class="bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 px-2 py-1 rounded text-gray-600 dark:text-gray-300 transition"><i class="far fa-calendar-alt mr-1"></i> ${t('lists_btn_due_date', 'Срок')}</button>
+                        <button onclick="window.todoManager.editNote('${task.id}', '${parentListId}')" class="bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 px-2 py-1 rounded text-gray-600 dark:text-gray-300 transition"><i class="far fa-sticky-note mr-1"></i> ${t('lists_meta_note', 'Заметка')}</button>
                     </div>
 
-                    ${task.note ? `<div class="text-xs text-gray-500 bg-yellow-50 dark:bg-yellow-900/10 p-2 rounded mb-2 whitespace-pre-wrap">${task.note}</div>` : ''}
+                    ${task.note ? `<div class="text-xs text-gray-500 bg-yellow-50 dark:bg-yellow-900/10 p-2 rounded mb-2 whitespace-pre-wrap">${escapeHtml(task.note)}</div>` : ''}
 
                     ${subtasks.map(sub => `
                         <div class="flex items-center justify-between group/sub">
@@ -264,7 +267,7 @@ class TodoManager {
                                 <button class="flex-shrink-0 w-4 h-4 rounded-sm border ${sub.completed ? 'border-blue-400 bg-blue-400 text-white' : 'border-gray-300 dark:border-gray-600'} flex items-center justify-center transition-colors">
                                     ${sub.completed ? '<i class="fas fa-check text-[8px]"></i>' : ''}
                                 </button>
-                                <span class="text-sm ${sub.completed ? 'line-through text-gray-400' : 'text-gray-600 dark:text-gray-300'} truncate">${sub.title}</span>
+                                <span class="text-sm ${sub.completed ? 'line-through text-gray-400' : 'text-gray-600 dark:text-gray-300'} truncate">${escapeHtml(sub.title)}</span>
                             </div>
                             <button onclick="window.todoManager.removeSubtask('${task.id}', '${sub.id}', '${parentListId}')" class="text-gray-300 hover:text-red-400 opacity-0 group-hover/sub:opacity-100 transition-opacity text-xs p-1">
                                 <i class="fas fa-times"></i>
@@ -274,7 +277,7 @@ class TodoManager {
                     
                     <div class="flex items-center gap-2 mt-2 group/addsub cursor-text" onclick="window.todoManager.addSubtaskPrompt('${task.id}', '${parentListId}')">
                         <i class="fas fa-plus text-xs text-blue-400 opacity-50 group-hover/addsub:opacity-100"></i>
-                        <span class="text-xs text-gray-400 group-hover/addsub:text-blue-500 transition-colors">Добавить шаг</span>
+                        <span class="text-xs text-gray-400 group-hover/addsub:text-blue-500 transition-colors">${t('lists_btn_add_step', 'Добавить шаг')}</span>
                     </div>
                 </div>
             </div>
@@ -339,7 +342,7 @@ class TodoManager {
         const task = list.tasks.find(t => t.id === taskId);
         if(task) {
             const current = task.dueDate || this.getTodayDateString();
-            const dateStr = prompt('Формат ГГГГ-ММ-ДД:', current);
+            const dateStr = prompt(t('lists_prompt_due_format', 'Формат ГГГГ-ММ-ДД:'), current);
             if(dateStr !== null) {
                 task.dueDate = dateStr.trim();
                 this.selectList(this.currentListId);
@@ -353,7 +356,7 @@ class TodoManager {
         if(!list || !list.tasks) return;
         const task = list.tasks.find(t => t.id === taskId);
         if(task) {
-            const noteStr = prompt('Заметка для задачи:', task.note || '');
+            const noteStr = prompt(t('lists_prompt_task_note', 'Заметка для задачи:'), task.note || '');
             if(noteStr !== null) {
                 task.note = noteStr.trim();
                 this.selectList(this.currentListId);
@@ -363,7 +366,7 @@ class TodoManager {
     }
 
     async addSubtaskPrompt(taskId, parentListId) {
-        const title = prompt('Название подзадачи:');
+        const title = prompt(t('lists_prompt_subtask_title', 'Название подзадачи:'));
         if (!title || !title.trim()) return;
 
         const list = this.lists.find(l => l.id === parentListId);
@@ -409,7 +412,7 @@ class TodoManager {
     }
 
     async removeSubtask(taskId, subtaskId, parentListId) {
-        if(!confirm('Удалить подзадачу?')) return;
+        if(!confirm(t('lists_confirm_delete_subtask', 'Удалить подзадачу?'))) return;
         const list = this.lists.find(l => l.id === parentListId);
         if (!list) return;
 
@@ -425,7 +428,7 @@ class TodoManager {
     }
 
     async createNewList() {
-        const title = prompt('Название нового списка:');
+        const title = prompt(t('lists_prompt_new_list', 'Название нового списка:'));
         if (!title || !title.trim()) return;
 
         const newList = {
@@ -449,7 +452,7 @@ class TodoManager {
                 // Auto create a list
                 const newList = {
                     id: 'list_default',
-                    title: 'Задачи',
+                    title: t('lists_default_list_name', 'Задачи'),
                     tasks: [],
                     createdAt: Date.now()
                 };
@@ -499,7 +502,7 @@ class TodoManager {
     }
 
     async removeTask(taskId, parentListId) {
-        if(!confirm('Удалить эту задачу?')) return;
+        if(!confirm(t('lists_confirm_delete_task', 'Удалить эту задачу?'))) return;
         const list = this.lists.find(l => l.id === parentListId);
         if (!list) return;
 
@@ -510,7 +513,7 @@ class TodoManager {
 
     async deleteCurrentList() {
         if(!this.currentListId || this.currentListId.startsWith('smart_')) return;
-        if(!confirm('Точно удалить список и все его задачи?')) return;
+        if(!confirm(t('lists_confirm_delete_list', 'Точно удалить список и все его задачи?'))) return;
 
         const listId = this.currentListId;
         this.lists = this.lists.filter(l => l.id !== listId);

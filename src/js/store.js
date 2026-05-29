@@ -103,10 +103,12 @@ async function idbDelete(key) {
 // LOCALSTORAGE — for lightweight text/state data (fast, sync)
 // =====================================================================
 window.Store = {
-    // ── Daily Planner ──────────────────────────────────────────────
     getDayData(dateString) {
         try {
-            const data = localStorage.getItem(`barakah_day_${dateString}`);
+            const key = window.currentGroupId 
+                ? `barakah_group_${window.currentGroupId}_day_${dateString}`
+                : `barakah_day_${dateString}`;
+            const data = localStorage.getItem(key);
             return data ? JSON.parse(data) : { tasks: {}, texts: {}, checkboxes: {} };
         } catch (e) {
             return { tasks: {}, texts: {}, checkboxes: {} };
@@ -115,8 +117,16 @@ window.Store = {
 
     saveDayData(dateString, data) {
         try {
-            localStorage.setItem(`barakah_day_${dateString}`, JSON.stringify(data));
-            if (window.DbSync) window.DbSync.syncToCloud(`day_${dateString}`, data);
+            if (window.currentGroupId) {
+                const key = `barakah_group_${window.currentGroupId}_day_${dateString}`;
+                localStorage.setItem(key, JSON.stringify(data));
+                if (window.Groups && typeof window.Groups.saveGroupDayData === 'function') {
+                    window.Groups.saveGroupDayData(window.currentGroupId, dateString, data);
+                }
+            } else {
+                localStorage.setItem(`barakah_day_${dateString}`, JSON.stringify(data));
+                if (window.DbSync) window.DbSync.syncToCloud(`day_${dateString}`, data);
+            }
             window.ActivityLog?.log('day_saved', { date: dateString });
         } catch (e) {
             console.error('[Store] Failed to save day data:', e);
@@ -165,6 +175,10 @@ window.Store = {
     // ── Board State (notes + viewport) ─────────────────────────────
     getBoardData(boardId = 'main_board') {
         try {
+            if (window.currentGroupId) {
+                const groupBoard = localStorage.getItem(`barakah_group_${window.currentGroupId}_board_state`);
+                return groupBoard ? JSON.parse(groupBoard) : { notes: [], viewport: { x: 0, y: 0, zoom: 1 } };
+            }
             const board = localStorage.getItem(`barakah_board_state_${boardId}`);
             if (!board && boardId === 'main_board') {
                 const oldBoard = localStorage.getItem('barakah_board_state');
@@ -179,6 +193,13 @@ window.Store = {
     saveBoardData(boardData, boardId = 'main_board') {
         try {
             const { drawingData, ...lightData } = boardData;
+            if (window.currentGroupId) {
+                localStorage.setItem(`barakah_group_${window.currentGroupId}_board_state`, JSON.stringify(lightData));
+                if (window.Groups && typeof window.Groups.saveGroupBoardState === 'function') {
+                    window.Groups.saveGroupBoardState(window.currentGroupId, lightData);
+                }
+                return;
+            }
             localStorage.setItem(`barakah_board_state_${boardId}`, JSON.stringify(lightData));
             if (window.DbSync) window.DbSync.syncToCloud(`board_state_${boardId}`, lightData);
         } catch (e) {
@@ -188,6 +209,9 @@ window.Store = {
 
     // ── Drawing (IndexedDB) ─────────────────────────────────────────
     getDrawing(boardId = 'main_board') {
+        if (window.currentGroupId) {
+            return idbGet(`group_drawing_${window.currentGroupId}`);
+        }
         return idbGet(`board_drawing_${boardId}`).then(data => {
             if (!data && boardId === 'main_board') return idbGet('board_drawing');
             return data;
@@ -195,6 +219,12 @@ window.Store = {
     },
 
     saveDrawing(dataUrl, boardId = 'main_board') {
+        if (window.currentGroupId) {
+            if (window.Groups && typeof window.Groups.saveGroupBoardDrawing === 'function') {
+                window.Groups.saveGroupBoardDrawing(window.currentGroupId, dataUrl);
+            }
+            return idbSet(`group_drawing_${window.currentGroupId}`, dataUrl);
+        }
         if (!dataUrl) {
             if (window.DbSync && !window._isSyncingDrawing) window.DbSync.syncToCloud(`board_drawing_${boardId}`, { dataUrl: null });
             return idbDelete(`board_drawing_${boardId}`);
@@ -207,6 +237,12 @@ window.Store = {
     },
 
     clearDrawing(boardId = 'main_board') {
+        if (window.currentGroupId) {
+            if (window.Groups && typeof window.Groups.saveGroupBoardDrawing === 'function') {
+                window.Groups.saveGroupBoardDrawing(window.currentGroupId, null);
+            }
+            return idbDelete(`group_drawing_${window.currentGroupId}`);
+        }
         if (window.DbSync && !window._isSyncingDrawing) window.DbSync.syncToCloud(`board_drawing_${boardId}`, { dataUrl: null });
         window.ActivityLog?.log('drawing_cleared');
         return idbDelete(`board_drawing_${boardId}`);
@@ -215,6 +251,10 @@ window.Store = {
     // ── Events & Reminders ─────────────────────────────────────────
     getEvents() {
         try {
+            if (window.currentGroupId) {
+                const groupEvents = localStorage.getItem(`barakah_group_${window.currentGroupId}_events`);
+                return groupEvents ? JSON.parse(groupEvents) : {};
+            }
             const events = localStorage.getItem('barakah_events');
             return events ? JSON.parse(events) : {};
         } catch (e) {
@@ -238,6 +278,13 @@ window.Store = {
             all[dateString].push(event);
         }
         try {
+            if (window.currentGroupId) {
+                localStorage.setItem(`barakah_group_${window.currentGroupId}_events`, JSON.stringify(all));
+                if (window.Groups && typeof window.Groups.saveGroupEvents === 'function') {
+                    window.Groups.saveGroupEvents(window.currentGroupId, all);
+                }
+                return;
+            }
             localStorage.setItem('barakah_events', JSON.stringify(all));
             if (window.DbSync) {
                 window.DbSync.syncToCloud('events', all);
@@ -257,6 +304,13 @@ window.Store = {
         all[dateString] = all[dateString].filter(e => e.id !== eventId);
         if (all[dateString].length === 0) delete all[dateString];
         try {
+            if (window.currentGroupId) {
+                localStorage.setItem(`barakah_group_${window.currentGroupId}_events`, JSON.stringify(all));
+                if (window.Groups && typeof window.Groups.saveGroupEvents === 'function') {
+                    window.Groups.saveGroupEvents(window.currentGroupId, all);
+                }
+                return;
+            }
             localStorage.setItem('barakah_events', JSON.stringify(all));
             if (window.DbSync) {
                 window.DbSync.syncToCloud('events', all);
@@ -273,6 +327,10 @@ window.Store = {
     // ── To-Do Lists ─────────────────────────────────────────────────────
     getTodoLists() {
         try {
+            if (window.currentGroupId) {
+                const groupLists = localStorage.getItem(`barakah_group_${window.currentGroupId}_todo_lists`);
+                return groupLists ? JSON.parse(groupLists) : [];
+            }
             const lists = localStorage.getItem('barakah_todo_lists');
             return lists ? JSON.parse(lists) : [];
         } catch (e) {
@@ -283,6 +341,13 @@ window.Store = {
     saveTodoLists(lists) {
         try {
             const normalizedLists = Array.isArray(lists) ? lists : [];
+            if (window.currentGroupId) {
+                localStorage.setItem(`barakah_group_${window.currentGroupId}_todo_lists`, JSON.stringify(normalizedLists));
+                if (window.Groups && typeof window.Groups.saveGroupTodoLists === 'function') {
+                    window.Groups.saveGroupTodoLists(window.currentGroupId, normalizedLists);
+                }
+                return;
+            }
             localStorage.setItem('barakah_todo_lists', JSON.stringify(normalizedLists));
             if (window.DbSync) window.DbSync.syncToCloud('todo_lists', normalizedLists);
             window.ActivityLog?.log('todo_lists_saved', { count: normalizedLists.length });

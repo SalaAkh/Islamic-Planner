@@ -2,6 +2,16 @@
 <html lang="ru" dir="ltr">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SHJEPJDL0J"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-SHJEPJDL0J');
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barakah Planner — Исламский Ежедневник</title>
@@ -11,12 +21,25 @@
     <link rel="canonical" href="https://islamic-planer.web.app">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://islamic-planer.web.app">
+    <meta property="og:site_name" content="Barakah Planner">
     <meta property="og:title" content="Barakah Planner — Исламский Ежедневник">
     <meta property="og:description"
         content="Планируй день по Исламу: трекер намазов, цели Ахирата и Дуньи, доска Tafakkur.">
-    <meta property="og:image" content="https://islamic-planer.web.app/banner-ru.png">
+    <meta property="og:image" content="https://islamic-planer.web.app/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:locale:alternate" content="kk_KZ">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta property="og:locale:alternate" content="ar_SA">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Barakah Planner — Исламский Ежедневник">
+    <meta name="twitter:description"
+        content="Планируй день по Исламу: трекер намазов, цели Ахирата и Дуньи, доска Tafakkur.">
+    <meta name="twitter:image" content="https://islamic-planer.web.app/og-image.png">
+    <meta name="twitter:image:alt" content="Barakah Planner — Исламский Ежедневник">
     <meta name="theme-color" content="#059669">
+
     <link rel="icon" type="image/x-icon" href="./public/favicon.ico">
     <link rel="manifest" href="./public/manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -860,11 +883,11 @@
                 <p class="feature-desc t" data-key="f7_desc">Встроенный счетчик зикров с тактильной вибрацией, популярными пресетами и автосохранением дневной статистики.</p>
             </div>
 
-            <!-- Rukhsa Mode -->
+            <!-- Double Asr Calculation -->
             <div class="feature-card">
-                <div class="feature-icon blue"><i class="fas fa-feather-alt"></i></div>
-                <h3 class="feature-title t" data-key="f8_title">Режим Рухса (Облегчение)</h3>
-                <p class="feature-desc t" data-key="f8_desc">Адаптивный интерфейс для путешественников, больных или уставших с теологически одобренными послаблениями.</p>
+                <div class="feature-icon blue"><i class="fas fa-clock"></i></div>
+                <h3 class="feature-title t" data-key="f8_title">Расчет Асра (Ханафи / Шафии)</h3>
+                <p class="feature-desc t" data-key="f8_desc">Отображение времени Асра сразу по двум мазхабам: Ханафи (стандарт ДУМК) и Шафии (1х тень) для максимального удобства планирования.</p>
             </div>
         </div>
     </section>
@@ -906,7 +929,11 @@
                             <div class="prayer-check done"><i class="fas fa-check"></i></div>
                         </div>
                         <div class="prayer-item">
-                            <span class="prayer-name t" data-key="pr_asr">Аср</span>
+                            <span class="prayer-name t" data-key="pr_asr_shafii">Аср (Шафии)</span>
+                            <div class="prayer-check done"><i class="fas fa-check"></i></div>
+                        </div>
+                        <div class="prayer-item">
+                            <span class="prayer-name t" data-key="pr_asr_hanafi">Аср (Ханифи)</span>
                             <div class="prayer-check done"><i class="fas fa-check"></i></div>
                         </div>
                         <div class="prayer-item">
@@ -949,6 +976,57 @@
             <span style="font-family: 'Amiri', serif; font-size: 1.1rem; color: var(--gold);">بَارَكَ اللهُ
                 فِيكُمْ</span>
         </div>
+
+        <!-- Social Media Links -->
+        <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
+            <a href="https://instagram.com/sala_ah_dev" target="_blank" rel="noopener"
+                style="color: var(--text-muted); font-size: 1.4rem; transition: all .25s; text-decoration: none;"
+                onmouseover="this.style.color='#E1306C'; this.style.transform='translateY(-3px)'"
+                onmouseout="this.style.color='var(--text-muted)'; this.style.transform='translateY(0)'"
+                title="Instagram">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="https://tiktok.com/@sala_ah_dev" target="_blank" rel="noopener"
+                style="color: var(--text-muted); font-size: 1.4rem; transition: all .25s; text-decoration: none;"
+                onmouseover="this.style.color='#fff'; this.style.transform='translateY(-3px)'"
+                onmouseout="this.style.color='var(--text-muted)'; this.style.transform='translateY(0)'"
+                title="TikTok">
+                <i class="fab fa-tiktok"></i>
+            </a>
+            <a href="https://t.me/sala_ah_dev" target="_blank" rel="noopener"
+                style="color: var(--text-muted); font-size: 1.4rem; transition: all .25s; text-decoration: none;"
+                onmouseover="this.style.color='#0088cc'; this.style.transform='translateY(-3px)'"
+                onmouseout="this.style.color='var(--text-muted)'; this.style.transform='translateY(0)'"
+                title="Telegram">
+                <i class="fab fa-telegram-plane"></i>
+            </a>
+            <a href="https://github.com/SalaAkh" target="_blank" rel="noopener"
+                style="color: var(--text-muted); font-size: 1.4rem; transition: all .25s; text-decoration: none;"
+                onmouseover="this.style.color='#fff'; this.style.transform='translateY(-3px)'"
+                onmouseout="this.style.color='var(--text-muted)'; this.style.transform='translateY(0)'"
+                title="GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+        </div>
+
+        <!-- Support / Donate -->
+        <div style="display: flex; justify-content: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
+            <a href="https://www.patreon.com/c/Sala_ah" target="_blank" rel="noopener"
+                onclick="if(typeof gtag === 'function') gtag('event', 'donate_click', { method: 'patreon' });"
+                style="display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; text-decoration: none; transition: all .25s;"
+                onmouseover="this.style.borderColor='var(--gold)'; this.style.color='var(--gold)'"
+                onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'">
+                <i class="fab fa-patreon"></i> Patreon
+            </a>
+            <a href="https://boosty.to/Sala_ah" target="_blank" rel="noopener"
+                onclick="if(typeof gtag === 'function') gtag('event', 'donate_click', { method: 'boosty' });"
+                style="display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; text-decoration: none; transition: all .25s;"
+                onmouseover="this.style.borderColor='#f97316'; this.style.color='#f97316'"
+                onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--text-muted)'">
+                🚀 Boosty
+            </a>
+        </div>
+
         <p>© 2025 <strong>Barakah Planner</strong> · <span class="t" data-key="footer_free">Бесплатно для Уммы</span> ·
             <a href="./app.html" class="t" data-key="open_app">Открыть</a>
         </p>
@@ -974,11 +1052,12 @@
                 f5_title: 'Исламский Календарь', f5_desc: 'Хиджарийская дата, события, напоминания. Понедельники и четверги отмечены для Сунна-постов.',
                 f6_title: 'Облако + ИИ Ассистент', f6_desc: 'Firebase синхронизация между устройствами. Gemini AI генерирует персональный план дня.',
                 f7_title: 'Тасбих / Зикр', f7_desc: 'Встроенный счетчик зикров с тактильной вибрацией, популярными пресетами и автосохранением дневной статистики.',
-                f8_title: 'Режим Рухса (Облегчение)', f8_desc: 'Адаптивный интерфейс для путешественников, больных или уставших с теологически одобренными послаблениями.',
+                f8_title: 'Расчет Асра (Ханафи / Шафии)', f8_desc: 'Отображение времени Асра сразу по двум мазхабам: Ханафи (стандарт ДУМК) и Шафии (1х тень) для максимального удобства планирования.',
                 prayer_badge: 'Ибадат Трекер', prayer_title: 'Намаз — фундамент баракатного дня',
                 prayer_desc: 'Отмечайте каждый намаз, следите за прогрессом и заряжайтесь баракатом на весь день.',
                 try_now: 'Попробовать сейчас',
-                pr_fajr: 'Фаджр', pr_azkar_m: 'Утренние азкары', pr_zuhr: 'Зухр', pr_asr: 'Аср',
+                pr_fajr: 'Фаджр', pr_azkar_m: 'Утренние азкары', pr_zuhr: 'Зухр',
+                pr_asr_shafii: 'Аср (Шафии)', pr_asr_hanafi: 'Аср (Ханифи)',
                 pr_azkar_e: 'Вечерние азкары', pr_maghrib: 'Магриб', pr_isha: 'Иша',
                 cta_title: 'Начни планировать с баракатом',
                 cta_desc: 'Бесплатно, без регистрации, работает офлайн. Просто открой и начни — ИншаАллах.',
@@ -1001,11 +1080,12 @@
                 f5_title: 'Исламдық Күнтізбе', f5_desc: 'Хижри күні, оқиғалар, еске салулар. Дүйсенбі және бейсенбі Сүннет оразасы үшін белгіленген.',
                 f6_title: 'Бұлт + ЖИ Көмекшісі', f6_desc: 'Firebase синхрондауы. Gemini AI жеке күн жоспарын жасайды.',
                 f7_title: 'Тәсбих / Зікір', f7_desc: 'Дірілмен, танымал зікірлер тізімімен және күнделікті статистиканы автоматты түрде сақтау мүмкіндігі бар тәсбих.',
-                f8_title: 'Рухса режимі (Жеңілдік)', f8_desc: 'Саяхатшылар, науқастар немесе шаршағандар үшін шариғатқа сәйкес жеңілдіктер ұсынатын режим.',
+                f8_title: 'Екінті есебі (Ханафи / Шафиғи)', f8_desc: 'Жоспарлаудың максималды ыңғайлылығы үшін Екінті (Аср) уақытын бірден екі мәзһаб бойынша көрсету: Ханафи (ҚМДБ стандарты) және Шафиғи (1х көлеңке).',
                 prayer_badge: 'Құлшылық Трекері', prayer_title: 'Намаз — баракатты күннің негізі',
                 prayer_desc: 'Әрбір намазды белгілеп, прогрессті бақылаңыз және күніңізге барака алыңыз.',
                 try_now: 'Қазір байқап көру',
-                pr_fajr: 'Бамдат', pr_azkar_m: 'Таңғы зікірлер', pr_zuhr: 'Бесін', pr_asr: 'Екінті',
+                pr_fajr: 'Бамдат', pr_azkar_m: 'Таңғы зікірлер', pr_zuhr: 'Бесін',
+                pr_asr_shafii: 'Екінті (Шафиғи)', pr_asr_hanafi: 'Екінті (Ханифи)',
                 pr_azkar_e: 'Кешкі зікірлер', pr_maghrib: 'Ақшам', pr_isha: 'Құптан',
                 cta_title: 'Баракатпен жоспарлауды бастаңыз',
                 cta_desc: 'Тегін, тіркелмей-ақ, офлайн жұмыс істейді. Ашып, бастаңыз — ИншаАллах.',
@@ -1028,11 +1108,12 @@
                 f5_title: 'Islamic Calendar', f5_desc: 'Hijri date, events, reminders. Mondays and Thursdays highlighted for Sunnah fasting.',
                 f6_title: 'Cloud + AI Assistant', f6_desc: 'Firebase sync across devices. Gemini AI generates a personalized daily plan.',
                 f7_title: 'Tasbih / Dhikr Counter', f7_desc: 'Built-in counter with haptic feedback, popular presets, and automatic daily statistic logging.',
-                f8_title: 'Concession Mode (Rukhsa)', f8_desc: 'Adaptive interface for travelers, the sick, or the exhausted with scripturally approved daily adjustments.',
+                f8_title: 'Double Asr Calculation', f8_desc: 'Simultaneous display of Asr prayer times for both Hanafi (2x shadow) and Shafi\'i (1x shadow) madhhabs for easy planning.',
                 prayer_badge: 'Ibadah Tracker', prayer_title: 'Prayer — foundation of a blessed day',
                 prayer_desc: 'Mark each prayer, track your progress and fill your day with barakah.',
                 try_now: 'Try it now',
-                pr_fajr: 'Fajr', pr_azkar_m: 'Morning Adhkar', pr_zuhr: 'Zuhr', pr_asr: 'Asr',
+                pr_fajr: 'Fajr', pr_azkar_m: 'Morning Adhkar', pr_zuhr: 'Zuhr',
+                pr_asr_shafii: "Asr (Shafi'i)", pr_asr_hanafi: "Asr (Hanafi)",
                 pr_azkar_e: 'Evening Adhkar', pr_maghrib: 'Maghrib', pr_isha: 'Isha',
                 cta_title: 'Start planning with barakah',
                 cta_desc: 'Free, no sign-up required, works offline. Just open and start — InshaAllah.',
@@ -1055,11 +1136,12 @@
                 f5_title: 'التقويم الإسلامي', f5_desc: 'التاريخ الهجري والأحداث والتذكيرات. الإثنين والخميس مخصصان لصيام السنة.',
                 f6_title: 'السحابة + المساعد الذكي', f6_desc: 'مزامنة Firebase عبر الأجهزة. يولّد Gemini AI خطة يوم مخصصة.',
                 f7_title: 'مسبحة / ذكر', f7_desc: 'عداد أذكار مدمج مع اهتزاز تفاعلي، إعدادات مسبقة للأذكار الشائعة، وتسجيل تلقائي للإحصائيات.',
-                f8_title: 'رخصة (تسهيل)', f8_desc: 'واجهة متكيفة للمسافرين والمرضى والمتعبين مع رخص شرعية معتمدة لتعديل وتسهيل المهام والصلوات.',
+                f8_title: 'حساب مزدوج للعصر', f8_desc: 'عرض وقت صلاة العصر وفقًا للمذهبين الحنفي (ظل 2x) والشافعي (ظل 1x) في وقت واحد لتسهيل التخطيط.',
                 prayer_badge: 'متتبع العبادات', prayer_title: 'الصلاة — أساس يوم مبارك',
                 prayer_desc: 'ضع علامة على كل صلاة وتابع تقدمك وامنح يومك البركة.',
                 try_now: 'جرّب الآن',
-                pr_fajr: 'الفجر', pr_azkar_m: 'أذكار الصباح', pr_zuhr: 'الظهر', pr_asr: 'العصر',
+                pr_fajr: 'الفجر', pr_azkar_m: 'أذكار الصباح', pr_zuhr: 'الظهر',
+                pr_asr_shafii: 'العصر (شافعي)', pr_asr_hanafi: 'العصر (حنفي)',
                 pr_azkar_e: 'أذكار المساء', pr_maghrib: 'المغرب', pr_isha: 'العشاء',
                 cta_title: 'ابدأ التخطيط بالبركة',
                 cta_desc: 'مجاني، دون تسجيل، يعمل بدون إنترنت. افتحه وابدأ — إن شاء الله.',

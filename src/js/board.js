@@ -1,3 +1,5 @@
+var escapeHtml = escapeHtml || ((str) => (window.escapeHtml || ((s) => { if (typeof s !== 'string') return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }))(str));
+
 window.initBoard = function (showToast) {
     if(!window.Konva) {
         console.error('Konva is not loaded!');
@@ -1070,6 +1072,25 @@ window.initBoard = function (showToast) {
     loadData();
 
     document.addEventListener('cloudDataSynced', () => loadData());
+
+    // Collaborative and workspace updates
+    const handleGroupBoardUpdated = () => {
+        if (window.currentGroupId) {
+            loadData();
+        }
+    };
+    const handleGroupDrawingUpdated = () => {
+        if (window.currentGroupId) {
+            loadData();
+        }
+    };
+    const handleWorkspaceChanged = () => {
+        selectNode(null);
+        loadData();
+    };
+    document.addEventListener('groupBoardUpdated', handleGroupBoardUpdated);
+    document.addEventListener('groupDrawingUpdated', handleGroupDrawingUpdated);
+    document.addEventListener('workspaceChanged', handleWorkspaceChanged);
 };
 
 // --- MIRO DASHBOARD LOGIC ---
@@ -1100,10 +1121,10 @@ window.initBoardsDashboard = function() {
             <td class="p-4">
                 <div class="flex items-center gap-3 cursor-pointer" onclick="openBoard('${board.id}')">
                     <img src="https://mirostatic.com/board-image-assets/20250610/112x112/board_icon_${board.thumbnail || 1}.png" class="w-8 h-8 object-contain">
-                    <span class="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-blue-600 transition-colors">${board.name}</span>
+                    <span class="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-blue-600 transition-colors">${escapeHtml(board.name)}</span>
                 </div>
             </td>
-            <td class="p-4 text-gray-500">${owner}</td>
+            <td class="p-4 text-gray-500">${escapeHtml(owner)}</td>
             <td class="p-4 text-gray-500 cursor-pointer" onclick="openBoard('${board.id}')">${formattedDate}</td>
             <td class="p-4">
                 <button class="w-8 h-8 rounded-full hover:bg-gray-200 dark:hover:bg-slate-600 flex items-center justify-center text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-30 disabled:hover:bg-transparent" title="Delete" onclick="deleteBoard('${board.id}')" ${board.id === 'main_board' ? 'disabled' : ''}>
@@ -1177,8 +1198,23 @@ window.deleteBoard = function(boardId) {
 
 function initDashboardEvents() {
     document.getElementById('btn-create-board')?.addEventListener('click', () => {
-        const id = 'board_' + Date.now();
         const boards = window.Store.getBoardsMeta();
+        
+        // Ограничение для бесплатного аккаунта: макс. 1 доска
+        if (!window.Auth?.isPremium && boards.length >= 1) {
+            if (window.showToast) {
+                window.showToast(window.t ? window.t('premium_board_limit_reached') : 'Лимит бесплатной версии: макс. 1 доска. Активируйте Premium!');
+            }
+            // Открываем модалку профиля/оплаты
+            const authModal = document.getElementById('auth-modal');
+            if (authModal) {
+                authModal.classList.remove('hidden');
+                authModal.classList.add('flex');
+            }
+            return;
+        }
+
+        const id = 'board_' + Date.now();
         boards.unshift({
             id,
             name: 'Untitled board',

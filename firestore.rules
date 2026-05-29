@@ -19,6 +19,7 @@ service cloud.firestore {
                                document == 'events' ||
                                document == 'todo_lists' ||
                                document == 'boards_meta' ||
+                               document == 'mindmap' ||
                                document.matches('^board_state_.*') ||
                                document.matches('^board_drawing_.*') ||
                                document.matches('^day_.*') || 
@@ -39,6 +40,47 @@ service cloud.firestore {
     // FCM Tokens for Push Notifications
     match /users/{userId}/fcmTokens/{tokenId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ─── NEW: Group Workspaces ───
+    match /groups/{groupId} {
+      // Any authenticated user can create a group
+      allow create: if request.auth != null
+                    && request.resource.data.createdBy == request.auth.uid;
+      
+      // Read: any member or creator
+      allow read: if request.auth != null && 
+        (resource.data.members.hasAny([request.auth.token.email]) || resource.data.createdBy == request.auth.uid);
+      
+      // Update: member or creator, but createdBy field cannot be changed
+      allow update: if request.auth != null && 
+        (resource.data.members.hasAny([request.auth.token.email]) || resource.data.createdBy == request.auth.uid)
+        && request.resource.data.createdBy == resource.data.createdBy;
+      
+      // Delete: ONLY the creator can delete a group
+      allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
+
+      // Access to nested collections (board, events, lists)
+      match /data/{document} {
+        allow read: if request.auth != null && 
+          get(/databases/$(database)/documents/groups/$(groupId)).data.members.hasAny([request.auth.token.email]);
+        // Write: members only, with document name validation
+        allow write: if request.auth != null && 
+          get(/databases/$(database)/documents/groups/$(groupId)).data.members.hasAny([request.auth.token.email])
+          && (
+            document == 'goals' || 
+            document == 'board_state' ||
+            document == 'board_drawing' ||
+            document == 'events' ||
+            document == 'todo_lists' ||
+            document == 'boards_meta' ||
+            document == 'mindmap' ||
+            document.matches('^board_state_.*') ||
+            document.matches('^board_drawing_.*') ||
+            document.matches('^day_.*') || 
+            document.matches('^notes_.*')
+          );
+      }
     }
   }
 }

@@ -5,7 +5,8 @@ const PRAYER_NAMES = {
     'fajr': 'Фаджр',
     'sunrise': 'Восход',
     'dhuhr': 'Зухр',
-    'asr': 'Аср',
+    'asr_shafii': 'Аср (Шафии)',
+    'asr_hanafi': 'Аср (Ханифи)',
     'maghrib': 'Магриб',
     'isha': 'Иша'
 };
@@ -14,7 +15,8 @@ const PRAYER_I18N_KEYS = {
     'fajr': 'fajr',
     'sunrise': 'namaz_prayer_sunrise',
     'dhuhr': 'zuhr',
-    'asr': 'asr',
+    'asr_shafii': 'asr_shafii',
+    'asr_hanafi': 'asr_hanafi',
     'maghrib': 'maghrib',
     'isha': 'isha'
 };
@@ -22,12 +24,13 @@ const PRAYER_I18N_KEYS = {
 const PRAYER_CHECKBOХES = {
     'fajr': 'chk-fajr',
     'dhuhr': 'chk-zuhr',
-    'asr': 'chk-asr',
+    'asr_shafii': 'chk-asr-shafii',
+    'asr_hanafi': 'chk-asr-hanafi',
     'maghrib': 'chk-maghrib',
     'isha': 'chk-isha'
 };
 
-const ORDERED_PRAYERS = ['fajr', 'sunrise', 'dhuhr', 'asr', 'maghrib', 'isha'];
+const ORDERED_PRAYERS = ['fajr', 'sunrise', 'dhuhr', 'asr_shafii', 'asr_hanafi', 'maghrib', 'isha'];
 
 let currentCityPref = null;
 let currentSchedule = null;
@@ -408,6 +411,91 @@ function updateHeaderCityName(name) {
     if (el) el.textContent = name;
 }
 
+function calculateAsrOffset(latitude, dhuhrTimeStr, dateStr, shadowRatio) {
+    const lat = parseFloat(latitude);
+    if (isNaN(lat) || !dhuhrTimeStr) return null;
+    const parts = dhuhrTimeStr.split(':');
+    if (parts.length < 2) return null;
+    const dhuhrH = parseInt(parts[0], 10);
+    const dhuhrM = parseInt(parts[1], 10);
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return null;
+    
+    // Day of year N
+    const start = new Date(date.getFullYear(), 0, 0);
+    const diff = date - start + (start.getTimezoneOffset() - date.getTimezoneOffset()) * 60 * 1000;
+    const oneDay = 1000 * 60 * 60 * 24;
+    const N = Math.floor(diff / oneDay);
+    
+    // Declination delta in radians
+    const declinationDeg = 23.45 * Math.sin((360 / 365) * (284 + N) * Math.PI / 180);
+    const declinationRad = declinationDeg * Math.PI / 180;
+    const latRad = lat * Math.PI / 180;
+    
+    const z0 = Math.abs(latRad - declinationRad);
+    const S = shadowRatio + Math.tan(z0);
+    const a = Math.atan(1 / S);
+    
+    const cosH = (Math.sin(a) - Math.sin(latRad) * Math.sin(declinationRad)) / (Math.cos(latRad) * Math.cos(declinationRad));
+    
+    if (cosH < -1 || cosH > 1) {
+        return null; // Asr doesn't occur
+    }
+    
+    const H = Math.acos(cosH); // in radians
+    const offsetHours = H * 12 / Math.PI;
+    
+    // Dhuhr in hours
+    const dhuhrDecimal = dhuhrH + dhuhrM / 60;
+    const asrDecimal = dhuhrDecimal + offsetHours;
+    
+    const asrPlusTime = new Date(date);
+    asrPlusTime.setHours(0, 0, 0, 0);
+    const totalMs = Math.round(asrDecimal * 3600 * 1000);
+    asrPlusTime.setTime(asrPlusTime.getTime() + totalMs);
+    
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(asrPlusTime.getHours())}:${pad(asrPlusTime.getMinutes())}`;
+}
+
+function enrichScheduleWithShafiiAsr(scheduleMap, lat) {
+    if (!scheduleMap) return;
+    const latFloat = parseFloat(lat);
+    Object.keys(scheduleMap).forEach(dateStr => {
+        const day = scheduleMap[dateStr];
+        // Ensure asr_hanafi is populated
+        if (!day.asr_hanafi) {
+            day.asr_hanafi = day.asr || '';
+        }
+        // Ensure asr_shafii is populated
+        if (!day.asr_shafii) {
+            const calculated = calculateAsrOffset(isNaN(latFloat) ? 49.806406 : latFloat, day.dhuhr, dateStr, 1);
+            if (calculated) {
+                day.asr_shafii = calculated;
+            } else {
+                // Fallback: if calculation fails, Shafi'i Asr is approximately 1 hour and 10 minutes before Hanafi Asr
+                if (day.asr_hanafi && day.dhuhr) {
+                    try {
+                        const [dh, dm] = day.dhuhr.split(':').map(Number);
+                        const [ah, am] = day.asr_hanafi.split(':').map(Number);
+                        const dMins = dh * 60 + dm;
+                        const aMins = ah * 60 + am;
+                        const midMins = Math.round(dMins + (aMins - dMins) * 0.55); 
+                        const sh = Math.floor(midMins / 60);
+                        const sm = midMins % 60;
+                        const pad = (n) => String(n).padStart(2, '0');
+                        day.asr_shafii = `${pad(sh)}:${pad(sm)}`;
+                    } catch (e) {
+                        day.asr_shafii = day.asr_hanafi;
+                    }
+                } else {
+                    day.asr_shafii = day.asr || '';
+                }
+            }
+        }
+    });
+}
+
 async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null, ignoreSet = new Set()) {
     if (!currentCityPref && !fallbackCity) return;
 
@@ -415,6 +503,8 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
     const apiCity = resolveScheduleCity(targetCity);
     const cityId = parseInt(targetCity.id || targetCity.i, 10);
     const storeKey = `${NAMAZ_STORAGE_KEY_PREFIX}${cityId}_${year}`;
+    const lat = apiCity.lat || apiCity.la;
+    const lng = apiCity.lng || apiCity.lo;
 
     // Add current target to ignore set so we don't pick it as fallback
     ignoreSet.add(cityId);
@@ -424,6 +514,7 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
         if (cached) {
             try {
                 currentSchedule = JSON.parse(cached);
+                enrichScheduleWithShafiiAsr(currentSchedule, lat);
                 updateNamazUI();
                 return;
             } catch (e) {
@@ -433,8 +524,6 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
     }
 
     try {
-        const lat = apiCity.lat || apiCity.la;
-        const lng = apiCity.lng || apiCity.lo;
         let res = await fetch(`https://api.muftyat.kz/prayer-times/${year}/${lat}/${lng}`);
 
         // If current year fails, try year - 1
@@ -457,8 +546,19 @@ async function loadScheduleForYear(year, forceFetch = false, fallbackCity = null
                 if (!dateStr.startsWith(year.toString())) {
                     dateStr = year.toString() + dateStr.substring(4);
                 }
-                scheduleMap[dateStr] = day;
+                const normalizedDay = {
+                    ...day,
+                    fajr: day.fajr || day.Fajr || '',
+                    sunrise: day.sunrise || day.Sunrise || '',
+                    dhuhr: day.dhuhr || day.Dhuhr || '',
+                    asr: day.asr || day.Asr || '',
+                    maghrib: day.maghrib || day.Maghrib || '',
+                    isha: day.isha || day.Isha || '',
+                    Date: dateStr
+                };
+                scheduleMap[dateStr] = normalizedDay;
             });
+            enrichScheduleWithShafiiAsr(scheduleMap, lat);
             currentSchedule = scheduleMap;
             // Cache the result for the specific city and year
             const prefStoreKey = `${NAMAZ_STORAGE_KEY_PREFIX}${cityId}_${year}`;
@@ -625,6 +725,22 @@ function updateNamazUI() {
     window._nextNamazInfo = { name: nextPrayerName, time: nextPrayerTime };
 
     highlightActivePrayer(currentPrayerName);
+
+    const timeSpanMap = {
+        'fajr': 'time-fajr',
+        'dhuhr': 'time-zuhr',
+        'asr_shafii': 'time-asr-shafii',
+        'asr_hanafi': 'time-asr-hanafi',
+        'maghrib': 'time-maghrib',
+        'isha': 'time-isha'
+    };
+
+    Object.entries(timeSpanMap).forEach(([prayerKey, spanId]) => {
+        const spanEl = document.getElementById(spanId);
+        if (spanEl && todayData[prayerKey]) {
+            spanEl.textContent = todayData[prayerKey];
+        }
+    });
 }
 
 function highlightActivePrayer(prayerKey) {

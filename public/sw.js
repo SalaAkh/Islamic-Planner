@@ -1,4 +1,6 @@
-const CACHE_NAME = 'barakah-planner-v25';
+const CACHE_NAME = 'barakah-planner-v36';
+
+// Static assets to pre-cache on install
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -6,105 +8,130 @@ const ASSETS_TO_CACHE = [
     './manifest.json',
     './favicon.ico',
     './favicon.png',
-    'https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&family=Inter:wght@300;400;600;700&family=Amiri:wght@400;700&display=swap',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
 ];
 
+// ─────────────────────────────────────────────────────
+// INSTALL: pre-cache static shell + force activate
+// ─────────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => cache.addAll(ASSETS_TO_CACHE))
             .then(() => self.skipWaiting())
-            .catch(err => console.warn('[Barakah Planner] SW cache addAll failed:', err))
+            .catch(err => console.warn('[Barakah SW] install cache failed:', err))
     );
 });
 
+// ─────────────────────────────────────────────────────
+// ACTIVATE: purge ALL old caches + claim clients
+// ─────────────────────────────────────────────────────
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.filter((name) => name !== CACHE_NAME)
-                    .map((name) => caches.delete(name))
-            );
-        }).then(() => self.clients.claim())
+        caches.keys()
+            .then((names) => Promise.all(
+                names.filter(n => n !== CACHE_NAME).map(n => {
+                    console.log('[Barakah SW] Deleting old cache:', n);
+                    return caches.delete(n);
+                })
+            ))
+            .then(() => self.clients.claim())
     );
 });
 
-// URLs that should never be cached
-const SKIP_CACHE_PATTERNS = [
+// ─────────────────────────────────────────────────────
+// FETCH: smart routing
+// Only cache our OWN origin assets.
+// ALL external URLs pass through directly to network.
+// ─────────────────────────────────────────────────────
+
+const OWN_ORIGIN = self.location.origin; // e.g. https://islamic-planer.web.app
+
+// Domains we NEVER intercept (auth, payment, analytics, APIs)
+const PASSTHROUGH_PATTERNS = [
+    /google\.com/,
+    /googleapis\.com/,
+    /gstatic\.com/,
+    /googletagmanager\.com/,
+    /google-analytics\.com/,
+    /analytics\.google\.com/,
     /firebaseapp\.com/,
-    /googleapis\.com\/identitytoolkit/,
-    /securetoken\.google\.com/,
-    /accounts\.google\.com/,
-    /firebase\.googleapis\.com/,
-    /__\/auth\//,
+    /firebaseio\.com/,
+    /cloudfunctions\.net/,
+    /accounts\.google/,
+    /nowpayments\.io/,
+    /robokassa\.ru/,
 ];
 
-function isCacheableResponse(response) {
-    return response && response.status === 200 && response.type !== 'opaque';
-}
-
-function isHtmlRequest(request) {
-    const accept = request.headers.get('accept') || '';
-    return request.mode === 'navigate' || accept.includes('text/html');
-}
-
 self.addEventListener('fetch', (event) => {
+    // Only handle GET
     if (event.request.method !== 'GET') return;
-    if (!event.request.url.startsWith('http')) return;
 
-    // Skip Firebase Auth and other non-cacheable URLs
-    if (SKIP_CACHE_PATTERNS.some(pattern => pattern.test(event.request.url))) return;
+    const url = event.request.url;
 
-    if (isHtmlRequest(event.request)) {
+    // Must be http/https
+    if (!url.startsWith('http')) return;
+
+    // ── Let ALL external URLs pass through to network (no SW interference) ──
+    // This is the KEY fix: external = not our own origin
+    try {
+        const reqOrigin = new URL(url).origin;
+        if (reqOrigin !== OWN_ORIGIN) {
+            // Additionally block known auth/API domains from being even touched by SW
+            // (just return, don't call event.respondWith — browser handles it natively)
+            return;
+        }
+    } catch (e) {
+        return; // malformed URL — skip
+    }
+
+    // ── From here: only OWN ORIGIN requests ──
+    const isNavigate = event.request.mode === 'navigate';
+
+    if (isNavigate) {
+        // Navigation: network-first, fall back to cache
         event.respondWith(
-            fetch(event.request).then((networkResponse) => {
-                if (isCacheableResponse(networkResponse)) {
-                    const responseToCache = networkResponse.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseToCache).catch(err => {
-                            console.warn('[Barakah Planner] SW HTML cache put error:', err);
-                        });
-                    });
-                }
-                return networkResponse;
-            }).catch(async () => {
-                const cachedResponse = await caches.match(event.request);
-                if (cachedResponse) return cachedResponse;
-
-                return new Response('Content not available offline', {
-                    status: 503,
-                    statusText: 'Service Unavailable',
-                    headers: new Headers({ 'Content-Type': 'text/plain' })
-                });
-            })
+            fetch(event.request)
+                .then((networkResponse) => {
+                    if (networkResponse && networkResponse.status === 200) {
+                        const clone = networkResponse.clone();
+                        caches.open(CACHE_NAME).then(c =>
+                            c.put(event.request, clone).catch(() => {})
+                        );
+                    }
+                    return networkResponse;
+                })
+                .catch(async () => {
+                    const cached = await caches.match(event.request, { ignoreSearch: true });
+                    return cached || caches.match('./app.html', { ignoreSearch: true }) || new Response(
+                        '<h1>Offline</h1><p>No internet connection.</p>',
+                        { status: 503, headers: { 'Content-Type': 'text/html' } }
+                    );
+                })
         );
         return;
     }
 
+    // Static assets: cache-first
     event.respondWith(
-        caches.match(event.request)
-            .then((cachedResponse) => {
-                if (cachedResponse) return cachedResponse;
+        caches.match(event.request).then((cached) => {
+            if (cached) return cached;
 
-                return fetch(event.request).then((networkResponse) => {
-                    if (isCacheableResponse(networkResponse)) {
-                        const responseToCache = networkResponse.clone();
-                        caches.open(CACHE_NAME).then((cache) => {
-                            cache.put(event.request, responseToCache).catch(err => {
-                                console.warn('[Barakah Planner] SW cache put error:', err);
-                            });
-                        });
-                    }
-                    return networkResponse;
-                }).catch(() => {
-                    // Return a valid offline Response instead of undefined to avoid TypeErrors
-                    return new Response('Content not available offline', {
-                        status: 503,
-                        statusText: 'Service Unavailable',
-                        headers: new Headers({ 'Content-Type': 'text/plain' })
-                    });
+            return fetch(event.request).then((networkResponse) => {
+                if (networkResponse && networkResponse.status === 200 && networkResponse.type !== 'opaque') {
+                    const clone = networkResponse.clone();
+                    caches.open(CACHE_NAME).then(c =>
+                        c.put(event.request, clone).catch(() => {})
+                    );
+                }
+                return networkResponse;
+            }).catch(() => {
+                // Asset not available offline — return empty 503 (not html)
+                return new Response('', {
+                    status: 503,
+                    statusText: 'Offline',
+                    headers: { 'Content-Type': 'text/plain' }
                 });
-            })
+            });
+        })
     );
 });
