@@ -114,7 +114,7 @@ if (fs.existsSync(PUBLIC_DIR)) {
             if (!apiKey) console.warn(`⚠️ WARNING: FIREBASE_API_KEY is not set for ${file}.`);
             fs.writeFileSync(destPath, content);
         } else {
-            fs.copyFileSync(srcPath, destPath);
+            fs.cpSync(srcPath, destPath, { recursive: true });
         }
     });
 }

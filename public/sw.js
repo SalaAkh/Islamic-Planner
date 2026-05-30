@@ -6,6 +6,7 @@ const ASSETS_TO_CACHE = [
     './index.html',
     './app.html',
     './manifest.json',
+    './offline.html',
     './favicon.ico',
     './favicon.png',
 ];
@@ -102,10 +103,15 @@ self.addEventListener('fetch', (event) => {
                 })
                 .catch(async () => {
                     const cached = await caches.match(event.request, { ignoreSearch: true });
-                    return cached || caches.match('./app.html', { ignoreSearch: true }) || new Response(
-                        '<h1>Offline</h1><p>No internet connection.</p>',
-                        { status: 503, headers: { 'Content-Type': 'text/html' } }
-                    );
+                    if (cached) return cached;
+                    
+                    const appCached = await caches.match('./app.html', { ignoreSearch: true });
+                    if (appCached) return appCached;
+
+                    const offlineCached = await caches.match('./offline.html', { ignoreSearch: true });
+                    if (offlineCached) return offlineCached;
+                    
+                    return new Response('<h1>Offline</h1>', { status: 503, headers: { 'Content-Type': 'text/html' } });
                 })
         );
         return;
