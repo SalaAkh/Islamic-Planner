@@ -9,6 +9,15 @@ window.initMindMap = function () {
     const container = document.getElementById(containerId);
     if (!container) return;
 
+    // Constants & Colors
+    const PADDING_X = 16;
+    const PADDING_Y = 12;
+    const MIN_WIDTH = 80;
+    const MAX_WIDTH = 250;
+    const HORIZONTAL_SPACING = 60;
+    const VERTICAL_SPACING = 20;
+    const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#d946ef', '#f43f5e'];
+
     // Default state
     let treeData = {
         id: 'root',
@@ -26,11 +35,39 @@ window.initMindMap = function () {
         }
     }
 
-    // Constants
-    const NODE_WIDTH = 160;
-    const NODE_HEIGHT = 45;
-    const HORIZONTAL_SPACING = 80;
-    const VERTICAL_SPACING = 20;
+    // State Management (Undo/Redo)
+    let undoStack = [];
+    let redoStack = [];
+
+    function saveState() {
+        undoStack.push(JSON.stringify(treeData));
+        redoStack = [];
+        if (undoStack.length > 50) undoStack.shift();
+        persistData();
+    }
+
+    function persistData() {
+        localStorage.setItem('barakah_mindmap', JSON.stringify(treeData));
+        if (window.DbSync && typeof window.DbSync.syncToCloud === 'function') {
+            window.DbSync.syncToCloud('mindmap', treeData);
+        }
+    }
+
+    function undo() {
+        if (undoStack.length === 0) return;
+        redoStack.push(JSON.stringify(treeData));
+        treeData = JSON.parse(undoStack.pop());
+        selectedNodeId = null;
+        renderTree();
+    }
+
+    function redo() {
+        if (redoStack.length === 0) return;
+        undoStack.push(JSON.stringify(treeData));
+        treeData = JSON.parse(redoStack.pop());
+        selectedNodeId = null;
+        renderTree();
+    }
 
     let selectedNodeId = 'root';
     let isEditing = false;
@@ -197,39 +234,105 @@ window.initMindMap = function () {
 
     // Center root on init
     stage.position({
-        x: stage.width() / 4,
+        x: stage.width() / 2,
         y: stage.height() / 2
     });
     drawGrid();
 
-    // -- Layout Engine (Right-expanding tree) --
-    // Calculates heights
-    function calculateSubtreeHeight(node) {
-        if (!node.children || node.children.length === 0) {
-            node._height = NODE_HEIGHT;
-            return node._height;
+    // -- Bilateral Layout Engine --
+
+    const dummyText = new Konva.Text({
+        fontFamily: 'Inter, sans-serif',
+        fontSize: 14,
+        wrap: 'word',
+        width: MAX_WIDTH
+    });
+
+    function calculateNodeSize(node) {
+        dummyText.text(node.text || "Идея");
+        dummyText.fontSize(node.id === 'root' ? 18 : 14);
+        dummyText.fontStyle(node.id === 'root' ? 'bold' : 'normal');
+        dummyText.width(null);
+
+        let naturalWidth = dummyText.width();
+        if (naturalWidth > MAX_WIDTH) {
+            dummyText.width(MAX_WIDTH);
+            node._width = MAX_WIDTH + PADDING_X * 2;
+        } else {
+            node._width = Math.max(MIN_WIDTH, naturalWidth + PADDING_X * 2);
         }
+
+        node._height = dummyText.height() + PADDING_Y * 2;
+
+        if (node.isCollapsed || !node.children || node.children.length === 0) {
+            node._subtreeHeight = node._height;
+            return;
+        }
+
         let totalHeight = 0;
         node.children.forEach(child => {
-            totalHeight += calculateSubtreeHeight(child) + VERTICAL_SPACING;
+            calculateNodeSize(child);
+            totalHeight += child._subtreeHeight + VERTICAL_SPACING;
         });
-        totalHeight -= VERTICAL_SPACING; // remove last spacing
-        node._height = Math.max(NODE_HEIGHT, totalHeight);
-        return node._height;
+        totalHeight -= VERTICAL_SPACING;
+        node._subtreeHeight = Math.max(node._height, totalHeight);
     }
 
-    function calculatePositions(node, x, y) {
-        node._x = x;
-        node._y = y;
+    function calculatePositions() {
+        calculateNodeSize(treeData);
+        // Root is at (0,0) in logical coordinates
+        treeData._x = -(treeData._width / 2);
+        treeData._y = -(treeData._height / 2);
 
-        if (!node.children || node.children.length === 0) return;
+        if (!treeData.children || treeData.isCollapsed) return;
 
-        let startY = y - (node._height / 2);
-        node.children.forEach(child => {
-            let childY = startY + (child._height / 2);
-            calculatePositions(child, x + NODE_WIDTH + HORIZONTAL_SPACING, childY);
-            startY += child._height + VERTICAL_SPACING;
+        const leftChildren = [];
+        const rightChildren = [];
+        
+        treeData.children.forEach((child, idx) => {
+            if (idx % 2 === 0) rightChildren.push(child);
+            else leftChildren.push(child);
+            
+            if (!child.color) {
+                child.color = COLORS[idx % COLORS.length];
+            }
         });
+
+        function positionChildren(nodeList, startX, startY, direction) {
+            let currentY = startY;
+            nodeList.forEach(child => {
+                let childY = currentY + (child._subtreeHeight / 2);
+                child._x = direction === 'right' ? startX : startX - child._width;
+                child._y = childY - (child._height / 2);
+                
+                positionSubtree(child, direction);
+                currentY += child._subtreeHeight + VERTICAL_SPACING;
+            });
+        }
+
+        function positionSubtree(node, direction) {
+            if (!node.children || node.isCollapsed) return;
+            let startX = direction === 'right' ? node._x + node._width + HORIZONTAL_SPACING : node._x - HORIZONTAL_SPACING;
+            let currentY = node._y + (node._height / 2) - (node._subtreeHeight / 2);
+
+            node.children.forEach(child => {
+                // Inherit color
+                if (!child.color) child.color = node.color;
+
+                let childY = currentY + (child._subtreeHeight / 2);
+                child._x = direction === 'right' ? startX : startX - child._width;
+                child._y = childY - (child._height / 2);
+
+                positionSubtree(child, direction);
+                currentY += child._subtreeHeight + VERTICAL_SPACING;
+            });
+        }
+
+        let rightHeight = rightChildren.reduce((sum, c) => sum + c._subtreeHeight + VERTICAL_SPACING, 0) - VERTICAL_SPACING;
+        let leftHeight = leftChildren.reduce((sum, c) => sum + c._subtreeHeight + VERTICAL_SPACING, 0) - VERTICAL_SPACING;
+
+        positionChildren(rightChildren, treeData._x + treeData._width + HORIZONTAL_SPACING, treeData._y + treeData._height/2 - rightHeight / 2, 'right');
+        positionChildren(leftChildren, treeData._x - HORIZONTAL_SPACING, treeData._y + treeData._height/2 - leftHeight / 2, 'left');
     }
 
     // -- Rendering --
@@ -237,90 +340,244 @@ window.initMindMap = function () {
         linkLayer.destroyChildren();
         nodeLayer.destroyChildren();
 
-        calculateSubtreeHeight(treeData);
-        calculatePositions(treeData, 0, 0);
+        calculatePositions();
 
-        drawNodeRecursive(treeData);
+        drawNodeRecursive(treeData, null, 'right');
         
         linkLayer.draw();
         nodeLayer.draw();
-        saveTree();
+        persistData();
         if (typeof updateToolbarButtons === 'function') {
             updateToolbarButtons();
         }
     }
 
-    function drawNodeRecursive(node) {
-        // Draw Links
-        if (node.children) {
-            node.children.forEach(child => {
-                const startX = node._x + NODE_WIDTH;
-                const startY = node._y + NODE_HEIGHT / 2;
-                const endX = child._x;
-                const endY = child._y + NODE_HEIGHT / 2;
+    let dragTarget = null;
+    let highlightRect = null;
 
-                const cp1X = startX + (endX - startX) / 2;
-                const cp1Y = startY;
-                const cp2X = startX + (endX - startX) / 2;
-                const cp2Y = endY;
+    function drawNodeRecursive(node, parentNode, direction) {
+        // Draw Links from parent to node
+        if (parentNode) {
+            const isParentRoot = parentNode.id === 'root';
+            let startX, startY;
+            
+            if (isParentRoot) {
+                startX = parentNode._x + parentNode._width / 2;
+                startY = parentNode._y + parentNode._height / 2;
+            } else {
+                startX = direction === 'right' ? parentNode._x + parentNode._width : parentNode._x;
+                startY = parentNode._y + parentNode._height / 2;
+            }
 
-                const bezier = new Konva.Shape({
-                    stroke: '#94a3b8',
-                    strokeWidth: 2,
-                    sceneFunc: (ctx, shape) => {
-                        ctx.beginPath();
-                        ctx.moveTo(startX, startY);
-                        ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, endX, endY);
-                        ctx.strokeShape(shape);
-                    },
-                    listening: false
-                });
-                linkLayer.add(bezier);
+            const endX = direction === 'right' ? node._x : node._x + node._width;
+            const endY = node._y + node._height / 2;
 
-                drawNodeRecursive(child);
+            const cp1X = startX + (endX - startX) / 2;
+            const cp1Y = startY;
+            const cp2X = startX + (endX - startX) / 2;
+            const cp2Y = endY;
+
+            const linkColor = node.color || '#cbd5e1';
+
+            const bezier = new Konva.Shape({
+                stroke: linkColor,
+                strokeWidth: 2,
+                opacity: 0.6,
+                sceneFunc: (ctx, shape) => {
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, endX, endY);
+                    ctx.strokeShape(shape);
+                },
+                listening: false
             });
+            linkLayer.add(bezier);
         }
 
-        // Draw Node
         const isSelected = node.id === selectedNodeId;
         const isRoot = node.id === 'root';
+        const nodeColor = node.color || '#10b981';
 
         const group = new Konva.Group({
             x: node._x,
             y: node._y,
             id: node.id,
-            draggable: false
+            draggable: !isRoot
         });
 
+        // Background Rect
         const rect = new Konva.Rect({
-            width: NODE_WIDTH,
-            height: NODE_HEIGHT,
-            fill: isRoot ? '#10b981' : (isSelected ? '#e0e7ff' : '#ffffff'),
-            stroke: isSelected ? '#4f46e5' : (isRoot ? '#059669' : '#cbd5e1'),
-            strokeWidth: isSelected ? 2 : 1,
-            cornerRadius: 8,
-            shadowColor: '#000',
-            shadowBlur: 10,
-            shadowOffset: { x: 0, y: 4 },
-            shadowOpacity: 0.05
+            width: node._width,
+            height: node._height,
+            fill: isRoot ? '#10b981' : (isSelected ? nodeColor : '#ffffff'),
+            stroke: isSelected ? '#1e293b' : nodeColor,
+            strokeWidth: isSelected ? 2 : 1.5,
+            cornerRadius: 12,
+            shadowColor: nodeColor,
+            shadowBlur: isSelected ? 12 : 4,
+            shadowOffset: { x: 0, y: 2 },
+            shadowOpacity: isSelected ? 0.3 : 0.1
         });
 
+        // Text
         const text = new Konva.Text({
             text: node.text || "Идея",
-            fontSize: isRoot ? 16 : 14,
+            fontSize: isRoot ? 18 : 14,
             fontFamily: 'Inter, sans-serif',
-            fill: isRoot ? '#ffffff' : '#1e293b',
-            width: NODE_WIDTH - 20,
-            padding: 10,
+            fontStyle: isRoot ? 'bold' : 'normal',
+            fill: (isRoot || isSelected) ? '#ffffff' : '#1e293b',
+            width: Math.min(MAX_WIDTH, node._width) - PADDING_X * 2,
+            padding: 0,
+            x: PADDING_X,
+            y: PADDING_Y,
             align: 'center',
             verticalAlign: 'middle',
-            height: NODE_HEIGHT,
-            wrap: 'none',
-            ellipsis: true
+            wrap: 'word'
         });
 
         group.add(rect);
         group.add(text);
+
+        // Collapse/Expand Button
+        if (node.children && node.children.length > 0) {
+            const btnRadius = 8;
+            const btnX = direction === 'right' ? node._width : 0;
+            const btnY = node._height / 2;
+
+            const toggleGroup = new Konva.Group({
+                x: btnX,
+                y: btnY,
+                cursor: 'pointer'
+            });
+
+            const toggleBg = new Konva.Circle({
+                radius: btnRadius,
+                fill: '#ffffff',
+                stroke: nodeColor,
+                strokeWidth: 1.5
+            });
+
+            const toggleSign = new Konva.Text({
+                text: node.isCollapsed ? '+' : '-',
+                fontSize: 14,
+                fontFamily: 'monospace',
+                fontStyle: 'bold',
+                fill: nodeColor,
+                width: btnRadius * 2,
+                height: btnRadius * 2,
+                x: -btnRadius,
+                y: -btnRadius,
+                align: 'center',
+                verticalAlign: 'middle'
+            });
+
+            toggleGroup.add(toggleBg);
+            toggleGroup.add(toggleSign);
+
+            toggleGroup.on('click tap', (e) => {
+                e.cancelBubble = true;
+                saveState();
+                node.isCollapsed = !node.isCollapsed;
+                renderTree();
+            });
+
+            toggleGroup.on('mouseenter', () => {
+                stage.container().style.cursor = 'pointer';
+                toggleBg.fill(nodeColor);
+                toggleSign.fill('#ffffff');
+                nodeLayer.draw();
+            });
+
+            toggleGroup.on('mouseleave', () => {
+                stage.container().style.cursor = 'default';
+                toggleBg.fill('#ffffff');
+                toggleSign.fill(nodeColor);
+                nodeLayer.draw();
+            });
+
+            group.add(toggleGroup);
+        }
+
+        // Drag and Drop Logic
+        if (!isRoot) {
+            group.on('dragstart', (e) => {
+                e.cancelBubble = true;
+                group.moveToTop();
+            });
+
+            group.on('dragmove', (e) => {
+                const pos = stage.getPointerPosition();
+                const transform = stage.getAbsoluteTransform().copy();
+                transform.invert();
+                const localPos = transform.point(pos);
+
+                let found = null;
+                function checkIntersect(n) {
+                    if (n.id === node.id) return; // skip self and subtree
+                    if (localPos.x >= n._x && localPos.x <= n._x + n._width &&
+                        localPos.y >= n._y && localPos.y <= n._y + n._height) {
+                        found = n;
+                    }
+                    if (n.children && !n.isCollapsed) {
+                        // don't search inside node being dragged
+                        if (n.id !== node.id) {
+                            n.children.forEach(checkIntersect);
+                        }
+                    }
+                }
+                checkIntersect(treeData);
+
+                if (found !== dragTarget) {
+                    if (highlightRect) highlightRect.destroy();
+                    dragTarget = found;
+                    if (dragTarget) {
+                        highlightRect = new Konva.Rect({
+                            x: dragTarget._x - 4,
+                            y: dragTarget._y - 4,
+                            width: dragTarget._width + 8,
+                            height: dragTarget._height + 8,
+                            stroke: '#3b82f6',
+                            strokeWidth: 3,
+                            cornerRadius: 14,
+                            dash: [5, 5]
+                        });
+                        nodeLayer.add(highlightRect);
+                    }
+                }
+            });
+
+            group.on('dragend', (e) => {
+                e.cancelBubble = true;
+                if (highlightRect) highlightRect.destroy();
+                highlightRect = null;
+
+                if (dragTarget && dragTarget.id !== node.id) {
+                    saveState();
+                    // Remove from old parent
+                    const oldParent = findNodeParent(treeData, node.id);
+                    if (oldParent) {
+                        oldParent.children = oldParent.children.filter(c => c.id !== node.id);
+                    }
+                    
+                    // Add to new parent
+                    if (!dragTarget.children) dragTarget.children = [];
+                    // Reset color so it inherits
+                    if (dragTarget.id !== 'root') {
+                        node.color = undefined;
+                        function clearColors(n) { n.color = undefined; if(n.children) n.children.forEach(clearColors); }
+                        if(node.children) node.children.forEach(clearColors);
+                    }
+                    dragTarget.children.push(node);
+                    dragTarget.isCollapsed = false;
+                    selectedNodeId = node.id;
+                    renderTree();
+                } else {
+                    // snap back
+                    renderTree();
+                }
+                dragTarget = null;
+            });
+        }
 
         group.on('click tap', (e) => {
             e.cancelBubble = true;
@@ -335,7 +592,6 @@ window.initMindMap = function () {
             selectedNodeId = node.id;
             renderTree();
             
-            // Находим новые отрисованные ноды, так как renderTree удалил старые
             const newGroup = nodeLayer.findOne('#' + node.id);
             if (newGroup) {
                 const newTextNode = newGroup.getChildren()[1];
@@ -344,6 +600,16 @@ window.initMindMap = function () {
         });
 
         nodeLayer.add(group);
+
+        if (node.children && !node.isCollapsed) {
+            node.children.forEach((child, idx) => {
+                let childDirection = direction;
+                if (isRoot) {
+                    childDirection = (idx % 2 === 0) ? 'right' : 'left';
+                }
+                drawNodeRecursive(child, node, childDirection);
+            });
+        }
     }
 
     stage.on('click tap', (e) => {
@@ -375,7 +641,8 @@ window.initMindMap = function () {
     }
 
     function deleteNode(targetId) {
-        if (targetId === 'root') return; // Can't delete root
+        if (targetId === 'root') return;
+        saveState();
         const parent = findNodeParent(treeData, targetId);
         if (parent) {
             parent.children = parent.children.filter(c => c.id !== targetId);
@@ -387,13 +654,15 @@ window.initMindMap = function () {
     function addChild(parentId) {
         const parent = findNode(treeData, parentId);
         if (parent) {
+            saveState();
             if (!parent.children) parent.children = [];
             const newId = 'node_' + Date.now();
             const newNode = { id: newId, text: 'Новая идея', children: [] };
             parent.children.push(newNode);
+            parent.isCollapsed = false;
             selectedNodeId = newId;
             renderTree();
-            // Optional: Auto-edit immediately
+            
             const group = nodeLayer.findOne('#' + newId);
             if (group) {
                 const textNode = group.getChildren()[1];
@@ -409,6 +678,7 @@ window.initMindMap = function () {
         }
         const parent = findNodeParent(treeData, nodeId);
         if (parent) {
+            saveState();
             const newId = 'node_' + Date.now();
             const newNode = { id: newId, text: 'Новая идея', children: [] };
             const idx = parent.children.findIndex(c => c.id === nodeId);
@@ -427,6 +697,21 @@ window.initMindMap = function () {
     // -- Keyboard Shortcuts --
     const keyHandler = (e) => {
         if (isEditing) return;
+        
+        // Handle Undo/Redo
+        if (e.ctrlKey || e.metaKey) {
+            if (e.key === 'z' || e.key === 'Z') {
+                e.preventDefault();
+                undo();
+                return;
+            }
+            if (e.key === 'y' || e.key === 'Y') {
+                e.preventDefault();
+                redo();
+                return;
+            }
+        }
+
         const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
         if (tag === 'input' || tag === 'textarea' || document.activeElement.isContentEditable) return;
 
@@ -443,7 +728,7 @@ window.initMindMap = function () {
             }
         }
     };
-    // Ensure we don't bind multiple times if tab is re-clicked
+    
     document.removeEventListener('keydown', window._mindMapKeyHandler);
     window._mindMapKeyHandler = keyHandler;
     document.addEventListener('keydown', keyHandler);
@@ -454,44 +739,44 @@ window.initMindMap = function () {
         textNode.hide();
         nodeLayer.draw();
 
-        const textPosition = textNode.absolutePosition();
-        const stageBox = stage.container().getBoundingClientRect();
+        const groupPosition = groupNode.absolutePosition();
         
-        // Account for offsetParent to fix position
-        const parentRect = container.offsetParent?.getBoundingClientRect() || { top: 0, left: 0 };
-        
-        const areaPosition = {
-            x: stageBox.left + textPosition.x - parentRect.left,
-            y: stageBox.top + textPosition.y - parentRect.top,
-        };
-
         const textarea = document.createElement('textarea');
-        document.body.appendChild(textarea);
+        textarea.id = 'mindmap-editor';
+        textarea.name = 'mindmap-editor';
+        stage.container().appendChild(textarea);
 
         textarea.value = nodeData.text;
         textarea.style.position = 'absolute';
-        textarea.style.top = areaPosition.y + 'px';
-        textarea.style.left = areaPosition.x + 'px';
-        textarea.style.width = textNode.width() * stage.scaleX() + 'px';
-        textarea.style.height = textNode.height() * stage.scaleY() + 'px';
+        textarea.style.top = groupPosition.y + 'px';
+        textarea.style.left = groupPosition.x + 'px';
+        textarea.style.width = (nodeData._width * stage.scaleX()) + 'px';
+        textarea.style.height = (nodeData._height * stage.scaleY()) + 'px';
         textarea.style.fontSize = (textNode.fontSize() * stage.scaleY()) + 'px';
         textarea.style.border = '2px solid #4f46e5';
-        textarea.style.padding = '0px';
+        textarea.style.padding = (PADDING_Y * stage.scaleY()) + 'px ' + (PADDING_X * stage.scaleX()) + 'px';
         textarea.style.margin = '0px';
         textarea.style.overflow = 'hidden';
         textarea.style.background = '#ffffff';
         textarea.style.color = '#1e293b';
         textarea.style.outline = 'none';
         textarea.style.resize = 'none';
-        textarea.style.lineHeight = textNode.lineHeight();
+        textarea.style.lineHeight = textNode.lineHeight() || 1.2;
         textarea.style.fontFamily = textNode.fontFamily();
         textarea.style.transformOrigin = 'left top';
         textarea.style.textAlign = textNode.align();
-        textarea.style.borderRadius = '6px';
+        textarea.style.borderRadius = '12px';
         textarea.style.zIndex = '1000';
+        textarea.style.boxSizing = 'border-box';
 
         textarea.focus();
         textarea.select();
+
+        // Auto-resize textarea while typing
+        textarea.addEventListener('input', () => {
+            textarea.style.height = 'auto';
+            textarea.style.height = (textarea.scrollHeight) + 'px';
+        });
 
         function removeTextarea() {
             if(!textarea.parentNode) return;
@@ -499,10 +784,13 @@ window.initMindMap = function () {
             window.removeEventListener('click', handleOutsideClick);
             isEditing = false;
             
-            nodeData.text = textarea.value;
-            textNode.text(textarea.value);
+            if (nodeData.text !== textarea.value) {
+                saveState();
+                nodeData.text = textarea.value;
+            }
+            
             textNode.show();
-            renderTree(); // re-render to apply changes
+            renderTree(); 
         }
 
         function handleOutsideClick(e) {
@@ -516,6 +804,7 @@ window.initMindMap = function () {
         });
 
         textarea.addEventListener('keydown', function (e) {
+            // Allow shift+enter for newlines
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 removeTextarea();
@@ -524,13 +813,6 @@ window.initMindMap = function () {
                 removeTextarea();
             }
         });
-    }
-
-    function saveTree() {
-        localStorage.setItem('barakah_mindmap', JSON.stringify(treeData));
-        if (window.DbSync && typeof window.DbSync.syncToCloud === 'function') {
-            window.DbSync.syncToCloud('mindmap', treeData);
-        }
     }
 
     // -- Floating Toolbar State update and Handlers --
@@ -546,32 +828,20 @@ window.initMindMap = function () {
         const isRoot = selectedNodeId === 'root';
 
         if (toolbarButtons.child) {
-            if (hasSelection) {
-                toolbarButtons.child.classList.remove('opacity-40', 'pointer-events-none');
-            } else {
-                toolbarButtons.child.classList.add('opacity-40', 'pointer-events-none');
-            }
+            if (hasSelection) toolbarButtons.child.classList.remove('opacity-40', 'pointer-events-none');
+            else toolbarButtons.child.classList.add('opacity-40', 'pointer-events-none');
         }
         if (toolbarButtons.sibling) {
-            if (hasSelection) {
-                toolbarButtons.sibling.classList.remove('opacity-40', 'pointer-events-none');
-            } else {
-                toolbarButtons.sibling.classList.add('opacity-40', 'pointer-events-none');
-            }
+            if (hasSelection) toolbarButtons.sibling.classList.remove('opacity-40', 'pointer-events-none');
+            else toolbarButtons.sibling.classList.add('opacity-40', 'pointer-events-none');
         }
         if (toolbarButtons.edit) {
-            if (hasSelection) {
-                toolbarButtons.edit.classList.remove('opacity-40', 'pointer-events-none');
-            } else {
-                toolbarButtons.edit.classList.add('opacity-40', 'pointer-events-none');
-            }
+            if (hasSelection) toolbarButtons.edit.classList.remove('opacity-40', 'pointer-events-none');
+            else toolbarButtons.edit.classList.add('opacity-40', 'pointer-events-none');
         }
         if (toolbarButtons.del) {
-            if (hasSelection && !isRoot) {
-                toolbarButtons.del.classList.remove('opacity-40', 'pointer-events-none');
-            } else {
-                toolbarButtons.del.classList.add('opacity-40', 'pointer-events-none');
-            }
+            if (hasSelection && !isRoot) toolbarButtons.del.classList.remove('opacity-40', 'pointer-events-none');
+            else toolbarButtons.del.classList.add('opacity-40', 'pointer-events-none');
         }
     }
 
@@ -616,7 +886,7 @@ window.initMindMap = function () {
         btnCenter.onclick = (e) => {
             e.stopPropagation();
             stage.position({
-                x: stage.width() / 4,
+                x: stage.width() / 2,
                 y: stage.height() / 2
             });
             stage.scale({ x: 1, y: 1 });
