@@ -1,23 +1,84 @@
 {
-    "name": "Barakah Planner",
-    "short_name": "Barakah",
-    "description": "Экосистема для мусульман: Дин и Дунья",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#0f172a",
-    "theme_color": "#059669",
-    "icons": [
-        {
-            "src": "favicon.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any maskable"
-        },
-        {
-            "src": "favicon.png",
-            "sizes": "640x640",
-            "type": "image/png",
-            "purpose": "any maskable"
-        }
-    ]
+  "name": "Barakah Planner",
+  "short_name": "Barakah",
+  "description": "Исламский планировщик: задачи и молитвы",
+  "start_url": "/",
+  "scope": "/",
+  "scope_extensions": [
+    { "origin": "https://islamic-planer.web.app" }
+  ],
+  "iarc_rating_id": "e",
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "file_handlers": [
+    {
+      "action": "/app.html",
+      "accept": {
+        "application/json": [".json"]
+      }
+    }
+  ],
+  "id": "/?source=pwa",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#059669",
+  "lang": "ru-RU",
+  "dir": "ltr",
+  "categories": ["productivity", "lifestyle"],
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "com.salaakh.barakahplanner"
+    }
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-wide.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Главный экран Barakah Planner"
+    },
+    {
+      "src": "screenshot-narrow.png",
+      "sizes": "630x1200",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Мобильная версия Barakah Planner"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Намаз",
+      "short_name": "Намаз",
+      "description": "Быстрый доступ к намазам",
+      "url": "/app.html?tab=daily",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Тасбих",
+      "short_name": "Тасбих",
+      "description": "Откройте тасбих",
+      "url": "/app.html?tab=tasbih",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
 }

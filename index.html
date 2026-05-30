@@ -5,11 +5,11 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-SHJEPJDL0J"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
 
-      gtag('config', 'G-SHJEPJDL0J');
+        gtag('config', 'G-SHJEPJDL0J');
     </script>
 
     <meta charset="UTF-8">
@@ -52,8 +52,10 @@
 
     <!-- Smart Redirect: if user already has app data, send them straight to app.html -->
     <script>
-        // No auto-redirect — landing page always shows.
-        // Users click "Open App" to go to the planner.
+        // Native App (Capacitor) users don't need the landing page
+        if (window.Capacitor || window.location.protocol === 'file:' || window.location.hostname === 'localhost') {
+            window.location.replace('./app.html');
+        }
     </script>
 
     <style>
@@ -880,14 +882,16 @@
             <div class="feature-card">
                 <div class="feature-icon purple"><i class="fas fa-pray"></i></div>
                 <h3 class="feature-title t" data-key="f7_title">Тасбих / Зикр</h3>
-                <p class="feature-desc t" data-key="f7_desc">Встроенный счетчик зикров с тактильной вибрацией, популярными пресетами и автосохранением дневной статистики.</p>
+                <p class="feature-desc t" data-key="f7_desc">Встроенный счетчик зикров с тактильной вибрацией,
+                    популярными пресетами и автосохранением дневной статистики.</p>
             </div>
 
             <!-- Double Asr Calculation -->
             <div class="feature-card">
                 <div class="feature-icon blue"><i class="fas fa-clock"></i></div>
                 <h3 class="feature-title t" data-key="f8_title">Расчет Асра (Ханафи / Шафии)</h3>
-                <p class="feature-desc t" data-key="f8_desc">Отображение времени Асра сразу по двум мазхабам: Ханафи (стандарт ДУМК) и Шафии (1х тень) для максимального удобства планирования.</p>
+                <p class="feature-desc t" data-key="f8_desc">Отображение времени Асра сразу по двум мазхабам: Ханафи
+                    (стандарт ДУМК) и Шафии (1х тень) для максимального удобства планирования.</p>
             </div>
         </div>
     </section>
@@ -989,8 +993,7 @@
             <a href="https://tiktok.com/@sala_ah_dev" target="_blank" rel="noopener"
                 style="color: var(--text-muted); font-size: 1.4rem; transition: all .25s; text-decoration: none;"
                 onmouseover="this.style.color='#fff'; this.style.transform='translateY(-3px)'"
-                onmouseout="this.style.color='var(--text-muted)'; this.style.transform='translateY(0)'"
-                title="TikTok">
+                onmouseout="this.style.color='var(--text-muted)'; this.style.transform='translateY(0)'" title="TikTok">
                 <i class="fab fa-tiktok"></i>
             </a>
             <a href="https://t.me/salaah_dev" target="_blank" rel="noopener"
@@ -1003,8 +1006,7 @@
             <a href="https://github.com/SalaAkh" target="_blank" rel="noopener"
                 style="color: var(--text-muted); font-size: 1.4rem; transition: all .25s; text-decoration: none;"
                 onmouseover="this.style.color='#fff'; this.style.transform='translateY(-3px)'"
-                onmouseout="this.style.color='var(--text-muted)'; this.style.transform='translateY(0)'"
-                title="GitHub">
+                onmouseout="this.style.color='var(--text-muted)'; this.style.transform='translateY(0)'" title="GitHub">
                 <i class="fab fa-github"></i>
             </a>
         </div>
@@ -1030,7 +1032,11 @@
         <p>© 2025 <strong>Barakah Planner</strong> · <span class="t" data-key="footer_free">Бесплатно для Уммы</span> ·
             <a href="./app.html" class="t" data-key="open_app">Открыть</a>
         </p>
-        <p class="t" data-key="religious_disclaimer_text" style="font-size: 0.75rem; max-width: 650px; margin: 16px auto 0; line-height: 1.5; opacity: 0.6; font-style: italic;">Barakah Planner является инструментом личной продуктивности и тайм-менеджмента. Приложение не предоставляет религиозных предписаний, фетв или официального шариатского руководства. Все расчеты времени намазов носят справочно-информационный характер.</p>
+        <p class="t" data-key="religious_disclaimer_text"
+            style="font-size: 0.75rem; max-width: 650px; margin: 16px auto 0; line-height: 1.5; opacity: 0.6; font-style: italic;">
+            Barakah Planner является инструментом личной продуктивности и тайм-менеджмента. Приложение не предоставляет
+            религиозных предписаний, фетв или официального шариатского руководства. Все расчеты времени намазов носят
+            справочно-информационный характер.</p>
     </footer>
 
     <script>
@@ -1201,6 +1207,17 @@
 
         // ─── Init ───
         setLang(currentLang);
+
+        // ─── PWA Service Worker ───
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('./sw.js?v=' + Date.now()).then(function (registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function (err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
     </script>
 
 </body>
