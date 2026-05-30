@@ -666,7 +666,7 @@ function renderCalendar() {
             const hy = hijriComps.year;
             const hMonthName = HIJRI_MONTHS[lang] ? HIJRI_MONTHS[lang][hm - 1] : "";
 
-            hijriLabelHtml = `<div class="absolute top-1.5 ltr:right-1.5 rtl:left-1.5 text-[9px] md:text-[10px] text-gray-400 dark:text-gray-500 font-semibold pointer-events-none">${hd} ${hMonthName}</div>`;
+            hijriLabelHtml = `<div class="absolute top-1.5 ltr:right-1.5 rtl:left-1.5 text-[9px] md:text-[10px] text-gray-400 dark:text-gray-500 font-semibold pointer-events-none">${hd} <span class="hidden md:inline">${hMonthName}</span></div>`;
 
             // Check if this date has matching events
             const matching = ISLAMIC_EVENTS.filter(ev => ev.month === hm && ev.day === hd);
@@ -685,12 +685,12 @@ function renderCalendar() {
                     });
 
                     if (!eventBadgesHtml) {
-                        eventBadgesHtml = `<div class="islamic-event-badge mt-1.5 text-[9px] md:text-[10px] px-1.5 py-0.5 rounded text-center truncate font-bold bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border border-emerald-500/30 shadow-sm" title="${escapeHtml(evName)}">🌟 ${escapeHtml(evName)}</div>`;
+                        eventBadgesHtml = `<div class="islamic-event-badge mt-1.5 text-[9px] md:text-[10px] px-1.5 py-0.5 rounded text-center truncate font-bold bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 border border-emerald-500/30 shadow-sm flex items-center justify-center gap-1" title="${escapeHtml(evName)}">🌟 <span class="hidden md:inline">${escapeHtml(evName)}</span></div>`;
                     }
                 });
             } else if (hm === 9) {
                 isRamadan = true;
-                eventBadgesHtml = `<div class="ramadan-day-badge mt-1.5 text-[9px] md:text-[10px] px-1 py-0.5 rounded text-center truncate font-medium bg-amber-500/10 text-amber-800 dark:text-amber-200 border border-amber-500/20" title="${hMonthName} ${hd}">🌙 ${hd} ${hMonthName}</div>`;
+                eventBadgesHtml = `<div class="ramadan-day-badge mt-1.5 text-[9px] md:text-[10px] px-1 py-0.5 rounded text-center truncate font-medium bg-amber-500/10 text-amber-800 dark:text-amber-200 border border-amber-500/20 flex items-center justify-center gap-1" title="${hMonthName} ${hd}">🌙 <span class="hidden md:inline">${hd} ${hMonthName}</span></div>`;
             }
         }
 

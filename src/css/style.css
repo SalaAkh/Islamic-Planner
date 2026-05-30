@@ -1468,14 +1468,32 @@ body {
     }
     
     /* Calendar fixes */
+    .calendar-wrapper {
+        padding: 0.5rem !important;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
     .calendar-grid {
-        min-width: 100%;
+        min-width: 480px;
         overflow-x: auto;
     }
     .calendar-cell {
-        min-height: 40px;
-        padding: 2px;
-        font-size: 0.7rem;
+        min-height: 52px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: stretch;
+        padding: 4px 2px;
+        font-size: 0.75rem;
+    }
+    .islamic-event-badge, .ramadan-day-badge {
+        display: inline-flex !important;
+        justify-content: center;
+        align-items: center;
+        margin: 4px auto 0 auto !important;
+        padding: 2px 4px !important;
+        width: auto !important;
+        max-width: max-content;
     }
 }
 
@@ -1983,5 +2001,29 @@ html:not(.dark) .main-footer {
     .main-footer {
         border-radius: 20px !important;
         margin: 0 !important;
+    }
+}
+
+/* Premium MindMap Toolbar Styles */
+#mindmap-toolbar button {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#mindmap-toolbar button:hover {
+    transform: translateY(-2px);
+}
+#mindmap-toolbar button:active {
+    transform: translateY(0) scale(0.95);
+}
+
+@media (max-width: 768px) {
+    #mindmap-toolbar {
+        bottom: 12px;
+        right: 12px;
+        padding: 6px;
+        border-radius: 16px;
+    }
+    #mindmap-toolbar button {
+        width: 36px;
+        height: 36px;
     }
 }

@@ -80,6 +80,77 @@ window.initMindMap = function () {
 
     stage.on('dragmove', drawGrid);
 
+    // Touch pinch zoom
+    let lastDist = 0;
+    let lastCenter = null;
+
+    function getDistance(p1, p2) {
+        return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+    }
+
+    function getCenter(p1, p2) {
+        return {
+            x: (p1.x + p2.x) / 2,
+            y: (p1.y + p2.y) / 2,
+        };
+    }
+
+    stage.on('touchmove', (e) => {
+        const touch1 = e.evt.touches[0];
+        const touch2 = e.evt.touches[1];
+
+        if (touch1 && touch2) {
+            e.evt.preventDefault();
+            if (stage.isDragging()) {
+                stage.stopDrag();
+            }
+
+            const p1 = { x: touch1.clientX, y: touch1.clientY };
+            const p2 = { x: touch2.clientX, y: touch2.clientY };
+
+            if (!lastDist) {
+                lastDist = getDistance(p1, p2);
+            }
+            if (!lastCenter) {
+                lastCenter = getCenter(p1, p2);
+                return;
+            }
+
+            const dist = getDistance(p1, p2);
+            const center = getCenter(p1, p2);
+
+            const oldScale = stage.scaleX();
+            const newScale = oldScale * (dist / lastDist);
+            const boundedScale = Math.max(0.1, Math.min(5, newScale));
+
+            const stageBox = stage.container().getBoundingClientRect();
+            const pointer = {
+                x: center.x - stageBox.left,
+                y: center.y - stageBox.top,
+            };
+
+            const mousePointTo = {
+                x: (pointer.x - stage.x()) / oldScale,
+                y: (pointer.y - stage.y()) / oldScale,
+            };
+
+            stage.scale({ x: boundedScale, y: boundedScale });
+            stage.position({
+                x: pointer.x - mousePointTo.x * boundedScale,
+                y: pointer.y - mousePointTo.y * boundedScale,
+            });
+
+            lastDist = dist;
+            lastCenter = center;
+            drawGrid();
+        }
+    });
+
+    stage.on('touchend', () => {
+        lastDist = 0;
+        lastCenter = null;
+    });
+
     // Grid
     const DOT_SPACING = 50;
     function drawGrid() {
@@ -174,6 +245,9 @@ window.initMindMap = function () {
         linkLayer.draw();
         nodeLayer.draw();
         saveTree();
+        if (typeof updateToolbarButtons === 'function') {
+            updateToolbarButtons();
+        }
     }
 
     function drawNodeRecursive(node) {
@@ -457,6 +531,97 @@ window.initMindMap = function () {
         if (window.DbSync && typeof window.DbSync.syncToCloud === 'function') {
             window.DbSync.syncToCloud('mindmap', treeData);
         }
+    }
+
+    // -- Floating Toolbar State update and Handlers --
+    function updateToolbarButtons() {
+        const toolbarButtons = {
+            child: document.getElementById('mm-btn-add-child'),
+            sibling: document.getElementById('mm-btn-add-sibling'),
+            edit: document.getElementById('mm-btn-edit'),
+            del: document.getElementById('mm-btn-delete')
+        };
+
+        const hasSelection = !!selectedNodeId;
+        const isRoot = selectedNodeId === 'root';
+
+        if (toolbarButtons.child) {
+            if (hasSelection) {
+                toolbarButtons.child.classList.remove('opacity-40', 'pointer-events-none');
+            } else {
+                toolbarButtons.child.classList.add('opacity-40', 'pointer-events-none');
+            }
+        }
+        if (toolbarButtons.sibling) {
+            if (hasSelection) {
+                toolbarButtons.sibling.classList.remove('opacity-40', 'pointer-events-none');
+            } else {
+                toolbarButtons.sibling.classList.add('opacity-40', 'pointer-events-none');
+            }
+        }
+        if (toolbarButtons.edit) {
+            if (hasSelection) {
+                toolbarButtons.edit.classList.remove('opacity-40', 'pointer-events-none');
+            } else {
+                toolbarButtons.edit.classList.add('opacity-40', 'pointer-events-none');
+            }
+        }
+        if (toolbarButtons.del) {
+            if (hasSelection && !isRoot) {
+                toolbarButtons.del.classList.remove('opacity-40', 'pointer-events-none');
+            } else {
+                toolbarButtons.del.classList.add('opacity-40', 'pointer-events-none');
+            }
+        }
+    }
+
+    const btnAddChild = document.getElementById('mm-btn-add-child');
+    const btnAddSibling = document.getElementById('mm-btn-add-sibling');
+    const btnEdit = document.getElementById('mm-btn-edit');
+    const btnDelete = document.getElementById('mm-btn-delete');
+    const btnCenter = document.getElementById('mm-btn-center');
+
+    if (btnAddChild) {
+        btnAddChild.onclick = (e) => {
+            e.stopPropagation();
+            if (selectedNodeId) addChild(selectedNodeId);
+        };
+    }
+    if (btnAddSibling) {
+        btnAddSibling.onclick = (e) => {
+            e.stopPropagation();
+            if (selectedNodeId) addSibling(selectedNodeId);
+        };
+    }
+    if (btnEdit) {
+        btnEdit.onclick = (e) => {
+            e.stopPropagation();
+            if (selectedNodeId && !isEditing) {
+                const node = findNode(treeData, selectedNodeId);
+                const group = nodeLayer.findOne('#' + selectedNodeId);
+                if (node && group) {
+                    const textNode = group.getChildren()[1];
+                    startTextEdit(node, group, textNode);
+                }
+            }
+        };
+    }
+    if (btnDelete) {
+        btnDelete.onclick = (e) => {
+            e.stopPropagation();
+            if (selectedNodeId) deleteNode(selectedNodeId);
+        };
+    }
+    if (btnCenter) {
+        btnCenter.onclick = (e) => {
+            e.stopPropagation();
+            stage.position({
+                x: stage.width() / 4,
+                y: stage.height() / 2
+            });
+            stage.scale({ x: 1, y: 1 });
+            drawGrid();
+        };
     }
 
     // Initial Render
