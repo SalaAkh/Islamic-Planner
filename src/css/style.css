@@ -2027,3 +2027,17 @@ html:not(.dark) .main-footer {
         height: 36px;
     }
 }
+
+/* Gamification Animations */
+@keyframes float-up {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+}
+
+.animate-float-up {
+    animation: float-up 1.5s ease-out forwards;
+}
+
+.shadow-glow {
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.8), 0 0 20px rgba(16, 185, 129, 0.5);
+}

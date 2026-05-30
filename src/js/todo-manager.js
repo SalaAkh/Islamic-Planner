@@ -404,6 +404,14 @@ class TodoManager {
             } else if (task.completed) {
                 task.completed = false; 
             }
+            
+            if (sub.completed && window.Gamification) {
+                const event = new CustomEvent('barakah:addPoints', {
+                    detail: { amount: 5, reason: 'todo_subtask_completed', eventObj: { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } }
+                });
+                window.dispatchEvent(event);
+            }
+
             this.selectList(this.currentListId);
             const subArea = document.getElementById(`subtasks-${taskId}`);
             if(subArea) subArea.classList.remove('hidden');
@@ -496,6 +504,14 @@ class TodoManager {
             if(task.completed && task.subtasks) {
                 task.subtasks.forEach(s => s.completed = true);
             }
+            
+            if (task.completed && window.Gamification) {
+                const event = new CustomEvent('barakah:addPoints', {
+                    detail: { amount: 15, reason: 'todo_task_completed', eventObj: { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 } }
+                });
+                window.dispatchEvent(event);
+            }
+            
             this.selectList(this.currentListId);
             await this.syncList(list);
         }

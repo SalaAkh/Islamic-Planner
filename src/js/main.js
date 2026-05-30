@@ -329,8 +329,16 @@ function initDailyPlanner() {
             saveDailyData();
             
             // GA4 Event: Activation tracking
-            if (e.target.checked && typeof gtag === 'function') {
-                gtag('event', 'ibadah_checked', { namaz: e.target.getAttribute('data-id') });
+            if (e.target.checked) {
+                if (typeof gtag === 'function') {
+                    gtag('event', 'ibadah_checked', { namaz: e.target.getAttribute('data-id') });
+                }
+                if (window.Gamification) {
+                    const event = new CustomEvent('barakah:addPoints', {
+                        detail: { amount: 5, reason: 'habit_checked', eventObj: e }
+                    });
+                    window.dispatchEvent(event);
+                }
             }
         }
     });
@@ -572,6 +580,14 @@ function toggleTask(btn) {
         btn.classList.add('task-done');
         input.classList.add('line-through', 'text-gray-400', 'opacity-60');
         window.ActivityLog?.log('task_toggled', { state: 'done', task: input.value?.slice(0, 60) });
+        
+        if (window.Gamification) {
+            const rect = btn.getBoundingClientRect();
+            const event = new CustomEvent('barakah:addPoints', {
+                detail: { amount: 10, reason: 'task_done', eventObj: { clientX: rect.right, clientY: rect.top } }
+            });
+            window.dispatchEvent(event);
+        }
     } else {
         btn.classList.remove('task-done');
         input.classList.remove('line-through', 'text-gray-400', 'opacity-60');

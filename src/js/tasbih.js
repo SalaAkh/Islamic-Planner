@@ -148,6 +148,18 @@
                 navigator.vibrate(60);
             }
         }
+        
+        if (target !== Infinity && current === target) {
+            if (window.Gamification) {
+                const clickerBtn = document.getElementById('tasbih-clicker');
+                const rect = clickerBtn ? clickerBtn.getBoundingClientRect() : null;
+                const pos = rect ? { clientX: rect.left + rect.width / 2, clientY: rect.top } : null;
+                const event = new CustomEvent('barakah:addPoints', {
+                    detail: { amount: 20, reason: 'tasbih_completed', eventObj: pos }
+                });
+                window.dispatchEvent(event);
+            }
+        }
     }
 
     // Reset current preset counter

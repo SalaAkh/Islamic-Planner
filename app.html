@@ -264,6 +264,7 @@
     <script defer src="./src/js/daily-wisdom.js"></script>
     <script defer src="./src/js/tasbih.js"></script>
     <script defer src="./src/js/mindmap.js"></script>
+    <script defer src="./src/js/gamification.js"></script>
     <script defer src="./src/js/main.js"></script>
     <script type="module" src="./src/js/native.js"></script>
 </head>
@@ -438,6 +439,25 @@
                                 <i class="fas fa-share-nodes"></i>
                                 <span data-i18n="btn_share">Поделиться</span>
                             </button>
+                            <!-- Gamification Widget -->
+                            <div class="ml-auto flex items-center gap-3 bg-white/60 dark:bg-slate-800/60 px-3 py-1.5 rounded-xl border border-slate-200/60 dark:border-slate-700/50 shadow-sm cursor-pointer hover:bg-white dark:hover:bg-slate-800 transition-colors" onclick="const modal = document.getElementById('gamification-modal'); if(modal) modal.showModal();">
+                                <div class="flex flex-col items-end">
+                                    <span id="barakah-level-name" class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 tracking-wider uppercase">Talib</span>
+                                    <div class="flex items-center gap-1 mt-0.5">
+                                        <span id="barakah-points" class="text-sm font-black text-slate-800 dark:text-slate-100">0</span>
+                                        <i class="fas fa-trophy text-[10px] text-amber-500"></i>
+                                    </div>
+                                </div>
+                                <div class="w-10 h-10 relative flex items-center justify-center bg-slate-100 dark:bg-slate-900 rounded-full border border-slate-200 dark:border-slate-700">
+                                    <span id="barakah-streak" class="text-[10px] font-bold text-orange-500 z-10" title="Огонь за ежедневный вход">🔥0</span>
+                                    <!-- Circular Progress -->
+                                    <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 100 100">
+                                        <circle class="text-slate-200 dark:text-slate-700 stroke-current" stroke-width="8" fill="transparent" r="42" cx="50" cy="50"/>
+                                        <circle id="barakah-progress-bar" class="text-emerald-500 stroke-current transition-all duration-500 ease-out" stroke-width="8" stroke-dasharray="264" stroke-dashoffset="264" stroke-linecap="round" fill="transparent" r="42" cx="50" cy="50"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            
                             <div class="workspace-switcher-placeholder inline-block sm:ml-2 mt-2 sm:mt-0"></div>
                         </div>
                     </div>
@@ -2553,6 +2573,22 @@
             </div>
         </div>
     </footer>
+    <!-- Gamification Modal -->
+    <dialog id="gamification-modal" class="bg-transparent m-auto p-0 backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm open:animate-fade-in z-[100] border-none">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-emerald-100 dark:border-emerald-900/50 w-[320px] max-w-[90vw] overflow-hidden flex flex-col items-center p-6 relative">
+            <button onclick="document.getElementById('gamification-modal').close()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors cursor-pointer">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/40 border-4 border-emerald-50 dark:border-slate-800 flex items-center justify-center mb-4 shadow-inner">
+                <i class="fas fa-trophy text-4xl text-amber-500 animate-bounce"></i>
+            </div>
+            <h3 id="gamification-modal-title" class="text-xl font-black text-slate-800 dark:text-white mb-2 text-center" data-i18n="gamification_title">Barakah System</h3>
+            <p id="gamification-modal-desc" class="text-sm text-slate-500 dark:text-slate-400 text-center mb-6 leading-relaxed" data-i18n="gamification_desc">Выполняйте привычки, закрывайте задачи и делайте зикр, чтобы повышать свой уровень ИншаАллах!</p>
+            <button onclick="document.getElementById('gamification-modal').close()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3 rounded-2xl transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer">
+                <span data-i18n="gamification_btn_ok">ИншаАллах, продолжу</span>
+            </button>
+        </div>
+    </dialog>
 </body>
 
 </html>

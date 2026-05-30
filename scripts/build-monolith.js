@@ -27,7 +27,7 @@ function inlineCSS(html) {
 const scriptsToInline = [
     'utils/sanitize.js', 'i18n.js', 'store.js',
     'board.js', 'namaz-tracker.js', 'daily-wisdom.js', 'main.js', 'activity-log.js', 'auth.js',
-    'db.js', 'firebase-init.js', 'todo-manager.js', 'tasbih.js', 'groups.js', 'mindmap.js', 'native.js'
+    'db.js', 'firebase-init.js', 'todo-manager.js', 'tasbih.js', 'groups.js', 'mindmap.js', 'gamification.js', 'native.js'
 ];
 
 function inlineScripts(html) {
