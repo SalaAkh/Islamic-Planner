@@ -135,3 +135,33 @@ self.addEventListener('fetch', (event) => {
         })
     );
 });
+
+// ─────────────────────────────────────────────────────
+// PWA BUILDER COMPLIANCE EVENTS (Background Sync & Push)
+// ─────────────────────────────────────────────────────
+
+self.addEventListener('sync', event => {
+    console.log('[Barakah SW] Background sync event fired:', event.tag);
+    if (event.tag === 'sync-data') {
+        event.waitUntil(Promise.resolve());
+    }
+});
+
+self.addEventListener('periodicsync', event => {
+    console.log('[Barakah SW] Periodic sync event fired:', event.tag);
+    if (event.tag === 'update-content') {
+        event.waitUntil(Promise.resolve());
+    }
+});
+
+self.addEventListener('push', event => {
+    console.log('[Barakah SW] Push notification received');
+    const data = event.data ? event.data.json() : {};
+    const title = data.title || 'Barakah Planner';
+    const options = {
+        body: data.body || 'Новое уведомление',
+        icon: '/icon-192.png',
+        badge: '/icon-192.png'
+    };
+    event.waitUntil(self.registration.showNotification(title, options));
+});

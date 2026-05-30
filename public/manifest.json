@@ -5,9 +5,14 @@
   "start_url": "/",
   "scope": "/",
   "scope_extensions": [
-    { "origin": "https://islamic-planer.web.app" }
+    {
+      "origin": "https://*.firebaseapp.com"
+    },
+    {
+      "origin": "https://*.web.app"
+    }
   ],
-  "iarc_rating_id": "e",
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "launch_handler": {
     "client_mode": "focus-existing"
   },
@@ -15,19 +20,76 @@
     {
       "action": "/app.html",
       "accept": {
-        "application/json": [".json"]
+        "application/json": [
+          ".json"
+        ]
       }
     }
   ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+planner",
+      "url": "/app.html?url=%s"
+    }
+  ],
+  "share_target": {
+    "action": "/app.html",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "widgets": [
+    {
+      "name": "Barakah Tasks",
+      "short_name": "Tasks",
+      "description": "Your daily tasks",
+      "tag": "tasks",
+      "ms_ac_template": "widgets/template.json",
+      "data": "widgets/data.json",
+      "type": "application/json",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "screenshots": [
+        {
+          "src": "screenshot-narrow.png",
+          "sizes": "630x1200",
+          "type": "image/png",
+          "label": "Widget Preview"
+        }
+      ]
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "note_taking": {
+    "new_note_url": "/app.html?tab=mindmap"
+  },
   "id": "/?source=pwa",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui"],
+  "display_override": [
+    "window-controls-overlay",
+    "tabbed",
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait",
   "background_color": "#0f172a",
   "theme_color": "#059669",
   "lang": "ru-RU",
   "dir": "ltr",
-  "categories": ["productivity", "lifestyle"],
+  "categories": [
+    "productivity",
+    "lifestyle"
+  ],
   "prefer_related_applications": false,
   "related_applications": [
     {
@@ -37,15 +99,45 @@
   ],
   "icons": [
     {
-      "src": "icon-192.png",
-      "sizes": "192x192",
+      "src": "../icons/icon-48.webp",
       "type": "image/png",
+      "sizes": "48x48",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
-      "sizes": "512x512",
+      "src": "../icons/icon-72.webp",
       "type": "image/png",
+      "sizes": "72x72",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../icons/icon-96.webp",
+      "type": "image/png",
+      "sizes": "96x96",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../icons/icon-128.webp",
+      "type": "image/png",
+      "sizes": "128x128",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../icons/icon-192.webp",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../icons/icon-256.webp",
+      "type": "image/png",
+      "sizes": "256x256",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../icons/icon-512.webp",
+      "type": "image/png",
+      "sizes": "512x512",
       "purpose": "any maskable"
     }
   ],
@@ -71,14 +163,24 @@
       "short_name": "Намаз",
       "description": "Быстрый доступ к намазам",
       "url": "/app.html?tab=daily",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Тасбих",
       "short_name": "Тасбих",
       "description": "Откройте тасбих",
       "url": "/app.html?tab=tasbih",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

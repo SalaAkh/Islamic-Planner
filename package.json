@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/SalaAkh/Islamic-Planner#readme",
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.3.4",
     "@tailwindcss/cli": "^4.2.1",
     "esbuild": "^0.28.0",
