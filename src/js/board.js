@@ -790,7 +790,8 @@ window.initBoard = function (showToast) {
 
     if(btnClearDrawing) {
         btnClearDrawing.addEventListener('click', () => {
-            if(confirm('Очистить весь холст? Внимание, удалятся все фигуры и стикеры!')) {
+            const confirmMsg = (window.t && window.t('board_clear_confirm')) || 'Очистить весь холст? Внимание, удалятся все фигуры и стикеры!';
+            if(confirm(confirmMsg)) {
                 selectNode(null);
                 pathLayer.destroyChildren();
                 clearNoteLayer();
@@ -798,7 +799,7 @@ window.initBoard = function (showToast) {
                 saveHistory();
                 requestPathSave();
                 saveBoardState();
-                if(window.showToast) window.showToast('Холст очищен');
+                if(window.showToast) window.showToast((window.t && window.t('drawing_cleared_toast')) || 'Холст очищен');
             }
         });
     }
@@ -806,7 +807,8 @@ window.initBoard = function (showToast) {
     // --- Text Editing Binder ---
     function bindTextArea(textNode, group) {
         if(window.innerWidth < 768 && window.prompt) {
-            const res = prompt("Редактировать текст:", textNode.text());
+            const promptMsg = (window.t && window.t('board_edit_text_prompt')) || 'Редактировать текст:';
+            const res = prompt(promptMsg, textNode.text());
             if (res !== null) { textNode.text(res); saveBoardState(); }
             return;
         }
@@ -938,7 +940,7 @@ window.initBoard = function (showToast) {
     function addFreeText(x, y) {
         const group = new Konva.Group({ x, y, draggable: true });
         const textNode = new Konva.Text({
-            text: 'Текст...',
+            text: (window.t && window.t('board_default_text')) || 'Текст...',
             fontSize: 24,
             fontFamily: 'Caveat, cursive, sans-serif',
             fill: currentColor,
@@ -972,7 +974,7 @@ window.initBoard = function (showToast) {
         });
 
         const textNode = new Konva.Text({
-            text: 'Дважды кликните...',
+            text: (window.t && window.t('board_double_click_hint')) || 'Дважды кликните...',
             x: 10, y: 10, width: 130, height: 130,
             fontSize: 18,
             fontFamily: 'Caveat, cursive, sans-serif',
@@ -1217,7 +1219,7 @@ function initDashboardEvents() {
         const id = 'board_' + Date.now();
         boards.unshift({
             id,
-            name: 'Untitled board',
+            name: (window.t && window.t('board_default_name')) || 'Untitled board',
             lastOpened: new Date().toISOString(),
             owner: 'You',
             thumbnail: Math.floor(Math.random() * 20) + 1

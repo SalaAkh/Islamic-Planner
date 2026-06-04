@@ -1,10 +1,30 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow users to read their own profile/premium status
+    // Allow users to read their own profile/premium status, and write specifically for trial activation
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null 
+                             && request.auth.uid == userId 
+                             && (
+                               (!exists(/databases/$(database)/documents/users/$(userId)) || !resource.data.hasUsedTrial)
+                               && request.resource.data.hasUsedTrial == true
+                               && request.resource.data.isPremium == true
+                               && request.resource.data.premiumPlan == 'trial'
+                               && request.resource.data.trialCardHash != null
+                               && get(/databases/$(database)/documents/used_cards/$(request.resource.data.trialCardHash)).data.userId == request.auth.uid
+                             );
     }
+
+    // Used cards registry for trial period (one card per trial)
+    match /used_cards/{cardHash} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null 
+                    && !exists(/databases/$(database)/documents/used_cards/$(cardHash))
+                    && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
 
     // Make sure users can only read and write their own documents, and only specific allowed data keys
     match /users/{userId}/data/{document} {
@@ -15,6 +35,7 @@ service cloud.firestore {
                              && (
                                document == 'goals' || 
                                document == 'board_state' ||
+                               document == 'user_stats' ||
                                document == 'board_drawing' ||
                                document == 'events' ||
                                document == 'todo_lists' ||

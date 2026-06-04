@@ -144,6 +144,7 @@ window.Auth = {
                     }
                 };
 
+                window.renderPremiumUI = renderPremiumUI;
                 renderPremiumUI();
 
                 if (window.firebaseDb) {
@@ -152,15 +153,29 @@ window.Auth = {
                         const docRef = doc(window.firebaseDb, "users", uid);
                         getDoc(docRef).then((docSnap) => {
                             if (docSnap.exists()) {
-                                const data = docSnap.data();
-                                console.log("[Auth] Fetched user doc for isPremium:", data);
-                                window.Auth.isPremium = !!data.isPremium;
-                                window.Auth.premiumPlan = data.premiumPlan || (data.isPremium ? "pro" : "free");
-                            } else {
-                                console.warn("[Auth] User doc does not exist, setting isPremium false");
-                                window.Auth.isPremium = false;
-                                window.Auth.premiumPlan = "free";
-                            }
+                                 const data = docSnap.data();
+                                 console.log("[Auth] Fetched user doc for isPremium:", data);
+                                 let isPremium = !!data.isPremium;
+                                 let premiumPlan = data.premiumPlan || (data.isPremium ? "pro" : "free");
+
+                                 // Dynamic check for trial expiration
+                                 if (premiumPlan === 'trial' && data.premiumExpiresAt) {
+                                     const expiry = new Date(data.premiumExpiresAt);
+                                     if (new Date() > expiry) {
+                                         isPremium = false;
+                                         premiumPlan = 'free';
+                                     }
+                                 }
+
+                                 window.Auth.isPremium = isPremium;
+                                 window.Auth.premiumPlan = premiumPlan;
+                                 window.Auth.premiumExpiresAt = data.premiumExpiresAt || null;
+                                 window.Auth.hasUsedTrial = !!data.hasUsedTrial;
+                             } else {
+                                 console.warn("[Auth] User doc does not exist, setting isPremium false");
+                                 window.Auth.isPremium = false;
+                                 window.Auth.premiumPlan = "free";
+                             }
                             renderPremiumUI();
 
                             // Sync data from cloud if user is Premium
@@ -568,6 +583,20 @@ document.addEventListener('DOMContentLoaded', () => {
             payStatusMsg.textContent = '';
             payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all';
         }
+
+        // Reset trial form and inputs on open
+        const trialForm = document.getElementById('trial-card-form');
+        if (trialForm) {
+            trialForm.classList.add('hidden');
+            trialForm.classList.remove('flex');
+        }
+        const cardIn = document.getElementById('trial-card-number');
+        const expiryIn = document.getElementById('trial-card-expiry');
+        const cvcIn = document.getElementById('trial-card-cvc');
+        if (cardIn) cardIn.value = '';
+        if (expiryIn) expiryIn.value = '';
+        if (cvcIn) cvcIn.value = '';
+
         payModal.classList.remove('hidden');
         payModal.classList.add('flex');
         requestAnimationFrame(() => {
@@ -723,7 +752,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             const sum = selectedPlan === 'org' ? 29.99 : 4.99;
-            const cardPayUrl = `https://robokassa.ru/merchant/test?user_id=${user.uid}&email=${encodeURIComponent(user.email)}&sum=${sum}&plan=${selectedPlan}`;
+            const cardPayUrl = `https://wooppay.com/pay?user_id=${user.uid}&email=${encodeURIComponent(user.email)}&sum=${sum}&plan=${selectedPlan}`;
             window.open(cardPayUrl, '_blank');
             if (payStatusMsg) {
                 payStatusMsg.textContent = 'Окно оплаты картой открыто. После оплаты Premium активируется автоматически.';
@@ -825,5 +854,190 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+    }
+
+    // ===== TRIAL PERIOD LOGIC =====
+    const btnShowTrialForm = document.getElementById('btn-show-trial-form');
+    const trialCardForm = document.getElementById('trial-card-form');
+    const btnActivateTrial = document.getElementById('btn-activate-trial');
+
+    if (btnShowTrialForm && trialCardForm) {
+        btnShowTrialForm.addEventListener('click', (e) => {
+            e.preventDefault();
+            trialCardForm.classList.toggle('hidden');
+            trialCardForm.classList.toggle('flex');
+            if (payStatusMsg) payStatusMsg.textContent = '';
+        });
+    }
+
+    // Inputs masking
+    const cardInput = document.getElementById('trial-card-number');
+    if (cardInput) {
+        cardInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            let formatted = '';
+            for (let i = 0; i < value.length && i < 16; i++) {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+                formatted += value[i];
+            }
+            e.target.value = formatted;
+        });
+    }
+
+    const expiryInput = document.getElementById('trial-card-expiry');
+    if (expiryInput) {
+        expiryInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            let formatted = '';
+            if (value.length > 0) {
+                formatted += value.substring(0, 2);
+                if (value.length > 2) {
+                    formatted += '/' + value.substring(2, 4);
+                }
+            }
+            e.target.value = formatted;
+        });
+    }
+
+    const cvcInput = document.getElementById('trial-card-cvc');
+    if (cvcInput) {
+        cvcInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
+        });
+    }
+
+    async function hashCardNumber(cardNumber) {
+        const clean = cardNumber.replace(/\D/g, '');
+        const msgUint8 = new TextEncoder().encode(clean);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    if (btnActivateTrial) {
+        btnActivateTrial.addEventListener('click', async () => {
+            const user = window.Auth?.user;
+            if (!user) {
+                if (payStatusMsg) {
+                    payStatusMsg.textContent = 'Пожалуйста, авторизуйтесь перед активацией пробного периода.';
+                    payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-red-500';
+                }
+                return;
+            }
+
+            // Check if user has already used a trial
+            if (window.Auth.hasUsedTrial) {
+                if (payStatusMsg) {
+                    payStatusMsg.textContent = 'Вы уже активировали пробный период на этом аккаунте.';
+                    payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-red-500';
+                }
+                return;
+            }
+
+            const rawCard = cardInput ? cardInput.value.replace(/\D/g, '') : '';
+            const rawExpiry = expiryInput ? expiryInput.value : '';
+            const rawCvc = cvcInput ? cvcInput.value.replace(/\D/g, '') : '';
+
+            if (rawCard.length !== 16) {
+                if (payStatusMsg) {
+                    payStatusMsg.textContent = 'Введите корректный 16-значный номер карты.';
+                    payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-red-500';
+                }
+                return;
+            }
+
+            if (!/^\d{2}\/\d{2}$/.test(rawExpiry)) {
+                if (payStatusMsg) {
+                    payStatusMsg.textContent = 'Введите срок действия карты в формате ММ/ГГ.';
+                    payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-red-500';
+                }
+                return;
+            }
+
+            if (rawCvc.length !== 3) {
+                if (payStatusMsg) {
+                    payStatusMsg.textContent = 'Введите корректный 3-значный CVC.';
+                    payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-red-500';
+                }
+                return;
+            }
+
+            btnActivateTrial.disabled = true;
+            btnActivateTrial.classList.add('opacity-70');
+            if (payStatusMsg) {
+                payStatusMsg.textContent = 'Проверка карты и активация пробного периода...';
+                payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-indigo-500';
+            }
+
+            try {
+                const cardHash = await hashCardNumber(rawCard);
+                const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js");
+                
+                // 1. Попытка зарегистрировать карту в used_cards
+                const cardRef = doc(window.firebaseDb, "used_cards", cardHash);
+                try {
+                    await setDoc(cardRef, {
+                        userId: user.uid,
+                        createdAt: new Date().toISOString()
+                    });
+                } catch (cardError) {
+                    console.error("[Trial Activation] Card already used or register failed:", cardError);
+                    throw new Error("Эта банковская карта уже была использована для пробного периода.");
+                }
+
+                // 2. Обновление статуса пользователя
+                const userRef = doc(window.firebaseDb, "users", user.uid);
+                const expiryTime = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+                
+                await setDoc(userRef, {
+                    isPremium: true,
+                    premiumPlan: 'trial',
+                    premiumExpiresAt: expiryTime,
+                    hasUsedTrial: true,
+                    trialCardHash: cardHash
+                }, { merge: true });
+
+                // 3. Обновление локального состояния
+                window.Auth.isPremium = true;
+                window.Auth.premiumPlan = 'trial';
+                window.Auth.premiumExpiresAt = expiryTime;
+                window.Auth.hasUsedTrial = true;
+
+                if (window.renderPremiumUI) {
+                    window.renderPremiumUI();
+                }
+
+                if (payStatusMsg) {
+                    payStatusMsg.textContent = 'Пробный период 7 дней активирован! МашаАллах! 🎉';
+                    payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-emerald-600 dark:text-emerald-400';
+                }
+
+                if (window.showToast) {
+                    window.showToast('Пробный период активирован! МашаАллах! 🎉');
+                }
+
+                // Запуск конфетти!
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js';
+                script.onload = () => {
+                    window.confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                };
+                document.head.appendChild(script);
+
+                setTimeout(() => {
+                    closePayModal();
+                }, 2500);
+
+            } catch (error) {
+                console.error("[Trial Activation Error]", error);
+                if (payStatusMsg) {
+                    payStatusMsg.textContent = error.message || 'Ошибка активации пробного периода.';
+                    payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-red-500';
+                }
+            } finally {
+                btnActivateTrial.disabled = false;
+                btnActivateTrial.classList.remove('opacity-70');
+            }
+        });
     }
 });

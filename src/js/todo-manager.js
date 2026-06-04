@@ -173,6 +173,17 @@ class TodoManager {
 
     renderTasks(tasks, isSmartView = false) {
         if(!this.tasksContainer) return;
+        
+        // Destroy Sortable first while container and children are still intact in the DOM
+        if (this.mainSortable) {
+            try {
+                this.mainSortable.destroy();
+            } catch(e) {
+                console.warn('Sortable destroy failed in renderTasks:', e);
+            }
+            this.mainSortable = null;
+        }
+
         this.tasksContainer.innerHTML = '';
         
         if (tasks.length === 0) {
@@ -180,7 +191,6 @@ class TodoManager {
                 this.emptyTasksMsg.textContent = isSmartView ? t('lists_empty_smart_tasks', 'Отдыхайте, тут пока пусто.') : t('lists_empty_regular_tasks', 'В этом списке пока нет задач.');
                 this.tasksContainer.appendChild(this.emptyTasksMsg);
             }
-            if(this.mainSortable) this.mainSortable.destroy();
             return;
         }
 
@@ -190,9 +200,7 @@ class TodoManager {
         });
 
         // Initialize Native Drag & Drop using SortableJS (only for real lists)
-        if(isSmartView) {
-            if(this.mainSortable) this.mainSortable.destroy();
-        } else {
+        if(!isSmartView) {
             this.initSortable();
         }
     }
@@ -287,7 +295,14 @@ class TodoManager {
 
     initSortable() {
         if (!window.Sortable || !this.tasksContainer) return;
-        if (this.mainSortable) this.mainSortable.destroy();
+        if (this.mainSortable) {
+            try {
+                this.mainSortable.destroy();
+            } catch(e) {
+                console.warn('Sortable destroy failed in initSortable:', e);
+            }
+            this.mainSortable = null;
+        }
 
         this.mainSortable = new Sortable(this.tasksContainer, {
             animation: 150,

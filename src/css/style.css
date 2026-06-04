@@ -2041,3 +2041,237 @@ html:not(.dark) .main-footer {
 .shadow-glow {
     text-shadow: 0 0 10px rgba(16, 185, 129, 0.8), 0 0 20px rgba(16, 185, 129, 0.5);
 }
+
+/* Rukhsa Mode Gradient Progress Bar */
+.progress-bar-rukhsa {
+    background: linear-gradient(to right, #f59e0b, #3b82f6) !important;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.4), 0 0 10px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* ==========================================================================
+   DAILY PLANNER OVERHAUL — STUNNING VISUALS & TIMELINE
+   ========================================================================== */
+
+/* Realistic Binder spirals for desktop notebooks */
+@media (min-width: 1024px) {
+    .binder-holes::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 4px;
+        width: 6px;
+        background: repeating-linear-gradient(
+            to bottom,
+            transparent,
+            transparent 15px,
+            #94a3b8 15px,
+            #cbd5e1 18px,
+            #64748b 21px,
+            transparent 24px
+        );
+        opacity: 0.8;
+        pointer-events: none;
+    }
+}
+
+/* Premium Card Overhaul */
+.premium-card {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 1.25rem;
+    box-shadow: 0 4px 20px -2px rgba(148, 163, 184, 0.08), 0 2px 8px -1px rgba(148, 163, 184, 0.04);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .premium-card {
+    background: rgba(30, 41, 59, 0.75);
+    border: 1px solid rgba(51, 65, 85, 0.8);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.2), 0 2px 8px -1px rgba(0, 0, 0, 0.15);
+}
+
+.premium-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 12px 30px -4px rgba(16, 185, 129, 0.08), 0 4px 12px -2px rgba(16, 185, 129, 0.04);
+}
+
+.dark .premium-card:hover {
+    border-color: rgba(52, 211, 153, 0.3);
+    box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.3), 0 4px 12px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Smooth line-through transitions for tasks */
+.day-input {
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.day-input.line-through {
+    color: #94a3b8 !important;
+    text-decoration: line-through;
+    opacity: 0.55;
+}
+
+.dark .day-input.line-through {
+    color: #475569 !important;
+}
+
+/* Timeline Layout */
+.daily-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+/* Vertical connector line */
+.daily-timeline::before {
+    content: '';
+    position: absolute;
+    top: 1.5rem;
+    bottom: 1.5rem;
+    left: 7px;
+    width: 2px;
+    background: repeating-linear-gradient(
+        to bottom,
+        var(--primary-light) 0%,
+        var(--primary-light) 6px,
+        transparent 6px,
+        transparent 12px
+    );
+    opacity: 0.8;
+}
+
+/* Timeline card style */
+.timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Glowing timeline node dot */
+.timeline-node {
+    position: absolute;
+    left: -2rem;
+    top: 1.25rem;
+    width: 16px;
+    height: 16px;
+    background: var(--paper);
+    border: 3px solid var(--primary);
+    border-radius: 50%;
+    transform: translateX(-7px);
+    z-index: 10;
+    box-shadow: 0 0 0 4px var(--primary-light);
+    transition: all 0.3s ease;
+}
+
+.timeline-item:hover .timeline-node {
+    background: var(--primary);
+    box-shadow: 0 0 0 6px var(--primary-light), 0 0 12px var(--primary);
+}
+
+/* Glowing indicator for current active time block if applicable */
+.timeline-item.active-block .timeline-node {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.3), 0 0 12px #f59e0b;
+    animation: node-pulse 2s infinite ease-in-out;
+}
+
+@keyframes node-pulse {
+    0%, 100% { transform: translateX(-7px) scale(1); }
+    50% { transform: translateX(-7px) scale(1.15); }
+}
+
+/* Clean, modern list layout inside cards */
+.task-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.75rem;
+    transition: background-color 0.2s ease;
+}
+
+.task-row:hover {
+    background-color: rgba(16, 185, 129, 0.03);
+}
+
+.dark .task-row:hover {
+    background-color: rgba(52, 211, 153, 0.03);
+}
+
+/* Premium Digital Tasbih clicker design */
+#tasbih-clicker {
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15) 0%, rgba(0, 0, 0, 0.08) 100%), var(--paper);
+    box-shadow: 
+        0 10px 25px -5px rgba(0, 0, 0, 0.05),
+        0 8px 16px -6px rgba(0, 0, 0, 0.05),
+        inset 0 -4px 12px rgba(0, 0, 0, 0.05),
+        inset 0 4px 12px rgba(255, 255, 255, 0.6);
+    border-color: rgba(226, 232, 240, 0.8) !important;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dark #tasbih-clicker {
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.3) 100%), #1e293b;
+    box-shadow: 
+        0 10px 25px -5px rgba(0, 0, 0, 0.3),
+        0 8px 16px -6px rgba(0, 0, 0, 0.3),
+        inset 0 -4px 12px rgba(0, 0, 0, 0.2),
+        inset 0 4px 12px rgba(255, 255, 255, 0.05);
+    border-color: rgba(51, 65, 85, 0.8) !important;
+}
+
+#tasbih-clicker:hover {
+    transform: scale(1.04) translateY(-1px);
+    box-shadow: 
+        0 20px 35px -8px rgba(16, 185, 129, 0.15),
+        inset 0 -4px 12px rgba(0, 0, 0, 0.05),
+        inset 0 4px 12px rgba(255, 255, 255, 0.6);
+}
+
+.dark #tasbih-clicker:hover {
+    box-shadow: 
+        0 20px 35px -8px rgba(52, 211, 153, 0.15),
+        inset 0 -4px 12px rgba(0, 0, 0, 0.2),
+        inset 0 4px 12px rgba(255, 255, 255, 0.05);
+}
+
+#tasbih-clicker:active {
+    transform: scale(0.94) translateY(1px);
+    box-shadow: 
+        0 4px 10px rgba(0, 0, 0, 0.1),
+        inset 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Beautiful reflection card gradient */
+.reflection-gradient-card {
+    background: linear-gradient(135deg, rgba(253, 244, 245, 0.95) 0%, rgba(254, 243, 199, 0.75) 100%);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.dark .reflection-gradient-card {
+    background: linear-gradient(135deg, rgba(30, 27, 75, 0.55) 0%, rgba(24, 24, 37, 0.65) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+/* Clean up mobile daily view styles */
+@media (max-width: 768px) {
+    .daily-timeline {
+        padding-left: 0;
+    }
+    .daily-timeline::before {
+        display: none;
+    }
+    .timeline-node {
+        display: none;
+    }
+    .timeline-item {
+        margin-bottom: 1.25rem;
+    }
+}

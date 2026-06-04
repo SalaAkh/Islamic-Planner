@@ -24,8 +24,9 @@ const PRAYER_I18N_KEYS = {
 const PRAYER_CHECKBOХES = {
     'fajr': 'chk-fajr',
     'dhuhr': 'chk-zuhr',
-    'asr_shafii': 'chk-asr-shafii',
-    'asr_hanafi': 'chk-asr-hanafi',
+    'asr': 'chk-asr',
+    'asr_shafii': 'chk-asr',
+    'asr_hanafi': 'chk-asr',
     'maghrib': 'chk-maghrib',
     'isha': 'chk-isha'
 };
@@ -729,16 +730,24 @@ function updateNamazUI() {
     const timeSpanMap = {
         'fajr': 'time-fajr',
         'dhuhr': 'time-zuhr',
-        'asr_shafii': 'time-asr-shafii',
-        'asr_hanafi': 'time-asr-hanafi',
+        'asr': 'time-asr',
+        'asr_shafii': 'time-asr',
+        'asr_hanafi': 'time-asr',
         'maghrib': 'time-maghrib',
         'isha': 'time-isha'
     };
 
     Object.entries(timeSpanMap).forEach(([prayerKey, spanId]) => {
         const spanEl = document.getElementById(spanId);
-        if (spanEl && todayData[prayerKey]) {
-            spanEl.textContent = todayData[prayerKey];
+        if (spanEl) {
+            if (spanId === 'time-asr') {
+                const asrTime = todayData['asr_hanafi'] || todayData['asr'] || todayData['asr_shafii'];
+                if (asrTime) {
+                    spanEl.textContent = asrTime;
+                }
+            } else if (todayData[prayerKey]) {
+                spanEl.textContent = todayData[prayerKey];
+            }
         }
     });
 }

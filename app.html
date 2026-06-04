@@ -462,7 +462,7 @@
                         </div>
                     </div>
                     <div
-                        class="w-full md:w-7/12 lg:w-6/12 mt-6 md:mt-0 bg-white/40 dark:bg-slate-800/40 p-5 rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700/50 backdrop-blur-md">
+                        class="w-full md:w-7/12 lg:w-6/12 mt-6 md:mt-0 premium-card p-5 shadow-sm border border-slate-200/60 dark:border-slate-700/50 backdrop-blur-md">
                         <div class="flex items-center justify-between mb-4">
                             <i id="prev-day"
                                 class="fas fa-chevron-left nav-btn text-xl p-2 pl-0 text-slate-500 hover:text-emerald-500 transition-all cursor-pointer transform hover:-translate-x-1"
@@ -500,7 +500,7 @@
                     <div class="md:col-span-4 space-y-6">
                         <!-- Ибадат -->
                         <div
-                            class="bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md">
+                            class="premium-card p-5 xl:p-6 shadow-sm transition-all">
                             <div class="flex flex-col gap-3 mb-4">
                                 <div class="flex justify-between items-center">
                                     <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 section-title"
@@ -508,12 +508,12 @@
                                         Ибадат Трекер</h2>
                                 </div>
                                 <div class="flex justify-between items-center min-h-[20px]">
-                                    <div class="ml-auto text-xs font-bold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-950/40 px-2 py-1 rounded-full">
+                                    <div class="ml-auto text-xs font-bold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-950/40 px-2.5 py-1 rounded-full">
                                         <span id="ibadah-progress-text">0</span>%
                                     </div>
                                 </div>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-1.5 mb-2">
+                            <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-1.5 mb-2">
                                 <div id="ibadah-progress-bar"
                                     class="bg-green-700 h-1.5 rounded-full transition-all duration-500 ease-out"
                                     style="width: 0%"></div>
@@ -524,7 +524,7 @@
 
                             <!-- Namaz Tracker Widget (Moved) -->
                             <div id="namaz-widget-header"
-                                class="mb-5 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 flex flex-col items-center cursor-pointer transition-all hover:scale-[1.02] border border-emerald-100 dark:border-emerald-800/50 shadow-sm"
+                                class="mb-5 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-xl p-4 flex flex-col items-center cursor-pointer transition-all hover:scale-[1.02] border border-emerald-100 dark:border-emerald-800/30 shadow-sm"
                                 title="Нажмите, чтобы выбрать город" data-i18n="namaz_widget_title"
                                 data-i18n-target="title">
                                 <div class="flex items-center gap-2 mb-1">
@@ -543,84 +543,84 @@
                             </div>
                             <!-- /Namaz Tracker Widget -->
 
-                            <div class="space-y-3 pl-2 border-l-2 border-dashed border-gray-200" id="ibadah-list">
+                            <div class="space-y-3 pl-2 border-l-2 border-dashed border-slate-200 dark:border-slate-700" id="ibadah-list">
                                 <label for="chk-tahajjud"
-                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                     <input data-id="tahajjud" id="chk-tahajjud" name="tahajjud" type="checkbox"
                                         class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-slate-500 dark:text-slate-400 text-sm group-hover:text-emerald-700 dark:text-emerald-400 transition"
+                                        class="text-slate-500 dark:text-slate-400 text-sm group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition"
                                         data-i18n="tahajjud">Тахаджуд</span>
                                 </label>
                                 <label for="chk-fajr"
-                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                     <input data-id="fajr" id="chk-fajr" name="fajr" type="checkbox"
                                         class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
+                                        class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition"
                                         data-i18n="fajr">Фаджр</span>
                                     <span id="time-fajr" class="ml-auto text-xs text-gray-400 dark:text-gray-500 font-normal"></span>
                                 </label>
                                 <label for="chk-morning-azkar"
-                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                     <input data-id="morning_azkar" id="chk-morning-azkar" name="morning_azkar"
                                         type="checkbox" class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-slate-500 dark:text-slate-400 text-sm group-hover:text-emerald-700 dark:text-emerald-400 transition"
+                                        class="text-slate-500 dark:text-slate-400 text-sm group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition"
                                         data-i18n="morning_azkar">Утренние
                                         азкары</span>
                                 </label>
                                 <label for="chk-zuhr"
-                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                     <input data-id="zuhr" id="chk-zuhr" name="zuhr" type="checkbox"
                                         class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
+                                        class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition"
                                         data-i18n="zuhr">Зухр</span>
                                     <span id="time-zuhr" class="ml-auto text-xs text-gray-400 dark:text-gray-500 font-normal"></span>
                                 </label>
                                 <label for="chk-asr"
-                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                     <input data-id="asr" id="chk-asr" name="asr" type="checkbox"
                                         class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
+                                        class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition"
                                         data-i18n="asr">Аср</span>
                                     <span id="time-asr" class="ml-auto text-xs text-gray-400 dark:text-gray-500 font-normal"></span>
                                 </label>
                                 <label for="chk-evening-azkar"
-                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                     <input data-id="evening_azkar" id="chk-evening-azkar" name="evening_azkar"
                                         type="checkbox" class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-slate-500 dark:text-slate-400 text-sm group-hover:text-emerald-700 dark:text-emerald-400 transition"
+                                        class="text-slate-500 dark:text-slate-400 text-sm group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition"
                                         data-i18n="evening_azkar">Вечерние
                                         азкары</span>
                                 </label>
                                 <label for="chk-maghrib"
-                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                     <input data-id="maghrib" id="chk-maghrib" name="maghrib" type="checkbox"
                                         class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
+                                        class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition"
                                         data-i18n="maghrib">Магриб</span>
                                     <span id="time-maghrib" class="ml-auto text-xs text-gray-400 dark:text-gray-500 font-normal"></span>
                                 </label>
                                 <label for="chk-isha"
-                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                     <input data-id="isha" id="chk-isha" name="isha" type="checkbox"
                                         class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:text-emerald-400 transition"
+                                        class="text-slate-700 dark:text-slate-300 font-medium group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition"
                                         data-i18n="isha">Иша</span>
                                     <span id="time-isha" class="ml-auto text-xs text-gray-400 dark:text-gray-500 font-normal"></span>
                                 </label>
                                 <label for="chk-witr"
-                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg">
+                                    class="flex items-center gap-3 w-full cursor-pointer group px-1 py-1 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                     <input data-id="witr" id="chk-witr" name="witr" type="checkbox"
                                         class="paper-checkbox day-checkbox">
                                     <span
-                                        class="text-slate-500 dark:text-slate-400 text-sm group-hover:text-emerald-700 dark:text-emerald-400 transition"
+                                        class="text-slate-500 dark:text-slate-400 text-sm group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition"
                                         data-i18n="witr">Витр</span>
                                 </label>
                             </div>
@@ -628,7 +628,7 @@
 
                         <!-- Коран -->
                         <div
-                            class="bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md">
+                            class="premium-card p-5 xl:p-6 shadow-sm transition-all">
                             <label for="quran"
                                 class="block text-lg font-bold text-slate-800 dark:text-slate-200 mb-4 section-title"
                                 data-i18n="quran_title">
@@ -641,7 +641,7 @@
 
                         <!-- Добрые дела -->
                         <div
-                            class="bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md">
+                            class="premium-card p-5 xl:p-6 shadow-sm transition-all">
                             <label for="sadaka"
                                 class="block text-lg font-bold text-slate-800 dark:text-slate-200 mb-2 section-title"
                                 data-i18n="sadaka_title">
@@ -654,7 +654,7 @@
 
                         <!-- Тасбих / Зикр -->
                         <div
-                            class="bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md mt-6">
+                            class="premium-card p-5 xl:p-6 shadow-sm transition-all mt-6">
                             <div class="flex items-center gap-2 mb-4">
                                 <i class="fas fa-fingerprint text-emerald-600 dark:text-emerald-400 text-lg"></i>
                                 <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 section-title" data-i18n="tasbih_title">
@@ -680,7 +680,7 @@
                             <!-- Область счетчика -->
                             <div class="flex flex-col items-center justify-center py-2 relative">
                                 <!-- Круглый счетчик -->
-                                <button id="tasbih-clicker" class="relative w-28 h-28 rounded-full bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border-4 border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center shadow-inner hover:scale-[1.03] active:scale-95 transition-all duration-150 cursor-pointer focus:outline-none group">
+                                <button id="tasbih-clicker" class="relative w-28 h-28 rounded-full border-4 flex flex-col items-center justify-center shadow-inner hover:scale-[1.03] active:scale-95 transition-all duration-150 cursor-pointer focus:outline-none group">
                                     <!-- SVG Progress Ring -->
                                     <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 100 100">
                                         <circle id="tasbih-ring" class="text-emerald-500 dark:text-emerald-400 stroke-current transition-all duration-300" stroke-width="4" stroke-dasharray="276.4" stroke-dashoffset="276.4" stroke-linecap="round" fill="transparent" r="44" cx="50" cy="50"/>
@@ -719,12 +719,13 @@
                     </div>
 
                     <!-- Правая колонка (Блоки времени) -->
-                    <div class="md:col-span-8 space-y-6">
+                    <div class="md:col-span-8 space-y-6 daily-timeline">
                         <!-- Блок 1 -->
                         <div
-                            class="relative bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md">
+                            class="timeline-item premium-card p-5 xl:p-6 shadow-sm transition-all animate-fade-in-up">
+                            <div class="timeline-node"></div>
                             <div class="flex items-center mb-2">
-                                <i class="fas fa-sun text-amber-500 mr-2"></i>
+                                <i class="fas fa-sun text-amber-500 mr-2 text-base"></i>
                                 <h3 class="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest text-sm"
                                     data-i18n="fajr_zuhr">Фаджр — Зухр</h3>
                                 <div class="flex-grow border-b border-slate-300 dark:border-slate-600 ml-4"></div>
@@ -760,9 +761,10 @@
 
                         <!-- Блок 2 -->
                         <div
-                            class="relative bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md">
+                            class="timeline-item premium-card p-5 xl:p-6 shadow-sm transition-all animate-fade-in-up">
+                            <div class="timeline-node"></div>
                             <div class="flex items-center mb-2">
-                                <i class="fas fa-clock text-blue-500 mr-2"></i>
+                                <i class="fas fa-clock text-blue-500 mr-2 text-base"></i>
                                 <h3 class="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest text-sm"
                                     data-i18n="zuhr_asr">Зухр — Аср</h3>
                                 <div class="flex-grow border-b border-slate-300 dark:border-slate-600 ml-4"></div>
@@ -796,9 +798,10 @@
 
                         <!-- Блок 3 -->
                         <div
-                            class="relative bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md">
+                            class="timeline-item premium-card p-5 xl:p-6 shadow-sm transition-all animate-fade-in-up">
+                            <div class="timeline-node"></div>
                             <div class="flex items-center mb-2">
-                                <i class="fas fa-coffee text-orange-500 mr-2"></i>
+                                <i class="fas fa-coffee text-orange-500 mr-2 text-base"></i>
                                 <h3 class="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest text-sm"
                                     data-i18n="asr_maghrib">Аср — Магриб</h3>
                                 <div class="flex-grow border-b border-slate-300 dark:border-slate-600 ml-4"></div>
@@ -832,9 +835,10 @@
 
                         <!-- Блок 4 -->
                         <div
-                            class="relative bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md">
+                            class="timeline-item premium-card p-5 xl:p-6 shadow-sm transition-all animate-fade-in-up">
+                            <div class="timeline-node"></div>
                             <div class="flex items-center mb-2">
-                                <i class="fas fa-cloud-moon text-purple-500 mr-2"></i>
+                                <i class="fas fa-cloud-moon text-purple-500 mr-2 text-base"></i>
                                 <h3 class="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest text-sm"
                                     data-i18n="maghrib_isha">Магриб — Иша</h3>
                                 <div class="flex-grow border-b border-slate-300 dark:border-slate-600 ml-4"></div>
@@ -868,9 +872,10 @@
 
                         <!-- Блок 5 -->
                         <div
-                            class="relative bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md">
+                            class="timeline-item premium-card p-5 xl:p-6 shadow-sm transition-all animate-fade-in-up">
+                            <div class="timeline-node"></div>
                             <div class="flex items-center mb-2">
-                                <i class="fas fa-moon text-indigo-500 mr-2"></i>
+                                <i class="fas fa-moon text-indigo-500 mr-2 text-base"></i>
                                 <h3 class="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest text-sm"
                                     data-i18n="isha_sleep">Иша — Сон</h3>
                                 <div class="flex-grow border-b border-slate-300 dark:border-slate-600 ml-4"></div>
@@ -906,9 +911,10 @@
 
                         <!-- Блок 6: Мухасаба (Рефлексия) -->
                         <div
-                            class="relative bg-white/60 dark:bg-slate-800/60 p-5 xl:p-6 rounded-2xl border border-gray-200 dark:border-slate-700/50 shadow-sm transition-all hover:shadow-md mt-6">
+                            class="timeline-item premium-card reflection-gradient-card p-5 xl:p-6 shadow-sm transition-all mt-6">
+                            <div class="timeline-node"></div>
                             <div class="flex items-center mb-2">
-                                <i class="fas fa-heart text-rose-500 mr-2"></i>
+                                <i class="fas fa-heart text-rose-500 mr-2 text-base"></i>
                                 <h3 class="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest text-sm"
                                     data-i18n="muhasabah_title">Мухасаба (Итоги дня)</h3>
                                 <div class="flex-grow border-b border-slate-300 dark:border-slate-600 ml-4"></div>

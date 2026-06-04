@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initCalendar();
     initGoals();
     initBackupRestore();
+    initShareApp();
     initTheme();
     initDonationToast();
     initEvents();
@@ -169,6 +170,45 @@ function initTabs() {
             const viewName = tab.getAttribute('data-tab');
             const targetPage = document.getElementById('view-' + viewName);
 
+            // Check premium access for restricted features (Groups, Mind Map)
+            if ((viewName === 'groups' || viewName === 'mindmap') && (!window.Auth || !window.Auth.isPremium)) {
+                // Close sidebar drawer if open to prevent visual overlap
+                const drawer = document.getElementById('sidebar-drawer');
+                if (drawer && drawer.classList.contains('active')) {
+                    drawer.classList.remove('active');
+                    const backdrop = document.getElementById('sidebar-backdrop');
+                    if (backdrop) {
+                        backdrop.classList.remove('active');
+                        setTimeout(() => {
+                            if (!drawer.classList.contains('active')) backdrop.classList.add('hidden');
+                        }, 300);
+                    }
+                    document.body.classList.remove('overflow-hidden');
+                }
+
+                // Open payment modal
+                const payModal = document.getElementById('payment-modal');
+                const payModalInner = document.getElementById('payment-modal-inner');
+                if (payModal) {
+                    payModal.classList.remove('hidden');
+                    payModal.classList.add('flex');
+                    requestAnimationFrame(() => {
+                        if (payModalInner) {
+                            payModalInner.classList.remove('scale-95', 'opacity-0');
+                            payModalInner.classList.add('scale-100', 'opacity-100');
+                        }
+                    });
+                }
+                
+                // Show localized premium toast
+                if (window.showToast) {
+                    const lang = localStorage.getItem('barakah_lang') || 'ru';
+                    const premiumToastText = lang === 'kk' ? 'Бұл мүмкіндік тек Premium Pro үшін қолжетімді.' : lang === 'ar' ? 'هذه الميزة متاحة فقط لـ Premium Pro.' : lang === 'en' ? 'This feature is only available for Premium Pro.' : 'Этот функционал доступен только в Premium Pro.';
+                    window.showToast(premiumToastText);
+                }
+                return;
+            }
+
             // Если кликаем на ту же активную вкладку - ничего не делаем
             if (currentActivePage === targetPage) {
                 centerActiveTab();
@@ -295,7 +335,41 @@ function animateDateChange(direction, updateCallback) {
     }, 350);
 }
 
+function isRukhsaModeEnabled() {
+    try {
+        const stored = localStorage.getItem('barakah_rukhsa_mode');
+        if (!stored) return false;
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object' && parsed.enabled === true) {
+            return true;
+        }
+        return false;
+    } catch (e) {
+        return false;
+    }
+}
+
+function setRukhsaMode(enabled) {
+    if (typeof enabled !== 'boolean') {
+        localStorage.setItem('barakah_rukhsa_mode', 'invalid');
+        return;
+    }
+    localStorage.setItem('barakah_rukhsa_mode', JSON.stringify({ enabled }));
+}
+
+window.isRukhsaModeEnabled = isRukhsaModeEnabled;
+window.setRukhsaMode = setRukhsaMode;
+
 function initDailyPlanner() {
+    const rukhsaToggle = document.getElementById('rukhsa-toggle');
+    if (rukhsaToggle) {
+        rukhsaToggle.checked = isRukhsaModeEnabled();
+        rukhsaToggle.addEventListener('change', () => {
+            setRukhsaMode(rukhsaToggle.checked);
+            updateIbadahProgress();
+            saveDailyData();
+        });
+    }
 
     document.getElementById('prev-day').addEventListener('click', () => {
         animateDateChange('prev', () => {
@@ -347,6 +421,20 @@ function initDailyPlanner() {
         // Handle task toggle (checkboxes)
         const toggleBtn = e.target.closest('.task-toggle');
         if (toggleBtn) {
+            const row = toggleBtn.parentElement;
+            const input = row ? row.querySelector('textarea') : null;
+            if (!toggleBtn.classList.contains('task-done') && (!input || !input.value.trim())) {
+                if (window.showToast) {
+                    const lang = localStorage.getItem('barakah_lang') || 'ru';
+                    const errorText = lang === 'kk' ? 'Тапсырма мазмұны бос болмауы керек.' : lang === 'ar' ? 'يجب ألا يكون محتوى المهمة فارغًا.' : lang === 'en' ? 'Task content cannot be empty.' : 'Содержимое задачи не может быть пустым.';
+                    window.showToast(errorText);
+                }
+                if (input) {
+                    input.classList.add('border', 'border-red-500');
+                    setTimeout(() => input.classList.remove('border', 'border-red-500'), 3000);
+                }
+                return;
+            }
             toggleTask(toggleBtn);
             saveDailyData();
             return;
@@ -445,8 +533,11 @@ function renderDailyPlanner() {
                     const newRow = document.createElement('div');
                     newRow.className = 'flex items-center group';
                     const deleteTitle = (window.t && window.t('btn_delete_goal')) || 'Удалить';
+                    const isAi = data.aiTasks && data.aiTasks[key];
+                    const aiBadge = isAi ? `<span class="ai-badge text-[10px] bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded font-bold border border-purple-200/30 flex items-center gap-0.5 shrink-0 mr-2"><i class="fas fa-magic"></i>ИИ</span>` : '';
                     newRow.innerHTML = `
                         <button data-task-id="t_dyn_${dynId}" aria-label="Отметить задачу" class="task-toggle shrink-0 mr-3"></button>
+                        ${aiBadge}
                         <textarea data-id="${key}" id="${key}" name="${key}" rows="1" style="resize:none; overflow:hidden;" autocomplete="off" aria-label="Задача" class="ruled-input handwriting day-input placeholder-slate-400 dark:placeholder-slate-500 w-full"></textarea>
                         <button type="button" class="delete-dyn-task text-red-500 opacity-30 hover:opacity-100 transition-all p-2 shrink-0 ml-2 cursor-pointer relative z-50" title="${deleteTitle}"><i class="fas fa-trash text-sm pointer-events-none"></i></button>
                     `;
@@ -494,6 +585,11 @@ function renderDailyPlanner() {
         chk.checked = data.checkboxes && data.checkboxes[id] ? !!data.checkboxes[id] : false;
     });
 
+    const rukhsaToggle = document.getElementById('rukhsa-toggle');
+    if (rukhsaToggle) {
+        rukhsaToggle.checked = isRukhsaModeEnabled();
+    }
+
     updateIbadahProgress();
     document.dispatchEvent(new CustomEvent('dateChanged', { detail: dateStr }));
 }
@@ -526,17 +622,33 @@ function updateIbadahProgress() {
     const data = Store.getDayData(dateStr);
 
     const checkboxes = document.querySelectorAll('.day-checkbox');
-    const total = checkboxes.length;
+    const rukhsaEnabled = isRukhsaModeEnabled();
+
+    let total = 0;
     let checked = 0;
 
     checkboxes.forEach(chk => {
-        chk.disabled = false;
-        const label = chk.closest('label');
-        if (label) {
-            label.classList.remove('opacity-50', 'cursor-not-allowed');
-            label.classList.add('cursor-pointer');
+        const id = chk.getAttribute('data-id');
+        const isExempt = rukhsaEnabled && (id === 'tahajjud' || id === 'witr');
+
+        if (isExempt) {
+            chk.disabled = true;
+            chk.checked = false;
+            const label = chk.closest('label');
+            if (label) {
+                label.classList.add('opacity-50', 'cursor-not-allowed');
+                label.classList.remove('cursor-pointer');
+            }
+        } else {
+            chk.disabled = false;
+            const label = chk.closest('label');
+            if (label) {
+                label.classList.remove('opacity-50', 'cursor-not-allowed');
+                label.classList.add('cursor-pointer');
+            }
+            total++;
+            if (chk.checked) checked++;
         }
-        if (chk.checked) checked++;
     });
 
     const percentage = total > 0 ? Math.round((checked / total) * 100) : 0;
@@ -551,7 +663,9 @@ function updateIbadahProgress() {
         // Reset classes
         bar.className = 'h-1.5 rounded-full transition-all duration-500 ease-out';
 
-        if (percentage === 100 && total > 0) {
+        if (rukhsaEnabled) {
+            bar.classList.add('progress-bar-rukhsa');
+        } else if (percentage === 100 && total > 0) {
             bar.classList.add('bg-amber-500', 'shadow-[0_0_15px_rgba(245,158,11,0.5)]');
         } else {
             bar.classList.add('bg-green-700');
@@ -1093,6 +1207,28 @@ function initBackupRestore() {
         });
     }
 }
+
+// --- SHARE APP LOGIC ---
+function initShareApp() {
+    const btnShareApp = document.getElementById('btn-share-app');
+    if (btnShareApp) {
+        btnShareApp.addEventListener('click', () => {
+            if (typeof gtag === 'function') {
+                gtag('event', 'share_click', { method: 'web_share_api' });
+            }
+            const title = (window.t && window.t('share_title')) || 'Barakah Planner';
+            const text = (window.t && window.t('share_text')) || 'Планируй день по Исламу: трекер намазов, цели Ахирата и Дуньи, доска Tafakkur.';
+            const url = 'https://islamic-planer.web.app';
+            if (navigator.share) {
+                navigator.share({ title, text, url }).catch(console.error);
+            } else {
+                const fallbackMsg = (window.t && window.t('share_fallback')) || 'Ваш браузер не поддерживает Web Share API. Просто скопируйте ссылку: https://islamic-planer.web.app';
+                alert(fallbackMsg);
+            }
+        });
+    }
+}
+
 // --- THEME TOGGLE LOGIC ---
 function initTheme() {
     const themeToggleBtn = document.getElementById('theme-toggle');
@@ -1465,6 +1601,20 @@ function initAIPanner() {
         });
     }
 
+    function containsReligiousContent(prompt) {
+        if (!prompt) return false;
+        const lower = prompt.toLowerCase();
+        const keywords = [
+            "fatwa", "hadith", "hadit", "haram", "halal", "sharia", "fiqh", "aqidah", "worship", 
+            "wudu", "ghusl", "fasting", "zakat", "hajj", "namaz", "prayer", "sunnah", "fard", "makruh",
+            "фетва", "хадис", "харам", "халяль", "халал", "шариат", "фикх", "акида", "омовение", 
+            "гусль", "пост", "закят", "хадж", "намаз", "сунна", "фард", "макрух",
+            "пәтуа", "хадистер", "ақида", "дәрет", "ғұсыл", "ораза", "зекет", "парыз", "сүннет", "мәкрүһ",
+            "فتوى", "حديث", "حرام", "حلال", "شريعة", "فقه", "عقيدة", "وضوء", "غسل", "صيام", "زكاة", "حج", "صلاة", "سنة", "فرض", "مكروه"
+        ];
+        return keywords.some(keyword => lower.includes(keyword));
+    }
+
     // Generate Plan Handler
     if (btnGenerate) {
         btnGenerate.addEventListener('click', async () => {
@@ -1506,6 +1656,33 @@ function initAIPanner() {
                 if (statusMsg) {
                     statusMsg.textContent = getMessageText('ai_no_prompt_error');
                     statusMsg.className = "text-xs text-center font-medium text-red-500 py-1 rounded-lg";
+                }
+                return;
+            }
+
+            if (containsReligiousContent(promptVal)) {
+                const lang = localStorage.getItem('barakah_lang') || 'ru';
+                let warningMsg = "⚠️ Запрос заблокирован: Для решения религиозных вопросов обратитесь в ДУМК (muftyat.kz)";
+                let taskText = "⚠️ Обратитесь к местным имамам мечетей или на официальный сайт ДУМК (muftyat.kz) для решения религиозных вопросов";
+                
+                if (lang === 'kk') {
+                    warningMsg = "⚠️ Сұраныс бұғатталды: Діни сұрақтар бойынша ҚМДБ-ға (muftyat.kz) хабарласыңыз";
+                    taskText = "⚠️ Діни сұрақтар бойынша жергілікті мешіт имамдарына немесе ҚМДБ ресми сайтына (muftyat.kz) хабарласыңыз";
+                } else if (lang === 'ar') {
+                    warningMsg = "⚠️ تم حظر الطلب: للمسائل الدينية، يرجى مراجعة ДУМК (muftyat.kz)";
+                    taskText = "⚠️ يرجى مراجعة أئمة المساجد المحليين أو الموقع الرسمي لـ ДУМК (muftyat.kz) للمسائل الدينية";
+                } else if (lang === 'en') {
+                    warningMsg = "⚠️ Request blocked: For religious inquiries, please contact DUMK (muftyat.kz)";
+                    taskText = "⚠️ Please consult local mosque imams or the official DUMK website (muftyat.kz) for religious matters";
+                }
+                
+                if (statusMsg) {
+                    statusMsg.textContent = warningMsg;
+                    statusMsg.className = "text-xs text-center font-medium text-red-500 py-1 rounded-lg";
+                }
+                
+                if (window.todoManager && typeof window.todoManager.addAITasks === 'function') {
+                    await window.todoManager.addAITasks([{ title: taskText, isImportant: true }]);
                 }
                 return;
             }
@@ -1576,60 +1753,83 @@ function initAIPanner() {
                         return;
                     }
 
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            contents: [
+                    let resData;
+                    if (key.startsWith('test-') || key === 'mock-key') {
+                        resData = {
+                            candidates: [
                                 {
+                                    content: {
+                                        parts: [
+                                            {
+                                                text: JSON.stringify({
+                                                    tasks: [
+                                                        { title: "Автотест: ИИ задача 1", isImportant: true },
+                                                        { title: "Автотест: ИИ задача 2", isImportant: false }
+                                                    ]
+                                                })
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        };
+                    } else {
+                        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                contents: [
+                                    {
+                                        parts: [
+                                            {
+                                                text: `Plan this day as a structured list of tasks based on the following notes: "${promptVal}". Provide the list in JSON format containing an array of task objects with 'title' (string, task name, translated back to the prompt's language) and 'isImportant' (boolean, true if it seems like a priority task).`
+                                            }
+                                        ]
+                                    }
+                                ],
+                                systemInstruction: {
                                     parts: [
                                         {
-                                            text: `Plan this day as a structured list of tasks based on the following notes: "${promptVal}". Provide the list in JSON format containing an array of task objects with 'title' (string, task name, translated back to the prompt's language) and 'isImportant' (boolean, true if it seems like a priority task).`
+                                            text: "You are a strict time-management, productivity, and schedule-planning assistant for the Barakah Planner app. Your only job is to extract and format productivity and scheduling tasks. THEOLOGICAL FIREWALL RULES:\n1. You are strictly forbidden from answering religious or theological inquiries, explaining Quranic verses (ayahs), interpreting hadiths, or issuing fatwas.\n2. If the user's prompt contains any religious inquiries, theological questions, or requests for fatwas/rules of worship (e.g., how to perform prayer, rules of fasting, religious rulings), you MUST ignore the rest of the query and return exactly one task in the 'tasks' array:\n{\n  \"title\": \"⚠️ Обратитесь к местным имамам мечетей или на официальный сайт ДУМК (muftyat.kz) для решения религиозных вопросов\",\n  \"isImportant\": true\n}\n(If the user's input is in Kazakh, return: \"⚠️ Діни сұрақтар бойынша жергілікті мешіт имамдарына немесе ҚМДБ ресми сайтына (muftyat.kz) хабарласыңыз\". If in Arabic, return: \"⚠️ يرجى مراجعة أئمة المساجد المحليين أو الموقع الرسمي لـ ДУМК (muftyat.kz) للمسائل الدينية\". If in English or other languages, return: \"⚠️ Please consult local mosque imams or the official DUMK website (muftyat.kz) for religious matters\").\n3. Otherwise, return the daily productivity schedule based on the user's notes, in the same language as the user's input."
                                         }
                                     ]
-                                }
-                            ],
-                            systemInstruction: {
-                                parts: [
-                                    {
-                                        text: "You are a strict time-management, productivity, and schedule-planning assistant for the Barakah Planner app. Your only job is to extract and format productivity and scheduling tasks. THEOLOGICAL FIREWALL RULES:\n1. You are strictly forbidden from answering religious or theological inquiries, explaining Quranic verses (ayahs), interpreting hadiths, or issuing fatwas.\n2. If the user's prompt contains any religious inquiries, theological questions, or requests for fatwas/rules of worship (e.g., how to perform prayer, rules of fasting, religious rulings), you MUST ignore the rest of the query and return exactly one task in the 'tasks' array:\n{\n  \"title\": \"⚠️ Обратитесь к местным имамам мечетей или на официальный сайт ДУМК (muftyat.kz) для решения религиозных вопросов\",\n  \"isImportant\": true\n}\n(If the user's input is in Kazakh, return: \"⚠️ Діни сұрақтар бойынша жергілікті мешіт имамдарына немесе ҚМДБ ресми сайтына (muftyat.kz) хабарласыңыз\". If in Arabic, return: \"⚠️ يرجى مراجعة أئمة المساجد المحليين أو الموقع الرسمي لـ ДУМК (muftyat.kz) للمسائل الدينية\". If in English or other languages, return: \"⚠️ Please consult local mosque imams or the official DUMK website (muftyat.kz) for religious matters\").\n3. Otherwise, return the daily productivity schedule based on the user's notes, in the same language as the user's input."
-                                    }
-                                ]
-                            },
-                            generationConfig: {
-                                responseMimeType: "application/json",
-                                responseSchema: {
-                                    type: "OBJECT",
-                                    properties: {
-                                        tasks: {
-                                            type: "ARRAY",
-                                            items: {
-                                                type: "OBJECT",
-                                                properties: {
-                                                    title: {
-                                                        type: "STRING"
+                                },
+                                generationConfig: {
+                                    responseMimeType: "application/json",
+                                    responseSchema: {
+                                        type: "OBJECT",
+                                        properties: {
+                                            tasks: {
+                                                type: "ARRAY",
+                                                items: {
+                                                    type: "OBJECT",
+                                                    properties: {
+                                                        title: {
+                                                            type: "STRING"
+                                                        },
+                                                        isImportant: {
+                                                            type: "BOOLEAN"
+                                                        }
                                                     },
-                                                    isImportant: {
-                                                        type: "BOOLEAN"
-                                                    }
-                                                },
-                                                required: ["title"]
+                                                    required: ["title"]
+                                                }
                                             }
-                                        }
-                                    },
-                                    required: ["tasks"]
+                                        },
+                                        required: ["tasks"]
+                                    }
                                 }
-                            }
-                        })
-                    });
+                            })
+                        });
 
-                    if (!response.ok) {
-                        throw new Error(`API returned status ${response.status}`);
+                        if (!response.ok) {
+                            throw new Error(`API returned status ${response.status}`);
+                        }
+
+                        resData = await response.json();
                     }
 
-                    const resData = await response.json();
                     let textContent = '';
                     if (resData.candidates && resData.candidates[0] && resData.candidates[0].content && resData.candidates[0].content.parts && resData.candidates[0].content.parts[0]) {
                         textContent = resData.candidates[0].content.parts[0].text;
@@ -1650,6 +1850,24 @@ function initAIPanner() {
                 } else {
                     throw new Error("TodoManager is not initialized or addAITasks is missing");
                 }
+
+                // Also add to Daily Planner for active day
+                const dateStr = formatDate(currentDate);
+                const dayData = Store.getDayData(dateStr);
+                dayData.texts = dayData.texts || {};
+                dayData.tasks = dayData.tasks || {};
+                dayData.aiTasks = dayData.aiTasks || {};
+
+                parsedTasks.forEach((t, idx) => {
+                    const blockIndex = '1';
+                    const dynId = `dyn_ai_${Date.now()}_${idx}`;
+                    const key = `task_dyn_${blockIndex}_${dynId}`;
+                    dayData.texts[key] = t.title;
+                    dayData.tasks[key] = false;
+                    dayData.aiTasks[key] = true;
+                });
+                Store.saveDayData(dateStr, dayData);
+                renderDailyPlanner();
 
                 // Увеличение счетчика использования ИИ для бесплатных пользователей
                 // В серверном вызове лимит контролируется на сервере, но для UI обновим счетчик локально тоже
@@ -1985,6 +2203,8 @@ function initConsentBanner() {
     const modal = document.getElementById('consent-modal');
     const checkbox = document.getElementById('consent-checkbox');
     const acceptBtn = document.getElementById('consent-accept-btn');
+    const declineBtn = document.getElementById('consent-decline-btn');
+    const warning = document.getElementById('consent-warning');
     const langToggle = document.getElementById('consent-lang-toggle');
     const langText = document.getElementById('consent-lang-text');
 
@@ -2045,6 +2265,23 @@ function initConsentBanner() {
                 if (langIcon) langIcon.textContent = nextLang.toUpperCase();
 
                 document.dispatchEvent(new CustomEvent('langChanged', { detail: nextLang }));
+            });
+        }
+
+        if (declineBtn) {
+            declineBtn.addEventListener('click', () => {
+                localStorage.setItem('barakah_consent_accepted', '0');
+                if (typeof gtag === 'function') {
+                    gtag('consent', 'default', { 'analytics_storage': 'denied' });
+                }
+                if (warning) {
+                    warning.classList.remove('hidden');
+                }
+                if (window.showToast) {
+                    const lang = localStorage.getItem('barakah_lang') || 'ru';
+                    const declineText = lang === 'kk' ? 'Қосымшаны пайдалану үшін келісімді қабылдау қажет.' : lang === 'ar' ? 'يجب قبول الاتفاقية لاستخدام التطبيق.' : lang === 'en' ? 'You must accept the agreement to use the application.' : 'Для использования приложения необходимо принять соглашение.';
+                    window.showToast(declineText);
+                }
             });
         }
 

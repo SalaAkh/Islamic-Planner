@@ -732,6 +732,137 @@
                 width: 87%;
             }
         }
+
+        /* ── CONSENT MODAL ── */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(5, 8, 5, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #0d150d;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            max-width: 540px;
+            width: 100%;
+            padding: 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+        }
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+        .modal-lang-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .modal-lang-btn:hover {
+            background: var(--surface2);
+        }
+        .modal-body {
+            max-height: 200px;
+            overflow-y: auto;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            text-align: justify;
+        }
+        .modal-checkbox-label {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .modal-checkbox-label input {
+            margin-top: 3px;
+        }
+        .modal-warning {
+            display: none;
+            background: rgba(220, 38, 38, 0.15);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            color: #f87171;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            align-items: center;
+            gap: 8px;
+        }
+        .modal-warning.active {
+            display: flex;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        .modal-btn-decline {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-weight: 700;
+            padding: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+        .modal-btn-decline:hover {
+            background: var(--surface2);
+        }
+        .modal-btn-accept {
+            flex: 2;
+            background: var(--green);
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            padding: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+        .modal-btn-accept:hover {
+            background: var(--green-dark);
+        }
+        .modal-btn-accept:disabled {
+            background: var(--surface);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
@@ -1039,6 +1170,33 @@
             справочно-информационный характер.</p>
     </footer>
 
+    <!-- Consent Banner Modal -->
+    <div id="consent-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title t" data-key="consent_title">Согласие на обработку данных и дисклеймер</h3>
+                <button id="consent-lang-toggle" class="modal-lang-btn">
+                    <i class="fas fa-globe"></i> <span id="consent-lang-text">RU</span>
+                </button>
+            </div>
+            <div class="modal-body t" data-key="consent_text">
+                Перед началом работы с Barakah Planner, пожалуйста, ознакомьтесь с условиями. В соответствии с законом РК «О персональных данных и их защите», мы запрашиваем ваше согласие на сбор, обработку и трансграничную передачу ваших данных (email, имя, задачи) на облачные серверы Google Cloud для обеспечения облачной синхронизации. Также обратите внимание, что приложение является инструментом личной продуктивности. Мы не предоставляем религиозных предписаний, фетв или официального шариатского руководства. Все расчеты времени намазов носят справочно-информационный характер.
+            </div>
+            <label class="modal-checkbox-label">
+                <input type="checkbox" id="consent-checkbox">
+                <span class="t" data-key="consent_check">Я даю согласие на обработку данных и принимаю условия дисклеймера</span>
+            </label>
+            <div id="consent-warning" class="modal-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span class="t" data-key="consent_decline_error">Для использования приложения необходимо принять соглашение.</span>
+            </div>
+            <div class="modal-buttons">
+                <button id="consent-decline-btn" class="modal-btn-decline t" data-key="consent_decline_btn">Отклонить</button>
+                <button id="consent-accept-btn" class="modal-btn-accept t" data-key="consent_btn" disabled>Согласен и продолжить</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ─── Translations ───
         const L = {
@@ -1068,7 +1226,13 @@
                 cta_title: 'Начни планировать с баракатом',
                 cta_desc: 'Бесплатно, без регистрации, работает офлайн. Просто открой и начни — ИншаАллах.',
                 footer_free: 'Бесплатно для Уммы',
-                religious_disclaimer_text: 'Barakah Planner является инструментом личной продуктивности и тайм-менеджмента. Приложение не предоставляет религиозных предписаний, фетв или официального шариатского руководства. Все расчеты времени намазов носят справочно-информационный характер.'
+                religious_disclaimer_text: 'Barakah Planner является инструментом личной продуктивности и тайм-менеджмента. Приложение не предоставляет религиозных предписаний, фетв или официального шариатского руководства. Все расчеты времени намазов носят справочно-информационный характер.',
+                consent_title: "Согласие на обработку данных и дисклеймер",
+                consent_text: "Перед началом работы с Barakah Planner, пожалуйста, ознакомьтесь с условиями. В соответствии с законом РК «О персональных данных и их защите», мы запрашиваем ваше согласие на сбор, обработку и трансграничную передачу ваших данных (email, имя, задачи) на облачные серверы Google Cloud для обеспечения облачной синхронизации. Также обратите внимание, что приложение является инструментом личной продуктивности. Мы не предоставляем религиозных предписаний, фетв или официального шариатского руководства. Все расчеты времени намазов носят справочно-информационный характер.",
+                consent_check: "Я даю согласие на обработку данных и принимаю условия дисклеймера",
+                consent_btn: "Согласен и продолжить",
+                consent_decline_btn: "Отклонить",
+                consent_decline_error: "Для использования приложения необходимо принять соглашение."
             },
             kk: {
                 open_app: 'Ашу', open_app_full: 'Қосымшаны ашу', learn_more: 'Толығырақ',
@@ -1096,7 +1260,13 @@
                 cta_title: 'Баракатпен жоспарлауды бастаңыз',
                 cta_desc: 'Тегін, тіркелмей-ақ, офлайн жұмыс істейді. Ашып, бастаңыз — ИншаАллах.',
                 footer_free: 'Үмбет үшін тегін',
-                religious_disclaimer_text: 'Barakah Planner — жеке өнімділік пен уақытты басқару құралы. Қолданба діни нұсқауларды, пәтуаларды немесе ресми шариғат нұсқауларын бермейді. Намаз уақытының барлық есептеулері тек анықтамалық сипатта болады.'
+                religious_disclaimer_text: 'Barakah Planner — жеке өнімділік пен уақытты басқару құралы. Қолданба діни нұсқауларды, пәтуаларды немесе ресми шариғат нұсқауларын бермейді. Намаз уақытының барлық есептеулері тек анықтамалық сипатта болады.',
+                consent_title: "Деректерді өңдеуге келісім және дисклеймер",
+                consent_text: "Barakah Planner-мен жұмысты бастамас бұрын шарттармен танысыңыз. ҚР «Дербес деректер және оларды қорғау туралы» Заңына сәйкес, бұлттық синхрондауды қамтамасыз ету үшін деректеріңізді (email, есім, тапсырмалар) Google Cloud бұлттық серверлеріне жинауға, өңдеуге және трансшекаралық тасымалдауға келісіміңізді сұраймыз. Сондай-ақ, қолданба жеке өнімділік құралы болып табылады. Біз діни нұсқауларды, пәтуаларды немесе ресми шариғат басшылығын бермейміз. Намаз уақытының барлық есептеулері анықтамалық сипатта болады.",
+                consent_check: "Мен деректерді өңдеуге келісім беремін және дисклеймер шарттарын қабылдаймын",
+                consent_btn: "Келісемін және жалғастыру",
+                consent_decline_btn: "Қабылдамау",
+                consent_decline_error: "Қосымшаны пайдалану үшін келісімді қабылдау қажет."
             },
             en: {
                 open_app: 'Launch', open_app_full: 'Launch App', learn_more: 'Learn more',
@@ -1124,7 +1294,13 @@
                 cta_title: 'Start planning with barakah',
                 cta_desc: 'Free, no sign-up required, works offline. Just open and start — InshaAllah.',
                 footer_free: 'Free for the Ummah',
-                religious_disclaimer_text: 'Barakah Planner is a personal productivity and time management tool. The application does not provide religious rulings, fatwas, or official Sharia guidance. All prayer time calculations are for reference and informational purposes only.'
+                religious_disclaimer_text: 'Barakah Planner is a personal productivity and time management tool. The application does not provide religious rulings, fatwas, or official Sharia guidance. All prayer time calculations are for reference and informational purposes only.',
+                consent_title: "Consent & Disclaimer",
+                consent_text: "Before starting with Barakah Planner, please read the terms. In accordance with the Law of the Republic of Kazakhstan \"On Personal Data and its Protection\", we request your consent for the collection, processing, and cross-border transfer of your data (email, name, tasks) to Google Cloud servers to enable cloud synchronization. Also note that the application is a personal productivity tool. We do not provide religious rulings, fatwas, or official Sharia guidance. All prayer time calculations are for reference and informational purposes only.",
+                consent_check: "I consent to data processing and accept the disclaimer terms",
+                consent_btn: "I Agree and Continue",
+                consent_decline_btn: "Decline",
+                consent_decline_error: "You must accept the agreement to use the application."
             },
             ar: {
                 open_app: 'فتح', open_app_full: 'فتح التطبيق', learn_more: 'اعرف المزيد',
@@ -1152,7 +1328,13 @@
                 cta_title: 'ابدأ التخطيط بالبركة',
                 cta_desc: 'مجاني، دون تسجيل، يعمل بدون إنترنت. افتحه وابدأ — إن شاء الله.',
                 footer_free: 'مجاناً للأمة',
-                religious_disclaimer_text: 'Barakah Planner هو أداة للإنتاجية الشخصية وإدارة الوقت. لا يقدم التطبيق فتاوى أو توجيهات شرعية رسمية. جميع حسابات أوقات الصلاة هي لأغراض مرجعية وإعلامية فقط.'
+                religious_disclaimer_text: 'Barakah Planner هو أداة للإنتاجية الشخصية وإدارة الوقت. لا يقدم التطبيق فتاوى أو توجيهات شرعية رسمية. جميع حسابات أوقات الصلاة هي لأغراض مرجعية وإعلامية فقط.',
+                consent_title: "الموافقة على معالجة البيانات وإخلاء المسؤولية",
+                consent_text: "قبل البدء في استخدام Barakah Planner، يرجى قراءة الشروط. وفقًا لقانون جمهورية كازاخستان «بشأن البيانات الشخصية وحمايتها»، نطلب موافقتك على جمع بياناتك (البريد الإلكتروني، الاسم، المهام) ومعالجتها ونقلها عبر الحدود إلى خوادم Google Cloud لضمان المزامنة السحابية. يرجى الملاحظة أيضًا أن التطبيق هو أداة للإنتاجية الشخصية. نحن لا نقدم أحكامًا شرعية أو فتاوى أو توجيهات دينية رسمية. جميع حسابات أوقات الصلاة هي لأغراض مرجعية وإعلامية فقط.",
+                consent_check: "أوافق على معالجة البيانات وأقبل شروط إخلاء المسؤولية",
+                consent_btn: "أوافق والمتابعة",
+                consent_decline_btn: "رفض",
+                consent_decline_error: "يجب قبول الاتفاقية لاستخدام التطبيق."
             }
         };
 
@@ -1207,6 +1389,84 @@
 
         // ─── Init ───
         setLang(currentLang);
+
+        // ─── Consent Banner Modal Logic ───
+        (function() {
+            var modal = document.getElementById('consent-modal');
+            var checkbox = document.getElementById('consent-checkbox');
+            var acceptBtn = document.getElementById('consent-accept-btn');
+            var declineBtn = document.getElementById('consent-decline-btn');
+            var warning = document.getElementById('consent-warning');
+            var langToggle = document.getElementById('consent-lang-toggle');
+            var langText = document.getElementById('consent-lang-text');
+
+            if (!modal) return;
+
+            var isAccepted = localStorage.getItem('barakah_consent_accepted') === '1';
+
+            if (!isAccepted) {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        e.stopPropagation();
+                    }
+                });
+
+                window.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && modal.classList.contains('active')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                }, true);
+
+                if (langText) langText.textContent = currentLang.toUpperCase();
+
+                if (checkbox) {
+                    checkbox.addEventListener('change', function() {
+                        acceptBtn.disabled = !checkbox.checked;
+                    });
+                }
+
+                if (langToggle) {
+                    langToggle.addEventListener('click', function() {
+                        var current = localStorage.getItem('barakah_lang') || 'ru';
+                        var nextLang = 'ru';
+                        if (current === 'ru') nextLang = 'kk';
+                        else if (current === 'kk') nextLang = 'ar';
+                        else if (current === 'ar') nextLang = 'en';
+                        else nextLang = 'ru';
+
+                        localStorage.setItem('barakah_lang', nextLang);
+                        setLang(nextLang);
+                        if (langText) langText.textContent = nextLang.toUpperCase();
+                    });
+                }
+
+                if (declineBtn) {
+                    declineBtn.addEventListener('click', function() {
+                        localStorage.setItem('barakah_consent_accepted', '0');
+                        if (typeof gtag === 'function') {
+                            gtag('consent', 'default', { 'analytics_storage': 'denied' });
+                        }
+                        if (warning) {
+                            warning.classList.add('active');
+                        }
+                    });
+                }
+
+                if (acceptBtn) {
+                    acceptBtn.addEventListener('click', function() {
+                        if (checkbox && checkbox.checked) {
+                            localStorage.setItem('barakah_consent_accepted', '1');
+                            modal.classList.remove('active');
+                            document.body.style.overflow = '';
+                        }
+                    });
+                }
+            }
+        })();
 
         // ─── PWA Service Worker ───
         if ('serviceWorker' in navigator) {

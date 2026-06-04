@@ -1,4 +1,4 @@
-export const Gamification = {
+const Gamification = {
     state: {
         points: 0,
         level: 1,
@@ -153,6 +153,8 @@ export const Gamification = {
         }
     }
 };
+
+window.Gamification = Gamification;
 
 document.addEventListener('DOMContentLoaded', () => {
     Gamification.init();

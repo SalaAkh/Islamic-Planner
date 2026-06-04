@@ -60,7 +60,7 @@ const PASSTHROUGH_PATTERNS = [
     /cloudfunctions\.net/,
     /accounts\.google/,
     /nowpayments\.io/,
-    /robokassa\.ru/,
+    /wooppay\.com/,
 ];
 
 self.addEventListener('fetch', (event) => {

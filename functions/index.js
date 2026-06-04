@@ -121,7 +121,7 @@ exports.checkAndSendReminders = functions.pubsub.schedule('every 5 minutes').onR
  * Webhook для автоматической активации Premium-статуса после оплаты.
  * Поддерживает CORS для тестирования/симуляции с фронтенда.
  * Поддерживает:
- * - Сигнатуру Robokassa (MD5/SHA256)
+ * - Сигнатуру Wooppay (HMAC-SHA256)
  * - Сигнатуру NowPayments IPN (HMAC-SHA512)
  * - Firebase ID Token (локальная симуляция)
  * - Legacy секрет x-webhook-secret
@@ -158,37 +158,33 @@ exports.handlePaymentWebhook = functions.https.onRequest(async (req, res) => {
     const params = { ...req.query, ...req.body };
     const authHeader = req.headers['authorization'];
 
-    // --- Strategy 1: Robokassa Signature Verification ---
-    if (params.SignatureValue) {
-        console.log('[PaymentWebhook] Robokassa signature detected');
-        const robokassaPass2 = process.env.ROBOKASSA_PASSWORD_2;
-        if (!robokassaPass2) {
-            console.error('[PaymentWebhook] ROBOKASSA_PASSWORD_2 is not configured!');
-            res.status(500).json({ error: "Robokassa secret not configured" });
+    // --- Strategy 1: Wooppay Signature Verification ---
+    if (params.WooppaySignature) {
+        console.log('[PaymentWebhook] Wooppay signature detected');
+        const wooppaySecretKey = process.env.WOOPPAY_SECRET_KEY;
+        if (!wooppaySecretKey) {
+            console.error('[PaymentWebhook] WOOPPAY_SECRET_KEY is not configured!');
+            res.status(500).json({ error: "Wooppay secret not configured" });
             return;
         }
 
-        const { OutSum, InvId, SignatureValue, Shp_user_id, Shp_email } = params;
+        const { user_id, email, sum, WooppaySignature } = params;
 
-        // Robokassa Success Signature: OutSum:InvId:Password2[:Shp_...]
-        // Параметры Shp_ сортируются по алфавиту: Shp_email (e) перед Shp_user_id (u)
-        let signString = `${OutSum}:${InvId}:${robokassaPass2}`;
-        if (Shp_email) signString += `:Shp_email=${Shp_email}`;
-        if (Shp_user_id) signString += `:Shp_user_id=${Shp_user_id}`;
-
+        // Wooppay Success Signature: HMAC-SHA256 of user_id+email+sum with secret key
         const crypto = require('crypto');
-        const calculatedSig = crypto.createHash('md5').update(signString).digest('hex').toUpperCase();
+        const signString = `${user_id}:${email}:${sum}`;
+        const calculatedSig = crypto.createHmac('sha256', wooppaySecretKey).update(signString).digest('hex').toUpperCase();
 
-        if (SignatureValue.toUpperCase() !== calculatedSig) {
-            console.warn('[PaymentWebhook] Invalid Robokassa signature. Calculated:', calculatedSig, 'Received:', SignatureValue);
+        if (WooppaySignature.toUpperCase() !== calculatedSig) {
+            console.warn('[PaymentWebhook] Invalid Wooppay signature. Calculated:', calculatedSig, 'Received:', WooppaySignature);
             res.status(401).json({ error: "Invalid signature" });
             return;
         }
 
-        targetUserId = Shp_user_id;
-        targetEmail = Shp_email || '';
+        targetUserId = user_id;
+        targetEmail = email || '';
         targetStatus = 'success';
-        targetMethod = 'robokassa';
+        targetMethod = 'wooppay';
     }
     // --- Strategy 2: NowPayments IPN Signature Verification ---
     else if (req.headers['x-nowpayments-sig']) {
@@ -388,7 +384,14 @@ exports.generateDailyPlan = functions.https.onRequest(async (req, res) => {
         let isPremium = false;
         const userDoc = await db.collection('users').doc(uid).get();
         if (userDoc.exists()) {
-            isPremium = !!userDoc.data().isPremium;
+            const userData = userDoc.data();
+            isPremium = !!userData.isPremium;
+            // Check if trial has expired
+            if (userData.premiumPlan === 'trial' && userData.premiumExpiresAt) {
+                if (new Date() > new Date(userData.premiumExpiresAt)) {
+                    isPremium = false;
+                }
+            }
         }
 
         // 2. Если бесплатный — проверяем лимиты
