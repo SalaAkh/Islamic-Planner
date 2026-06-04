@@ -249,7 +249,7 @@ window.initMindMap = function () {
     });
 
     function calculateNodeSize(node) {
-        dummyText.text(node.text || "Идея");
+        dummyText.text(node.text || ((window.t && window.t('mindmap_new_node_default')) || "Идея"));
         dummyText.fontSize(node.id === 'root' ? 18 : 14);
         dummyText.fontStyle(node.id === 'root' ? 'bold' : 'normal');
         dummyText.width(null);
@@ -421,7 +421,7 @@ window.initMindMap = function () {
 
         // Text
         const text = new Konva.Text({
-            text: node.text || "Идея",
+            text: node.text || ((window.t && window.t('mindmap_new_node_default')) || "Идея"),
             fontSize: isRoot ? 18 : 14,
             fontFamily: 'Inter, sans-serif',
             fontStyle: isRoot ? 'bold' : 'normal',
@@ -657,7 +657,7 @@ window.initMindMap = function () {
             saveState();
             if (!parent.children) parent.children = [];
             const newId = 'node_' + Date.now();
-            const newNode = { id: newId, text: 'Новая идея', children: [] };
+            const newNode = { id: newId, text: (window.t && window.t('mindmap_new_node_default')) || 'Новая идея', children: [] };
             parent.children.push(newNode);
             parent.isCollapsed = false;
             selectedNodeId = newId;
@@ -680,7 +680,7 @@ window.initMindMap = function () {
         if (parent) {
             saveState();
             const newId = 'node_' + Date.now();
-            const newNode = { id: newId, text: 'Новая идея', children: [] };
+            const newNode = { id: newId, text: (window.t && window.t('mindmap_new_node_default')) || 'Новая идея', children: [] };
             const idx = parent.children.findIndex(c => c.id === nodeId);
             parent.children.splice(idx + 1, 0, newNode);
             selectedNodeId = newId;
@@ -753,12 +753,13 @@ window.initMindMap = function () {
         textarea.style.width = (nodeData._width * stage.scaleX()) + 'px';
         textarea.style.height = (nodeData._height * stage.scaleY()) + 'px';
         textarea.style.fontSize = (textNode.fontSize() * stage.scaleY()) + 'px';
-        textarea.style.border = '2px solid #4f46e5';
+        const isDark = document.documentElement.classList.contains('dark');
+        textarea.style.border = isDark ? '2px solid #10b981' : '2px solid #10b981';
         textarea.style.padding = (PADDING_Y * stage.scaleY()) + 'px ' + (PADDING_X * stage.scaleX()) + 'px';
         textarea.style.margin = '0px';
         textarea.style.overflow = 'hidden';
-        textarea.style.background = '#ffffff';
-        textarea.style.color = '#1e293b';
+        textarea.style.background = isDark ? '#1e293b' : '#ffffff';
+        textarea.style.color = isDark ? '#f8fafc' : '#1e293b';
         textarea.style.outline = 'none';
         textarea.style.resize = 'none';
         textarea.style.lineHeight = textNode.lineHeight() || 1.2;

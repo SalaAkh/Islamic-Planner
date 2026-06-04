@@ -1266,52 +1266,54 @@
             <!-- СТРАНИЦА 3.9: МЕНТАЛЬНЫЕ КАРТЫ (MINDMAP) -->
             <div id="view-mindmap" class="page-view hidden" style="height: 100%;">
                 <div class="h-full w-full relative">
-                    <div id="mindmap-container" class="h-full w-full outline-none focus:outline-none" tabindex="0"></div>
+                    <div id="mindmap-container" class="h-full w-full outline-none focus:outline-none" style="min-height: 650px;" tabindex="0"></div>
                     
                     <!-- Подсказка по управлению -->
                     <div class="absolute bottom-6 left-6 bg-white/90 dark:bg-slate-800/90 p-4 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 backdrop-blur-sm pointer-events-none z-10 text-sm text-slate-600 dark:text-slate-300 hidden md:block">
-                        <div class="font-bold text-slate-800 dark:text-white mb-2"><i class="fas fa-keyboard text-emerald-500 mr-2"></i>Как пользоваться:</div>
+                        <div class="font-bold text-slate-800 dark:text-white mb-2">
+                            <i class="fas fa-keyboard text-emerald-500 mr-2"></i><span data-i18n="mindmap_how_to_use">Как пользоваться:</span>
+                        </div>
                         <div class="flex flex-col gap-2">
                             <div class="flex items-center gap-2">
                                 <kbd class="bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded border border-gray-300 dark:border-slate-600 font-mono text-xs text-slate-800 dark:text-slate-200 shadow-sm">Tab</kbd>
-                                <span>— Создать вложенную идею</span>
+                                <span data-i18n="mindmap_shortcut_tab_desc">— Создать вложенную идею</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <kbd class="bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded border border-gray-300 dark:border-slate-600 font-mono text-xs text-slate-800 dark:text-slate-200 shadow-sm">Enter</kbd>
-                                <span>— Создать соседнюю идею</span>
+                                <span data-i18n="mindmap_shortcut_enter_desc">— Создать соседнюю идею</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded border border-gray-300 dark:border-slate-600 font-mono text-xs text-slate-800 dark:text-slate-200 shadow-sm">Двойной клик</span>
-                                <span>— Редактировать текст</span>
+                                <span class="bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded border border-gray-300 dark:border-slate-600 font-mono text-xs text-slate-800 dark:text-slate-200 shadow-sm" data-i18n="mindmap_shortcut_dblclick">Двойной клик</span>
+                                <span data-i18n="mindmap_shortcut_edit_desc">— Редактировать текст</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <kbd class="bg-gray-100 dark:bg-slate-700 px-1.5 py-0.5 rounded border border-gray-300 dark:border-slate-600 font-mono text-xs text-slate-800 dark:text-slate-200 shadow-sm">Del</kbd>
-                                <span>— Удалить ветку</span>
+                                <span data-i18n="mindmap_shortcut_del_desc">— Удалить ветку</span>
                             </div>
-                            </div>
-                            </div>
+                        </div>
+                    </div>
 
                     <!-- Панель управления (MindMap Toolbar) -->
                     <div id="mindmap-toolbar" class="absolute bottom-6 right-6 bg-white/90 dark:bg-slate-800/90 p-2 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700 backdrop-blur-md flex items-center gap-2 z-10">
-                        <button id="mm-btn-add-child" class="w-10 h-10 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center transition-all active:scale-95 shadow-md shadow-emerald-500/20" title="Добавить идею (Tab)">
+                        <button id="mm-btn-add-child" class="w-10 h-10 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center transition-all active:scale-95 shadow-md shadow-emerald-500/20" data-i18n="mindmap_btn_add_child" data-i18n-target="title" title="Добавить идею (Tab)">
                             <i class="fas fa-plus"></i>
                         </button>
-                        <button id="mm-btn-add-sibling" class="w-10 h-10 rounded-xl bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-all active:scale-95 shadow-md shadow-blue-500/20" title="Добавить соседнюю идею (Enter)">
+                        <button id="mm-btn-add-sibling" class="w-10 h-10 rounded-xl bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-all active:scale-95 shadow-md shadow-blue-500/20" data-i18n="mindmap_btn_add_sibling" data-i18n-target="title" title="Добавить соседнюю идею (Enter)">
                             <i class="fas fa-level-down-alt fa-rotate-270"></i>
                         </button>
-                        <button id="mm-btn-edit" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-all active:scale-95 border border-slate-200/50 dark:border-slate-600/50" title="Редактировать текст">
+                        <button id="mm-btn-edit" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-all active:scale-95 border border-slate-200/50 dark:border-slate-600/50" data-i18n="mindmap_btn_edit" data-i18n-target="title" title="Редактировать текст">
                             <i class="fas fa-pen"></i>
                         </button>
-                        <button id="mm-btn-delete" class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-950/50 text-red-500 dark:text-red-400 flex items-center justify-center transition-all active:scale-95 border border-red-200/30 dark:border-red-900/30" title="Удалить ветку (Del)">
+                        <button id="mm-btn-delete" class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-950/50 text-red-500 dark:text-red-400 flex items-center justify-center transition-all active:scale-95 border border-red-200/30 dark:border-red-900/30" data-i18n="mindmap_btn_delete" data-i18n-target="title" title="Удалить ветку (Del)">
                             <i class="fas fa-trash"></i>
                         </button>
                         <div class="w-px h-6 bg-gray-200 dark:bg-slate-700 mx-1"></div>
-                        <button id="mm-btn-center" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-all active:scale-95 border border-slate-200/50 dark:border-slate-600/50" title="Центрировать">
+                        <button id="mm-btn-center" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center transition-all active:scale-95 border border-slate-200/50 dark:border-slate-600/50" data-i18n="mindmap_btn_center" data-i18n-target="title" title="Центрировать">
                             <i class="fas fa-crosshairs"></i>
                         </button>
                     </div>
-                            </div>
-                            </div>
+                </div>
+            </div>
             <!-- СТРАНИЦА 4 Дашборд: СПИСОК ДОСОК (MIRO DASHBOARD) -->
             <div id="view-boards" class="page-view hidden" style="height: 100%;">
                 <!-- Desktop View -->
