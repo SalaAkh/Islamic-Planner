@@ -795,8 +795,9 @@ function renderCalendar() {
             const hm = hijriComps.month;
             const hy = hijriComps.year;
             const hMonthName = HIJRI_MONTHS[lang] ? HIJRI_MONTHS[lang][hm - 1] : "";
+            const displayHd = lang === 'ar' ? toArabicNumerals(hd) : hd;
 
-            hijriLabelHtml = `<div class="absolute top-1.5 ltr:right-1.5 rtl:left-1.5 text-[9px] md:text-[10px] text-gray-400 dark:text-gray-500 font-semibold pointer-events-none">${hd} <span class="hidden md:inline">${hMonthName}</span></div>`;
+            hijriLabelHtml = `<div class="absolute top-1.5 ltr:right-1.5 rtl:left-1.5 text-[9px] md:text-[10px] text-gray-400 dark:text-gray-500 font-semibold pointer-events-none">${displayHd} <span class="hidden md:inline">${hMonthName}</span></div>`;
 
             // Check if this date has matching events
             const matching = ISLAMIC_EVENTS.filter(ev => ev.month === hm && ev.day === hd);
@@ -820,7 +821,7 @@ function renderCalendar() {
                 });
             } else if (hm === 9) {
                 isRamadan = true;
-                eventBadgesHtml = `<div class="ramadan-day-badge mt-1.5 text-[9px] md:text-[10px] px-1 py-0.5 rounded text-center truncate font-medium bg-amber-500/10 text-amber-800 dark:text-amber-200 border border-amber-500/20 flex items-center justify-center gap-1" title="${hMonthName} ${hd}">🌙 <span class="hidden md:inline">${hd} ${hMonthName}</span></div>`;
+                eventBadgesHtml = `<div class="ramadan-day-badge mt-1.5 text-[9px] md:text-[10px] px-1 py-0.5 rounded text-center truncate font-medium bg-amber-500/10 text-amber-800 dark:text-amber-200 border border-amber-500/20 flex items-center justify-center gap-1" title="${hMonthName} ${displayHd}">🌙 <span class="hidden md:inline">${displayHd} ${hMonthName}</span></div>`;
             }
         }
 
@@ -1072,76 +1073,31 @@ function getHijriDateComponents(date) {
     }
 }
 
+function toArabicNumerals(num) {
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return String(num).replace(/[0-9]/g, w => arabicDigits[+w]);
+}
+
 // --- UTILS & UX ---
 function getHijriDate(date) {
     const lang = localStorage.getItem('barakah_lang') || 'ru';
-    const localePrefix = lang === 'en' ? 'en-US' : lang === 'ar' ? 'ar-SA' : lang === 'kk' ? 'kk-KZ' : 'ru-RU';
+    const comps = getHijriDateComponents(date);
+    if (!comps) return '';
 
-    let formattedDate = '';
+    const hd = comps.day;
+    const hm = comps.month;
+    const hy = comps.year;
+    const hMonthName = HIJRI_MONTHS[lang] ? HIJRI_MONTHS[lang][hm - 1] : "";
 
-    try {
-        formattedDate = new Intl.DateTimeFormat(`${localePrefix}-u-ca-islamic-umalqura`, {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        }).format(date);
-    } catch (e) {
-        // Fallback
-        formattedDate = new Intl.DateTimeFormat(`${localePrefix}-u-ca-islamic`, {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        }).format(date);
+    if (lang === 'ar') {
+        return `${toArabicNumerals(hd)} ${hMonthName} ${toArabicNumerals(hy)} هـ`;
+    } else if (lang === 'kk') {
+        return `${hd} ${hMonthName} ${hy} ж.`;
+    } else if (lang === 'en') {
+        return `${hd} ${hMonthName} ${hy} AH`;
+    } else {
+        return `${hd} ${hMonthName} ${hy} г. Х.`;
     }
-
-    formattedDate = formattedDate.replace(' г.', '').replace(' AH', '').replace('ж.', '').replace(' AH', '').trim();
-
-    // Fix for Kazakh language where Intl often falls back to standard Gregorian months
-    if (lang === 'kk') {
-        const gregorianEngOrKk = [
-            "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
-            "Қаңтар", "Ақпан", "Наурыз", "Сәуір", "Мамыр", "Маусым", "Шілде", "Тамыз", "Қыркүйек", "Қазан", "Қараша", "Желтоқсан"
-        ];
-
-        const isGregorianFallback = gregorianEngOrKk.some(m => formattedDate.includes(m));
-
-        // If Intl completely failed and gave us a Gregorian month, force fetch Hijri info via Arabic/English locale
-        if (isGregorianFallback) {
-            try {
-                formattedDate = new Intl.DateTimeFormat(`en-US-u-ca-islamic-umalqura`, {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                }).format(date);
-            } catch (e) {
-                formattedDate = new Intl.DateTimeFormat(`en-US-u-ca-islamic`, {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                }).format(date);
-            }
-            formattedDate = formattedDate.replace(' AH', '').trim();
-        }
-
-        const hijriMonthsKk = {
-            "Muharram": "Мұхаррам", "Safar": "Сафар", "Rabiʻ I": "Рабиғ әл-әуәл", "Rabiʻ II": "Рабиғ әс-сәни",
-            "Jumada I": "Жұмада әл-улә", "Jumada II": "Жұмада әс-сәни", "Rajab": "Ережеп", "Shaʻban": "Шағбан",
-            "Ramadan": "Рамазан", "Shawwal": "Шәууәл", "Dhuʻl-Qiʻdah": "Зұлқағда", "Dhuʻl-Hijjah": "Зұлхижжа",
-            // Sometime browsers output standard names instead of hijri names in fallback
-            "Rabiʻ al-Awwal": "Рабиғ әл-әуәл", "Rabiʻ al-Thani": "Рабиғ әс-сәни",
-            "Jumada al-Awwal": "Жұмада әл-улә", "Jumada al-Thani": "Жұмада әс-сәни",
-            "Dhu al-Qiʻdah": "Зұлқағда", "Dhu al-Hijjah": "Зұлхижжа"
-        };
-
-        for (const [eng, kk] of Object.entries(hijriMonthsKk)) {
-            if (formattedDate.includes(eng)) {
-                formattedDate = formattedDate.replace(eng, kk);
-                break;
-            }
-        }
-    }
-
-    return formattedDate;
 }
 
 window.showToast = function (message = 'МашаАллах, сохранено!') {
