@@ -638,9 +638,9 @@ document.addEventListener('DOMContentLoaded', () => {
             tabPro.className = "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm border border-slate-200/10";
             tabOrg.className = "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white cursor-pointer flex items-center justify-center gap-1.5";
             
-            if (badge) badge.innerText = "B2C Pro";
-            if (title) title.innerText = window.t ? window.t('pricing_tab_pro') : "Barakah Pro";
-            if (price) price.innerText = "$4.99";
+            if (badge) badge.innerText = "B2B Business";
+            if (title) title.innerText = window.t ? window.t('pricing_tab_pro') : "Barakah Business";
+            if (price) price.innerText = "$9.99";
             if (period) period.innerText = window.t ? window.t('pricing_price_pro').split('/')[1] || " / мес" : " / мес";
             
             if (list) {
@@ -667,20 +667,20 @@ document.addEventListener('DOMContentLoaded', () => {
             tabPro.className = "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white cursor-pointer flex items-center justify-center gap-1.5";
             tabOrg.className = "flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm border border-slate-200/10";
             
-            if (badge) badge.innerText = "B2B Org";
-            if (title) title.innerText = window.t ? window.t('pricing_tab_org') : "Медресе / Орг";
-            if (price) price.innerText = "$29.99";
+            if (badge) badge.innerText = "B2B Enterprise";
+            if (title) title.innerText = window.t ? window.t('pricing_tab_org') : "Barakah Enterprise";
+            if (price) price.innerText = "$49.99";
             if (period) period.innerText = window.t ? window.t('pricing_price_org').split('/')[1] || " / мес" : " / мес";
             
             if (list) {
                 list.innerHTML = `
                     <li class="flex items-start gap-2.5">
                         <i class="fas fa-check-circle text-indigo-500 mt-0.5"></i>
-                        <span>${window.t ? window.t('pricing_feature_students') : 'До 100 учеников / участников'}</span>
+                        <span>${window.t ? window.t('pricing_feature_students') : 'До 100 участников проектов / сотрудников'}</span>
                     </li>
                     <li class="flex items-start gap-2.5">
                         <i class="fas fa-check-circle text-indigo-500 mt-0.5"></i>
-                        <span>${window.t ? window.t('pricing_feature_hifz') : 'Трекер заучивания Корана (Hifz)'}</span>
+                        <span>${window.t ? window.t('pricing_feature_hifz') : 'Halal Business Compliance & Этика'}</span>
                     </li>
                     <li class="flex items-start gap-2.5">
                         <i class="fas fa-check-circle text-indigo-500 mt-0.5"></i>
@@ -751,7 +751,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 return;
             }
-            const sum = selectedPlan === 'org' ? 29.99 : 4.99;
+            const sum = selectedPlan === 'org' ? 49.99 : 9.99;
             const cardPayUrl = `https://wooppay.com/pay?user_id=${user.uid}&email=${encodeURIComponent(user.email)}&sum=${sum}&plan=${selectedPlan}`;
             window.open(cardPayUrl, '_blank');
             if (payStatusMsg) {
