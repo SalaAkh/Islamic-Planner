@@ -38,16 +38,17 @@
 ## 🛡️ Идеология Barakah Planner
 
 - **Offline-First (PWA):** Service Worker устанавливает приложение на телефон и кэширует всё. Интернет не нужен.
+- **Multiplatform (Native Apps):** Кроссплатформенная сборка под Android и iOS на базе Capacitor с интеграцией нативных системных плагинов (Splash Screen, Status Bar, физическая кнопка Back).
 - **Multilingual (Global Reach):** Полная локализация 4 языков (RU, KK, AR, EN) с RTL для арабского.
-- **Dual Storage:** LocalStorage (тексты) + IndexedDB (рисунки). Никаких ограничений браузера.
-- **Security-First:** Firestore rules (reminders, fcmTokens, activity_log, data), HTTP-заголовки (HSTS, XSS, Clickjacking).
+- **Dual Storage:** LocalStorage (тексты, задачи, настройки) + IndexedDB (рисунки, холст доски). Никаких ограничений браузера на объём.
+- **Security-First:** Firestore rules (reminders, fcmTokens, activity_log, data), HTTP-заголовки (HSTS, XSS, Clickjacking). Защита от XSS на уровне рендеринга текста.
 - **Local Mode:** Работает через `file://` без авторизации с локальным паролем.
 - **Backup в один клик:** Экспорт всей жизни (задачи, цели, рисунки) в JSON.
 - **Легчайший монолит:** Кастомный `scripts/build-monolith.js` собирает `app.html` и `index.html` в папку `dist/`. Без webpack, без vite — просто Node.js.
 
 ---
 
-## 🗓️ Текущий Статус (Март 2026)
+## 🗓️ Текущий Статус (Июнь 2026)
 
 | Модуль | Статус |
 | ------ | ------ |
@@ -55,7 +56,13 @@
 | Namaz Tracker | ✅ Готов (+ Graceful Fallback) |
 | Hijra Calendar + Events | ✅ Готов |
 | Goals (Akhirat/Dunya) | ✅ Готов |
-| Tafakkur Board (Miro v2) | ⚠️ В разработке (базовый функционал готов, но есть известные ограничения/баги) |
+| Tafakkur Board (Miro v2) | ✅ Готов (улучшена стабильность undo/redo, textarea, масштабирование) |
+| Mind Map (Интеллект-карты) | ✅ Готов |
+| Daily Wisdom (Мудрость) | ✅ Готов |
+| Tasbih Counter (Тасбих) | ✅ Готов |
+| Groups (Совместные воркспейсы) | ✅ Готов |
+| Gamification (Уровни / Стрики) | ✅ Готов |
+| Capacitor Mobile (Android/iOS) | ✅ Готов (версия APK 1.1) |
 | Firebase Auth + Sync | ✅ Готов (+ Guest Bypass) |
 | AI Planner (Gemini) | ✅ Готов |
 | PWA / Service Worker | ✅ Готов |
