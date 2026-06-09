@@ -152,30 +152,16 @@ window.Auth = {
                     import("https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js").then(({ doc, getDoc }) => {
                         const docRef = doc(window.firebaseDb, "users", uid);
                         getDoc(docRef).then((docSnap) => {
-                            if (docSnap.exists()) {
-                                 const data = docSnap.data();
-                                 console.log("[Auth] Fetched user doc for isPremium:", data);
-                                 let isPremium = !!data.isPremium;
-                                 let premiumPlan = data.premiumPlan || (data.isPremium ? "pro" : "free");
+                            // The app is now completely free. All authenticated users are Premium Pro.
+                            let isPremium = true;
+                            let premiumPlan = "pro";
+                            let premiumExpiresAt = null;
+                            let hasUsedTrial = true;
 
-                                 // Dynamic check for trial expiration
-                                 if (premiumPlan === 'trial' && data.premiumExpiresAt) {
-                                     const expiry = new Date(data.premiumExpiresAt);
-                                     if (new Date() > expiry) {
-                                         isPremium = false;
-                                         premiumPlan = 'free';
-                                     }
-                                 }
-
-                                 window.Auth.isPremium = isPremium;
-                                 window.Auth.premiumPlan = premiumPlan;
-                                 window.Auth.premiumExpiresAt = data.premiumExpiresAt || null;
-                                 window.Auth.hasUsedTrial = !!data.hasUsedTrial;
-                             } else {
-                                 console.warn("[Auth] User doc does not exist, setting isPremium false");
-                                 window.Auth.isPremium = false;
-                                 window.Auth.premiumPlan = "free";
-                             }
+                            window.Auth.isPremium = isPremium;
+                            window.Auth.premiumPlan = premiumPlan;
+                            window.Auth.premiumExpiresAt = premiumExpiresAt;
+                            window.Auth.hasUsedTrial = hasUsedTrial;
                             renderPremiumUI();
 
                             // Sync data from cloud if user is Premium
@@ -826,6 +812,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Запуск конфетти!
                         const script = document.createElement('script');
                         script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js';
+                        script.integrity = 'sha384-Rv68Y7adOjMMJc1/xFMcdNvXre/HF51to4GZjBALmXr7ABnVl5V4UajJwBu7zbhN';
+                        script.crossOrigin = 'anonymous';
                         script.onload = () => {
                             window.confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
                         };
@@ -884,31 +872,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const expiryInput = document.getElementById('trial-card-expiry');
-    if (expiryInput) {
-        expiryInput.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/\D/g, '');
-            let formatted = '';
-            if (value.length > 0) {
-                formatted += value.substring(0, 2);
-                if (value.length > 2) {
-                    formatted += '/' + value.substring(2, 4);
-                }
-            }
-            e.target.value = formatted;
-        });
-    }
+    // CVC and expiry inputs have been removed to reduce PCI scope (M2)
 
-    const cvcInput = document.getElementById('trial-card-cvc');
-    if (cvcInput) {
-        cvcInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
-        });
-    }
-
-    async function hashCardNumber(cardNumber) {
+    async function hashCardNumber(cardNumber, userId) {
         const clean = cardNumber.replace(/\D/g, '');
-        const msgUint8 = new TextEncoder().encode(clean);
+        // Salt with userId to prevent cross-user hash correlation (M2)
+        const salted = clean + ':' + (userId || '');
+        const msgUint8 = new TextEncoder().encode(salted);
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -935,28 +905,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const rawCard = cardInput ? cardInput.value.replace(/\D/g, '') : '';
-            const rawExpiry = expiryInput ? expiryInput.value : '';
-            const rawCvc = cvcInput ? cvcInput.value.replace(/\D/g, '') : '';
 
             if (rawCard.length !== 16) {
                 if (payStatusMsg) {
                     payStatusMsg.textContent = 'Введите корректный 16-значный номер карты.';
-                    payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-red-500';
-                }
-                return;
-            }
-
-            if (!/^\d{2}\/\d{2}$/.test(rawExpiry)) {
-                if (payStatusMsg) {
-                    payStatusMsg.textContent = 'Введите срок действия карты в формате ММ/ГГ.';
-                    payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-red-500';
-                }
-                return;
-            }
-
-            if (rawCvc.length !== 3) {
-                if (payStatusMsg) {
-                    payStatusMsg.textContent = 'Введите корректный 3-значный CVC.';
                     payStatusMsg.className = 'text-xs text-center font-medium mt-4 h-4 transition-all text-red-500';
                 }
                 return;
@@ -970,7 +922,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const cardHash = await hashCardNumber(rawCard);
+                // Pass user.uid to salt the card hash (M2)
+                const cardHash = await hashCardNumber(rawCard, user.uid);
                 const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js");
                 
                 // 1. Попытка зарегистрировать карту в used_cards
@@ -1005,6 +958,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (window.renderPremiumUI) {
                     window.renderPremiumUI();
+                }
+
+                // Set Firebase Custom Claims for premium (H4) & force-refresh the ID token
+                try {
+                    const { getFunctions, httpsCallable } = await import("https://www.gstatic.com/firebasejs/10.9.0/firebase-functions.js");
+                    const functionsInstance = getFunctions(window.firebaseApp);
+                    const setPremiumClaimFn = httpsCallable(functionsInstance, 'setPremiumClaim');
+                    await setPremiumClaimFn();
+                    await user.getIdToken(true);
+                    console.log("[Trial Activation] Premium Custom Claim set and token refreshed.");
+                } catch (claimError) {
+                    console.error("[Trial Activation] Failed to set Premium Custom Claim:", claimError);
                 }
 
                 if (payStatusMsg) {

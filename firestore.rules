@@ -1,6 +1,11 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // ─── System logs — server-only, no client access ───
+    match /system_logs/{logId} {
+      allow read, write: if false;
+    }
+
     // Allow users to read their own profile/premium status, and write specifically for trial activation
     match /users/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
@@ -17,8 +22,10 @@ service cloud.firestore {
     }
 
     // Used cards registry for trial period (one card per trial)
+    // Read restricted to own cards only to prevent hash enumeration
     match /used_cards/{cardHash} {
-      allow read: if request.auth != null;
+      allow read: if request.auth != null
+                  && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null 
                     && !exists(/databases/$(database)/documents/used_cards/$(cardHash))
                     && request.resource.data.userId == request.auth.uid;
@@ -48,6 +55,12 @@ service cloud.firestore {
                              );
     }
 
+    // AI usage — read-only by owner, write restricted to server (Cloud Functions)
+    match /users/{userId}/ai_usage/{dateId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false;
+    }
+
     // Activity log — each user can only read/write their own log entries
     match /users/{userId}/activity_log/{logId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
@@ -63,7 +76,7 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // ─── NEW: Group Workspaces ───
+    // ─── Group Workspaces ───
     match /groups/{groupId} {
       // Any authenticated user can create a group
       allow create: if request.auth != null
@@ -73,10 +86,17 @@ service cloud.firestore {
       allow read: if request.auth != null && 
         (resource.data.members.hasAny([request.auth.token.email]) || resource.data.createdBy == request.auth.uid);
       
-      // Update: member or creator, but createdBy field cannot be changed
-      allow update: if request.auth != null && 
-        (resource.data.members.hasAny([request.auth.token.email]) || resource.data.createdBy == request.auth.uid)
-        && request.resource.data.createdBy == resource.data.createdBy;
+      // Update: only creator can change members list; other members can update non-membership fields
+      allow update: if request.auth != null
+        && request.resource.data.createdBy == resource.data.createdBy
+        && (
+          // Creator can update anything
+          resource.data.createdBy == request.auth.uid
+          ||
+          // Members can update, but CANNOT change the members array
+          (resource.data.members.hasAny([request.auth.token.email])
+           && request.resource.data.members == resource.data.members)
+        );
       
       // Delete: ONLY the creator can delete a group
       allow delete: if request.auth != null && resource.data.createdBy == request.auth.uid;

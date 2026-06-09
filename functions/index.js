@@ -1,22 +1,56 @@
 const functions = require("firebase-functions");
+const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
 
 admin.initializeApp();
 const db = admin.firestore();
 
-// Инициализация транспортера для отправки писем.
-// В идеале использовать Firebase Secret Manager для хранения кредов.
-// Для начала возьмём из окружения.
-const mailTransport = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: process.env.SMTP_PORT || 465,
-    secure: true,
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
+// ─── Secrets (managed via Firebase Secret Manager) ───
+// Set these with: firebase functions:secrets:set SECRET_NAME
+// Until migrated, falls back to process.env for compatibility.
+const SMTP_HOST_SECRET = defineSecret("SMTP_HOST");
+const SMTP_PORT_SECRET = defineSecret("SMTP_PORT");
+const SMTP_USER_SECRET = defineSecret("SMTP_USER");
+const SMTP_PASS_SECRET = defineSecret("SMTP_PASS");
+const GEMINI_API_KEY_SECRET = defineSecret("GEMINI_API_KEY");
+const NOWPAYMENTS_IPN_SECRET_DEF = defineSecret("NOWPAYMENTS_IPN_SECRET");
+const WOOPPAY_SECRET_KEY_DEF = defineSecret("WOOPPAY_SECRET_KEY");
+
+// Lazy-initialized mail transporter (created on first use with secret values)
+let _mailTransport = null;
+function getMailTransport() {
+    if (!_mailTransport) {
+        _mailTransport = nodemailer.createTransport({
+            host: SMTP_HOST_SECRET.value() || process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: SMTP_PORT_SECRET.value() || process.env.SMTP_PORT || 465,
+            secure: true,
+            auth: {
+                user: SMTP_USER_SECRET.value() || process.env.SMTP_USER,
+                pass: SMTP_PASS_SECRET.value() || process.env.SMTP_PASS,
+            },
+        });
+    }
+    return _mailTransport;
+}
+
+// ─── In-memory rate limiter ───
+const rateLimitStore = {};
+function isRateLimited(key, maxRequests, windowMs) {
+    const now = Date.now();
+    if (!rateLimitStore[key]) {
+        rateLimitStore[key] = { count: 1, windowStart: now };
+        return false;
+    }
+    const entry = rateLimitStore[key];
+    if (now - entry.windowStart > windowMs) {
+        entry.count = 1;
+        entry.windowStart = now;
+        return false;
+    }
+    entry.count++;
+    return entry.count > maxRequests;
+}
 
 exports.checkAndSendReminders = functions.pubsub.schedule('every 5 minutes').onRun(async (context) => {
     const now = new Date();
@@ -46,13 +80,13 @@ exports.checkAndSendReminders = functions.pubsub.schedule('every 5 minutes').onR
                 // 1. Отправляем email если разрешено
                 if (data.sendEmail) {
                     const mailOptions = {
-                        from: `"Barakah Planner" <${process.env.SMTP_USER || 'noreply@barakah.app'}>`,
+                        from: `"Barakah Planner" <${SMTP_USER_SECRET.value() || process.env.SMTP_USER || 'noreply@barakah.app'}>`,
                         to: data.userEmail,
                         subject: `Напоминание: ${data.title}`,
                         text: `Ассаляму алейкум!\n\nНапоминаем о событии: ${data.title}\nВремя: ${data.eventTime}\n\nДа благословит вас Всевышний!\n\nКоманда Barakah Planner`,
                     };
                     try {
-                        await mailTransport.sendMail(mailOptions);
+                        await getMailTransport().sendMail(mailOptions);
                         console.log(`Email sent to ${data.userEmail}`);
                     } catch (error) {
                         console.error('Error sending email:', error);
@@ -118,13 +152,50 @@ exports.checkAndSendReminders = functions.pubsub.schedule('every 5 minutes').onR
 });
 
 /**
+ * setPremiumClaim — Sets Firebase Custom Claims for premium users.
+ * Called after payment activation to enable server-side premium verification.
+ * This prevents client-side premium bypass attacks (H4).
+ */
+exports.setPremiumClaim = functions.https.onCall(async (data, context) => {
+    // Only allow calls from authenticated users for their own UID,
+    // or verify from an admin context
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'Must be authenticated');
+    }
+
+    const uid = context.auth.uid;
+
+    // Verify the user actually has premium status in Firestore (source of truth)
+    const userDoc = await db.collection('users').doc(uid).get();
+    if (!userDoc.exists) {
+        throw new functions.https.HttpsError('not-found', 'User document not found');
+    }
+
+    const userData = userDoc.data();
+    let isPremium = !!userData.isPremium;
+
+    // Check trial expiry
+    if (userData.premiumPlan === 'trial' && userData.premiumExpiresAt) {
+        if (new Date() > new Date(userData.premiumExpiresAt)) {
+            isPremium = false;
+            // Also update Firestore to reflect expired trial
+            await db.collection('users').doc(uid).update({ isPremium: false });
+        }
+    }
+
+    // Set custom claims
+    await admin.auth().setCustomUserClaims(uid, { premium: isPremium });
+
+    return { premium: isPremium };
+});
+
+/**
  * Webhook для автоматической активации Premium-статуса после оплаты.
  * Поддерживает CORS для тестирования/симуляции с фронтенда.
  * Поддерживает:
  * - Сигнатуру Wooppay (HMAC-SHA256)
  * - Сигнатуру NowPayments IPN (HMAC-SHA512)
  * - Firebase ID Token (локальная симуляция)
- * - Legacy секрет x-webhook-secret
  */
 exports.handlePaymentWebhook = functions.https.onRequest(async (req, res) => {
     // CORS — ограничиваем origin только нашим доменом и локалхостом для дева
@@ -141,11 +212,18 @@ exports.handlePaymentWebhook = functions.https.onRequest(async (req, res) => {
     if (allowedOrigins.includes(origin)) {
         res.set('Access-Control-Allow-Origin', origin);
     }
-    res.set('Access-Control-Allow-Headers', 'Content-Type, x-webhook-secret, Authorization, x-nowpayments-sig');
+    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-nowpayments-sig');
     res.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
 
     if (req.method === 'OPTIONS') {
         res.status(204).send('');
+        return;
+    }
+
+    // Rate limiting: max 30 requests per minute per IP
+    const clientIp = req.headers['x-forwarded-for'] || req.ip || 'unknown';
+    if (isRateLimited(`webhook_${clientIp}`, 30, 60000)) {
+        res.status(429).json({ error: "Too many requests" });
         return;
     }
 
@@ -161,7 +239,7 @@ exports.handlePaymentWebhook = functions.https.onRequest(async (req, res) => {
     // --- Strategy 1: Wooppay Signature Verification ---
     if (params.WooppaySignature) {
         console.log('[PaymentWebhook] Wooppay signature detected');
-        const wooppaySecretKey = process.env.WOOPPAY_SECRET_KEY;
+        const wooppaySecretKey = WOOPPAY_SECRET_KEY_DEF.value() || process.env.WOOPPAY_SECRET_KEY;
         if (!wooppaySecretKey) {
             console.error('[PaymentWebhook] WOOPPAY_SECRET_KEY is not configured!');
             res.status(500).json({ error: "Wooppay secret not configured" });
@@ -189,7 +267,7 @@ exports.handlePaymentWebhook = functions.https.onRequest(async (req, res) => {
     // --- Strategy 2: NowPayments IPN Signature Verification ---
     else if (req.headers['x-nowpayments-sig']) {
         console.log('[PaymentWebhook] NowPayments signature detected');
-        const nowpaymentsIpnKey = process.env.NOWPAYMENTS_IPN_SECRET;
+        const nowpaymentsIpnKey = NOWPAYMENTS_IPN_SECRET_DEF.value() || process.env.NOWPAYMENTS_IPN_SECRET;
         if (!nowpaymentsIpnKey) {
             console.error('[PaymentWebhook] NOWPAYMENTS_IPN_SECRET is not configured!');
             res.status(500).json({ error: "NowPayments secret not configured" });
@@ -253,25 +331,6 @@ exports.handlePaymentWebhook = functions.https.onRequest(async (req, res) => {
             return;
         }
     }
-    // --- Strategy 4: Legacy x-webhook-secret Header ---
-    else if (req.headers['x-webhook-secret']) {
-        const expectedSecret = process.env.PAYMENT_WEBHOOK_SECRET;
-        if (!expectedSecret) {
-            console.error('[PaymentWebhook] PAYMENT_WEBHOOK_SECRET is not configured!');
-            res.status(500).json({ error: "Server misconfiguration" });
-            return;
-        }
-        const secret = req.headers['x-webhook-secret'];
-        if (secret === expectedSecret) {
-            targetUserId = params.userId;
-            targetEmail = params.email;
-            targetStatus = params.status;
-            targetMethod = params.paymentMethod || 'legacy_secret';
-        } else {
-            res.status(401).json({ error: "Unauthorized" });
-            return;
-        }
-    }
     else {
         console.warn('[PaymentWebhook] Unsupported authentication method');
         res.status(400).json({ error: "Unsupported auth method" });
@@ -299,6 +358,13 @@ exports.handlePaymentWebhook = functions.https.onRequest(async (req, res) => {
             paymentMethod: targetMethod,
             email: targetEmail || ''
         }, { merge: true });
+
+        // Set Firebase Custom Claims for server-side premium verification (H4)
+        try {
+            await admin.auth().setCustomUserClaims(targetUserId, { premium: true });
+        } catch (claimError) {
+            console.warn('[PaymentWebhook] Failed to set custom claims:', claimError.message);
+        }
 
         await db.collection('system_logs').add({
             type: 'premium_activated',
@@ -361,6 +427,13 @@ exports.generateDailyPlan = functions.https.onRequest(async (req, res) => {
 
     const idToken = authHeader.split('Bearer ')[1];
     let uid = null;
+
+    // Rate limiting: max 10 AI requests per minute per IP (M4)
+    const aiClientIp = req.headers['x-forwarded-for'] || req.ip || 'unknown';
+    if (isRateLimited(`ai_${aiClientIp}`, 10, 60000)) {
+        res.status(429).json({ error: "Too many requests. Please slow down." });
+        return;
+    }
     let email = null;
 
     try {
@@ -398,7 +471,8 @@ exports.generateDailyPlan = functions.https.onRequest(async (req, res) => {
         const todayDate = new Date().toISOString().split('T')[0];
         const usageRef = db.collection('users').doc(uid).collection('ai_usage').doc(todayDate);
 
-        if (!isPremium) {
+        // The app is now completely free, all users get unlimited daily AI generation
+        if (false) {
             const usageDoc = await usageRef.get();
             if (usageDoc.exists()) {
                 const count = usageDoc.data().count || 0;
@@ -413,7 +487,7 @@ exports.generateDailyPlan = functions.https.onRequest(async (req, res) => {
         }
 
         // 3. Вызываем Gemini API
-        const geminiApiKey = process.env.GEMINI_API_KEY;
+        const geminiApiKey = GEMINI_API_KEY_SECRET.value() || process.env.GEMINI_API_KEY;
         if (!geminiApiKey) {
             console.error('[generateDailyPlan] GEMINI_API_KEY is not configured in server environment!');
             res.status(500).json({ error: "Server misconfiguration: API key missing" });
@@ -502,7 +576,7 @@ exports.generateDailyPlan = functions.https.onRequest(async (req, res) => {
 
     } catch (error) {
         console.error("[generateDailyPlan] Error generating plan:", error);
-        res.status(500).json({ error: "Internal server error", message: error.message });
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 

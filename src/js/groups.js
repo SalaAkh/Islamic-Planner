@@ -126,6 +126,13 @@ window.Groups = {
     async inviteMember(groupId, email) {
         if (!window.firebaseDb || !groupId || !email.trim()) return;
 
+        // Only the group creator can invite members
+        const group = this.groupMetadata[groupId];
+        if (!group || !window.Auth?.user || group.createdBy !== window.Auth.user.uid) {
+            alert(window.t ? window.t('err_not_group_creator') : 'Только создатель группы может приглашать участников.');
+            return;
+        }
+
         try {
             const groupRef = doc(window.firebaseDb, 'groups', groupId);
             await updateDoc(groupRef, {
