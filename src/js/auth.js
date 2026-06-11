@@ -6,7 +6,8 @@ import {
     signOut,
     onAuthStateChanged,
     updateProfile,
-    signInWithPopup
+    signInWithPopup,
+    GoogleAuthProvider
 } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
 const GOOGLE_REDIRECT_PENDING_KEY = 'barakah_google_redirect_pending';
@@ -49,6 +50,21 @@ window.Auth = {
 
             sessionStorage.removeItem(GOOGLE_REDIRECT_LOG_KEY);
             console.log("[Auth] Google redirect sign-in success:", result.user.email);
+
+            // Check if we came from Capacitor app
+            const isFromApp = sessionStorage.getItem('barakah_auth_source') === 'app' || 
+                              new URLSearchParams(window.location.search).get('auth_source') === 'app';
+            
+            if (isFromApp) {
+                sessionStorage.removeItem('barakah_auth_source');
+                const credential = GoogleAuthProvider.credentialFromResult(result);
+                if (credential && credential.idToken) {
+                    console.log("[Auth] Redirecting Google token to native app via deep link...");
+                    window.location.href = `barakahplanner://login?token=${credential.idToken}`;
+                    return;
+                }
+            }
+
             await window.ActivityLog?.log('user_login', { method: 'google' });
         } catch (error) {
             this.clearGoogleRedirectState();
@@ -59,6 +75,25 @@ window.Auth = {
 
     init() {
         if (!window.firebaseAuth) return;
+
+        // Check if query parameter auth_source=app is present, save it
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('auth_source') === 'app') {
+            sessionStorage.setItem('barakah_auth_source', 'app');
+            // Auto open auth modal
+            const authModal = document.getElementById('auth-modal');
+            if (authModal) {
+                authModal.classList.remove('hidden');
+                authModal.classList.add('flex');
+            }
+            // Trigger Google login automatically
+            setTimeout(() => {
+                const btnGoogle = document.getElementById('btn-google-auth');
+                if (btnGoogle) {
+                    btnGoogle.click();
+                }
+            }, 500);
+        }
 
         this.handleGoogleRedirectResult();
 
@@ -301,6 +336,20 @@ window.Auth = {
             
             // Clear redirect states since popup succeeded
             this.clearGoogleRedirectState();
+
+            // Check if we came from Capacitor app
+            const isFromApp = sessionStorage.getItem('barakah_auth_source') === 'app' || 
+                              new URLSearchParams(window.location.search).get('auth_source') === 'app';
+            
+            if (isFromApp) {
+                sessionStorage.removeItem('barakah_auth_source');
+                const credential = GoogleAuthProvider.credentialFromResult(result);
+                if (credential && credential.idToken) {
+                    console.log("[Auth] Redirecting Google token to native app via deep link...");
+                    window.location.href = `barakahplanner://login?token=${credential.idToken}`;
+                    return { pending: true };
+                }
+            }
             
             // Log activity
             await window.ActivityLog?.log('user_login', { method: 'google_popup' });
@@ -433,11 +482,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Check if running in a native mobile app (Capacitor)
             if (window.Capacitor) {
+                console.log("[Auth] Native app detected. Opening browser for deep-linked Google sign-in...");
                 if (errorEl) {
-                    errorEl.textContent = window.t 
-                        ? window.t('auth_err_google_native') 
-                        : "Вход через Google не поддерживается в мобильном приложении. Пожалуйста, войдите через браузер на сайте https://islamic-planer.web.app или используйте Email и пароль.";
+                    errorEl.className = 'text-xs text-center mt-2 text-indigo-500 font-bold';
+                    errorEl.textContent = "Перенаправление в браузер для входа через Google...";
                 }
+                
+                // Open system browser to the auth helper page on our web domain
+                const authUrl = `https://islamic-planer.web.app/app.html?auth_source=app`;
+                window.open(authUrl, '_system');
                 return;
             }
 
