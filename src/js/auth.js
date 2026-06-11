@@ -431,6 +431,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const errorEl = document.getElementById('auth-error');
             if (errorEl) errorEl.textContent = '';
 
+            // Check if running in a native mobile app (Capacitor)
+            if (window.Capacitor) {
+                if (errorEl) {
+                    errorEl.textContent = window.t 
+                        ? window.t('auth_err_google_native') 
+                        : "Вход через Google не поддерживается в мобильном приложении. Пожалуйста, войдите через браузер на сайте https://islamic-planer.web.app или используйте Email и пароль.";
+                }
+                return;
+            }
+
             // Check consent if Google auth is used for registration (RK Compliance)
             if (isRegister) {
                 const consentCheckbox = document.getElementById('auth-consent');

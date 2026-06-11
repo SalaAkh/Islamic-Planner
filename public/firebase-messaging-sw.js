@@ -3,7 +3,7 @@ importScripts("https://www.gstatic.com/firebasejs/10.9.0/firebase-messaging-comp
 
 const firebaseConfig = {
     apiKey: "__FIREBASE_API_KEY__",
-    authDomain: "islamic-planer.firebaseapp.com",
+    authDomain: "islamic-planer.web.app",
     projectId: "islamic-planer",
     storageBucket: "islamic-planer.firebasestorage.app",
     messagingSenderId: "421489927764",

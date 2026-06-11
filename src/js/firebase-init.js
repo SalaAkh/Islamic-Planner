@@ -13,7 +13,7 @@ const resolvedFirebaseApiKey =
 // User's actual Firebase Config
 const firebaseConfig = {
     apiKey: resolvedFirebaseApiKey,
-    authDomain: "islamic-planer.firebaseapp.com",
+    authDomain: "islamic-planer.web.app",
     projectId: "islamic-planer",
     storageBucket: "islamic-planer.firebasestorage.app",
     messagingSenderId: "421489927764",

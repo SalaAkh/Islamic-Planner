@@ -72,6 +72,16 @@ self.addEventListener('fetch', (event) => {
     // Must be http/https
     if (!url.startsWith('http')) return;
 
+    // Bypass service worker for Firebase system/auth paths (e.g., /__/auth/*)
+    try {
+        const urlObj = new URL(url);
+        if (urlObj.pathname.startsWith('/__/')) {
+            return;
+        }
+    } catch (e) {
+        return;
+    }
+
     // ── Let ALL external URLs pass through to network (no SW interference) ──
     // This is the KEY fix: external = not our own origin
     try {
