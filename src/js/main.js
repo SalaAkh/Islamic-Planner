@@ -170,44 +170,7 @@ function initTabs() {
             const viewName = tab.getAttribute('data-tab');
             const targetPage = document.getElementById('view-' + viewName);
 
-            // Check premium access for restricted features (Groups, Mind Map)
-            if ((viewName === 'groups' || viewName === 'mindmap') && (!window.Auth || !window.Auth.isPremium)) {
-                // Close sidebar drawer if open to prevent visual overlap
-                const drawer = document.getElementById('sidebar-drawer');
-                if (drawer && drawer.classList.contains('active')) {
-                    drawer.classList.remove('active');
-                    const backdrop = document.getElementById('sidebar-backdrop');
-                    if (backdrop) {
-                        backdrop.classList.remove('active');
-                        setTimeout(() => {
-                            if (!drawer.classList.contains('active')) backdrop.classList.add('hidden');
-                        }, 300);
-                    }
-                    document.body.classList.remove('overflow-hidden');
-                }
-
-                // Open payment modal
-                const payModal = document.getElementById('payment-modal');
-                const payModalInner = document.getElementById('payment-modal-inner');
-                if (payModal) {
-                    payModal.classList.remove('hidden');
-                    payModal.classList.add('flex');
-                    requestAnimationFrame(() => {
-                        if (payModalInner) {
-                            payModalInner.classList.remove('scale-95', 'opacity-0');
-                            payModalInner.classList.add('scale-100', 'opacity-100');
-                        }
-                    });
-                }
-                
-                // Show localized premium toast
-                if (window.showToast) {
-                    const lang = localStorage.getItem('barakah_lang') || 'ru';
-                    const premiumToastText = lang === 'kk' ? 'Бұл мүмкіндік тек Premium Pro үшін қолжетімді.' : lang === 'ar' ? 'هذه الميزة متاحة فقط لـ Premium Pro.' : lang === 'en' ? 'This feature is only available for Premium Pro.' : 'Этот функционал доступен только в Premium Pro.';
-                    window.showToast(premiumToastText);
-                }
-                return;
-            }
+            // Premium check removed. All features available to all users.
 
             // Если кликаем на ту же активную вкладку - ничего не делаем
             if (currentActivePage === targetPage) {
@@ -1598,7 +1561,7 @@ function initAIPanner() {
                         window.showToast(msg);
                     }
                     // Открываем модалку профиля/оплаты
-                    const authModal = document.getElementById('auth-modal');
+                    const authModal = document.getElementById('sync-modal');
                     if (authModal) {
                         authModal.classList.remove('hidden');
                         authModal.classList.add('flex');

@@ -1,5 +1,92 @@
 import { doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
+// ============================================================================
+// E2E Encryption Utils
+// ============================================================================
+
+function base64ToBuffer(b64) {
+    // Add padding if missing
+    b64 = b64.padEnd(b64.length + (4 - b64.length % 4) % 4, '=');
+    const binary = window.atob(b64.replace(/-/g, '+').replace(/_/g, '/'));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+}
+
+function bufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+class E2E {
+    static async getKey() {
+        if (!window.Auth || !window.Auth.syncId) throw new Error("No Sync ID");
+        const rawKey = base64ToBuffer(window.Auth.syncId);
+        return window.crypto.subtle.importKey(
+            "raw",
+            rawKey,
+            { name: "AES-GCM" },
+            false,
+            ["encrypt", "decrypt"]
+        );
+    }
+
+    static async getWorkspaceHash() {
+        if (!window.Auth || !window.Auth.syncId) throw new Error("No Sync ID");
+        const rawKey = new TextEncoder().encode(window.Auth.syncId);
+        const hashBuffer = await window.crypto.subtle.digest('SHA-256', rawKey);
+        return bufferToBase64(hashBuffer);
+    }
+
+    static async encryptData(dataObj) {
+        const key = await this.getKey();
+        const iv = window.crypto.getRandomValues(new Uint8Array(12));
+        const encodedData = new TextEncoder().encode(JSON.stringify(dataObj));
+        
+        const encryptedContent = await window.crypto.subtle.encrypt(
+            { name: "AES-GCM", iv: iv },
+            key,
+            encodedData
+        );
+        
+        return {
+            ciphertext: bufferToBase64(encryptedContent),
+            iv: bufferToBase64(iv)
+        };
+    }
+
+    static async decryptData(encryptedBlob) {
+        if (!encryptedBlob || !encryptedBlob.ciphertext || !encryptedBlob.iv) return null;
+        try {
+            const key = await this.getKey();
+            const iv = base64ToBuffer(encryptedBlob.iv);
+            const ciphertext = base64ToBuffer(encryptedBlob.ciphertext);
+            
+            const decryptedBuffer = await window.crypto.subtle.decrypt(
+                { name: "AES-GCM", iv: iv },
+                key,
+                ciphertext
+            );
+            
+            const decodedString = new TextDecoder().decode(decryptedBuffer);
+            return JSON.parse(decodedString);
+        } catch (e) {
+            console.error("[E2E] Decryption failed. Incorrect Sync ID?", e);
+            return null;
+        }
+    }
+}
+
+// ============================================================================
+// Database Sync Logic
+// ============================================================================
+
 window.DbSync = {
     _syncTimers: {},
 
@@ -24,13 +111,7 @@ window.DbSync = {
     },
 
     async syncToCloud(key, data) {
-        if (!window.firebaseDb || !window.Auth || !window.Auth.user) return;
-
-        // Gate cloud sync behind premium status
-        if (!window.Auth.isPremium) {
-            console.log(`[Sync] Skip saving ${key}: User is not Premium.`);
-            return;
-        }
+        if (!window.firebaseDb || !window.Auth || !window.Auth.syncId) return;
 
         // Debounce: Clear existing timer for this key
         if (this._syncTimers[key]) {
@@ -40,11 +121,9 @@ window.DbSync = {
         // Set a new timer to sync after 1.5 seconds of inactivity
         this._syncTimers[key] = setTimeout(async () => {
             try {
-                const uid = window.Auth.user.uid;
-                // Structure: users/UID/data/KEY
-                const docRef = doc(window.firebaseDb, `users/${uid}/data`, key);
+                const workspaceHash = await E2E.getWorkspaceHash();
+                const docRef = doc(window.firebaseDb, `workspaces/${workspaceHash}/data`, key);
                 
-                // Firestore не позволяет сохранять массивы в корне документа
                 let docContent = data;
                 if (Array.isArray(data)) {
                     docContent = { _isArray: true, items: data };
@@ -52,8 +131,11 @@ window.DbSync = {
                 
                 docContent = this._cleanUndefined(docContent);
                 
-                await setDoc(docRef, docContent);
-                console.log(`[Sync] Cloud saved: ${key} (debounced)`);
+                // End-to-End Encrypt before sending to Firebase
+                const encryptedPayload = await E2E.encryptData(docContent);
+                
+                await setDoc(docRef, encryptedPayload);
+                console.log(`[Sync] Cloud saved: ${key} (Encrypted)`);
             } catch (e) {
                 console.error('[Sync] Error saving to cloud:', e);
             }
@@ -61,8 +143,7 @@ window.DbSync = {
     },
 
     async syncReminderToCloud(event, dateString) {
-        if (!window.firebaseDb || !window.Auth || !window.Auth.user || !window.Auth.user.email) return;
-        if (!window.Auth.isPremium) return;
+        if (!window.firebaseDb || !window.Auth || !window.Auth.syncId) return;
 
         // Only set reminders if there is a specific time
         if (event.allDay || !event.time) {
@@ -71,9 +152,8 @@ window.DbSync = {
         }
 
         try {
-            const uid = window.Auth.user.uid;
-            // Structure: users/UID/reminders/EVENT_ID
-            const reminderRef = doc(window.firebaseDb, `users/${uid}/reminders`, event.id);
+            const workspaceHash = await E2E.getWorkspaceHash();
+            const reminderRef = doc(window.firebaseDb, `workspaces/${workspaceHash}/reminders`, event.id);
 
             // Calculate exact trigger time from date and time
             const dateTimeStr = `${dateString}T${event.time}:00`;
@@ -97,12 +177,13 @@ window.DbSync = {
                 eventTime: event.time,
                 eventDate: dateString,
                 triggerTime: triggerDate.toISOString(),
-                userEmail: window.Auth.user.email,
-                sendEmail: !!event.sendEmail,
                 notified: false
             };
 
-            await setDoc(reminderRef, reminderData);
+            // Encrypt Reminder Data
+            const encryptedPayload = await E2E.encryptData(reminderData);
+
+            await setDoc(reminderRef, encryptedPayload);
             console.log(`[Sync] Reminder set for ${event.id}`);
         } catch (e) {
             console.error('[Sync] Error syncing reminder:', e);
@@ -110,13 +191,12 @@ window.DbSync = {
     },
 
     async deleteReminderFromCloud(eventId) {
-        if (!window.firebaseDb || !window.Auth || !window.Auth.user) return;
-        if (!window.Auth.isPremium) return;
+        if (!window.firebaseDb || !window.Auth || !window.Auth.syncId) return;
 
         try {
-            const uid = window.Auth.user.uid;
+            const workspaceHash = await E2E.getWorkspaceHash();
             const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js");
-            const reminderRef = doc(window.firebaseDb, `users/${uid}/reminders`, eventId);
+            const reminderRef = doc(window.firebaseDb, `workspaces/${workspaceHash}/reminders`, eventId);
             await deleteDoc(reminderRef);
             console.log(`[Sync] Reminder deleted for ${eventId}`);
         } catch (e) {
@@ -125,37 +205,38 @@ window.DbSync = {
     },
 
     async syncFromCloud() {
-        if (!window.firebaseDb || !window.Auth || !window.Auth.user) return;
-
-        if (!window.Auth.isPremium) {
-            console.log("[Sync] Skip loading from cloud: User is not Premium.");
-            return;
-        }
+        if (!window.firebaseDb || !window.Auth || !window.Auth.syncId) return;
 
         try {
-            const uid = window.Auth.user.uid;
-            const dataCol = collection(window.firebaseDb, `users/${uid}/data`);
+            const workspaceHash = await E2E.getWorkspaceHash();
+            const dataCol = collection(window.firebaseDb, `workspaces/${workspaceHash}/data`);
             const snapshot = await getDocs(dataCol);
 
             if (snapshot.empty) {
-                // To prevent data leakage, we only upload local data if we are CERTAIN it's the current user's.
-                // If the cloud is empty, but we have local data, it could be leftover from a previous user.
-                const localKeys = Object.keys(localStorage).filter(k => k.startsWith('barakah_'));
+                const localKeys = Object.keys(localStorage).filter(k => k.startsWith('barakah_') && k !== 'barakah_sync_id');
 
                 if (localKeys.length > 0) {
-                    console.log(`[Sync] Cloud empty, found ${localKeys.length} local keys. Uploading to new account...`);
+                    console.log(`[Sync] Cloud empty, found ${localKeys.length} local keys. Uploading to new E2EE workspace...`);
                     await this.initialUpload();
                 } else {
-                    console.log("[Sync] Fresh account, no local data to upload.");
+                    console.log("[Sync] Fresh workspace, no local data to upload.");
                 }
                 document.dispatchEvent(new CustomEvent('cloudDataSynced'));
                 return;
             }
 
-            console.log("[Sync] Downloading cloud data...");
+            console.log("[Sync] Downloading and decrypting cloud data...");
             for (const docSnap of snapshot.docs) {
                 const key = docSnap.id;
-                let data = docSnap.data();
+                const encryptedPayload = docSnap.data();
+                
+                // Decrypt
+                let data = await E2E.decryptData(encryptedPayload);
+                
+                if (!data) {
+                    console.warn(`[Sync] Failed to decrypt document: ${key}. Skipping.`);
+                    continue; // Skip if decryption fails
+                }
                 
                 // Unpack array if it was wrapped by db.js
                 if (data && data._isArray) {
@@ -168,7 +249,6 @@ window.DbSync = {
                     localStorage.setItem('barakah_board_state', JSON.stringify(data));
                 } else if (key === 'board_drawing') {
                     if (data.dataUrl && window.Store && typeof window.Store.saveDrawing === 'function') {
-                        // Flag to prevent recursion
                         window._isSyncingDrawing = true;
                         await window.Store.saveDrawing(data.dataUrl);
                         window._isSyncingDrawing = false;
@@ -186,7 +266,7 @@ window.DbSync = {
                 }
             }
 
-            console.log("[Sync] Download complete. Refreshing UI...");
+            console.log("[Sync] Download and decryption complete. Refreshing UI...");
             document.dispatchEvent(new CustomEvent('cloudDataSynced'));
 
             if (window.loadDay) window.loadDay(window.currentDate);
@@ -227,7 +307,7 @@ window.DbSync = {
                 const key = localStorage.key(i);
                 if (key && key.startsWith('barakah_day_')) {
                     const data = localStorage.getItem(key);
-                    const cloudKey = key.replace('barakah_', ''); // day_2026-10-10
+                    const cloudKey = key.replace('barakah_', '');
                     await this.syncToCloud(cloudKey, JSON.parse(data));
                 }
             }

@@ -6,19 +6,9 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Allow users to read their own profile/premium status, and write specifically for trial activation
-    match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow create, update: if request.auth != null 
-                             && request.auth.uid == userId 
-                             && (
-                               (!exists(/databases/$(database)/documents/users/$(userId)) || !resource.data.hasUsedTrial)
-                               && request.resource.data.hasUsedTrial == true
-                               && request.resource.data.isPremium == true
-                               && request.resource.data.premiumPlan == 'trial'
-                               && request.resource.data.trialCardHash != null
-                               && get(/databases/$(database)/documents/used_cards/$(request.resource.data.trialCardHash)).data.userId == request.auth.uid
-                             );
+    // Allow users to read and write to their workspaces
+    match /workspaces/{syncId} {
+      allow read, write: if request.auth != null;
     }
 
     // Used cards registry for trial period (one card per trial)
@@ -33,12 +23,11 @@ service cloud.firestore {
     }
 
 
-    // Make sure users can only read and write their own documents, and only specific allowed data keys
-    match /users/{userId}/data/{document} {
-      allow read, delete: if request.auth != null && request.auth.uid == userId;
+    // Make sure users can read and write to the workspace data they know the syncId for
+    match /workspaces/{syncId}/data/{document} {
+      allow read, delete: if request.auth != null;
       // Allow create/update only if it matches our expected document keys
       allow create, update: if request.auth != null 
-                             && request.auth.uid == userId
                              && (
                                document == 'goals' || 
                                document == 'board_state' ||
@@ -55,25 +44,25 @@ service cloud.firestore {
                              );
     }
 
-    // AI usage — read-only by owner, write restricted to server (Cloud Functions)
-    match /users/{userId}/ai_usage/{dateId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
+    // AI usage — write restricted to server (Cloud Functions)
+    match /workspaces/{syncId}/ai_usage/{dateId} {
+      allow read: if request.auth != null;
       allow write: if false;
     }
 
-    // Activity log — each user can only read/write their own log entries
-    match /users/{userId}/activity_log/{logId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    // Activity log
+    match /workspaces/{syncId}/activity_log/{logId} {
+      allow read, write: if request.auth != null;
     }
 
-    // Reminders — each user can manage their own reminders
-    match /users/{userId}/reminders/{reminderId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    // Reminders
+    match /workspaces/{syncId}/reminders/{reminderId} {
+      allow read, write: if request.auth != null;
     }
 
     // FCM Tokens for Push Notifications
-    match /users/{userId}/fcmTokens/{tokenId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    match /workspaces/{syncId}/fcmTokens/{tokenId} {
+      allow read, write: if request.auth != null;
     }
 
     // ─── Group Workspaces ───

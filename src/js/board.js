@@ -1202,19 +1202,7 @@ function initDashboardEvents() {
     document.getElementById('btn-create-board')?.addEventListener('click', () => {
         const boards = window.Store.getBoardsMeta();
         
-        // Ограничение для бесплатного аккаунта: макс. 1 доска
-        if (!window.Auth?.isPremium && boards.length >= 1) {
-            if (window.showToast) {
-                window.showToast(window.t ? window.t('premium_board_limit_reached') : 'Лимит бесплатной версии: макс. 1 доска. Активируйте Premium!');
-            }
-            // Открываем модалку профиля/оплаты
-            const authModal = document.getElementById('auth-modal');
-            if (authModal) {
-                authModal.classList.remove('hidden');
-                authModal.classList.add('flex');
-            }
-            return;
-        }
+        // No board limit check since accounts are removed
 
         const id = 'board_' + Date.now();
         boards.unshift({
